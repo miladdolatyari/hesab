@@ -3,7 +3,7 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Yekan Bakh', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Yekan Bakh' !important;
 }
 
 body {
@@ -750,9 +750,9 @@ tr:hover {
 
 /* کارت چک کمی شیک‌تر */
 .check-item {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 15px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
   background: #fff;
   padding: 28px 15px 14px 15px; /* فاصله بالا بیشتر شد */
   border-radius: 12px;
@@ -940,7 +940,7 @@ tr:hover {
   to {
     opacity: 1;
     transform: translateY(0);
-  }
+    }
 }
 
 /* استایل اعلان‌ها */
@@ -1032,7 +1032,7 @@ tr:hover {
   }
   
   .search-results-info {
-    flex-direction: column;
+        flex-direction: column;
     gap: 8px;
     text-align: center;
   }
@@ -1155,7 +1155,7 @@ tr:hover {
   display: flex;
   align-items: center;
   gap: 8px;
-}
+    }
 .transaction-receipt .receipt-row {
   display: flex;
   justify-content: space-between;
@@ -1211,7 +1211,7 @@ tr:hover {
   box-shadow: 0 12px 36px rgba(52,152,219,0.28), 0 4px 16px rgba(0,0,0,0.10);
   background: linear-gradient(135deg, #1976d2 0%, #3498db 100%);
   transform: translateY(-4px) scale(1.04);
-}
+    }
 .report-btn-icon {
   width: 44px;
   height: 44px;
@@ -1233,7 +1233,7 @@ tr:hover {
 .report-btn-text span {
   font-weight: 700;
   font-size: 16px;
-  display: block;
+        display: block;
 }
 .report-btn-text small {
   font-size: 12px;
@@ -1355,5 +1355,10 @@ tr:hover {
   .report-table th, .report-table td {
     padding: 7px 3px;
     font-size: 13px;
+<<<<<<< HEAD:style.css
   }
 }
+=======
+    }
+}
+>>>>>>> fb77997 (fix: rename STYLE.CSS to style.css for GitHub Pages compatibility):STYLE.CSS
