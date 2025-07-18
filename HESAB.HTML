@@ -1,0 +1,1324 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سیستم حسابداری پیانو</title>
+    <link rel="stylesheet" href="fonts/fonts.css">
+    <link rel="stylesheet" href="icons/icons.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@majidh1/jalalidatepicker/dist/jalalidatepicker.min.css">
+    <script src="apexcharts.min.js"></script>
+    <link rel="stylesheet" href="comprehensive-report.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- نوار کناری -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-toggle" id="sidebar-toggle">
+                <i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="logo">
+                <i class="fas fa-piano"></i>
+                <span>حسابداری آداک</span>
+            </div>
+            <nav class="main-nav">
+                <ul>
+                    <li class="active"><a href="#dashboard"><i class="fas fa-home"></i><span>داشبورد</span></a></li>
+                    <li><a href="#transactions"><i class="fas fa-cash-register"></i><span>ثبت تراکنش</span></a></li>
+                    <li><a href="#sales-list"><i class="fas fa-list"></i><span>لیست تراکنش‌ها</span></a></li>
+                    <li><a href="#checks"><i class="fas fa-file-invoice-dollar"></i><span>مدیریت چک‌های ورودی</span></a></li>
+                    <li><a href="#outgoing-checks"><i class="fas fa-file-export"></i><span>چک های خروجی</span></a></li>
+                    <li><a href="#customers"><i class="fas fa-users"></i><span>مشتریان</span></a></li>
+                    <li><a href="#reports"><i class="fas fa-chart-line"></i><span>گزارشات</span></a></li>
+                    <li><a href="#employees"><i class="fas fa-user-tie"></i><span>کارکنان</span></a></li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-panel">
+                    <img src="https://adakpiano.com/wp-content/uploads/2024/05/IMG_20250702_032742_116.webp" alt="کاربر">
+                    <span>مدیر سیستم</span>
+                </div>
+                <button class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i><span>خروج</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- محتوای اصلی -->
+        <main class="main-content">
+            <!-- هدر صفحه -->
+            <header class="content-header">
+                <h1 id="page-title">داشبورد</h1>
+                <div class="header-actions">
+                    <div class="search-box">
+                        <input type="text" placeholder="جستجو...">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <div class="notifications">
+                        <i class="fas fa-bell"></i>
+                        <span class="badge">3</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- بخش داشبورد -->
+            <section id="dashboard" class="content-section active">
+                <div class="stats-cards">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background-color: #2ecc71;">
+                            <i class="fas fa-wallet"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-value">۱۲,۴۵۰,۰۰۰</span>
+                            <span class="stat-label">سود خالص ماه</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background-color: #3498db;">
+                            <i class="fas fa-shopping-cart"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-value">۲۴</span>
+                            <span class="stat-label">فروش این ماه</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background-color: #e74c3c;">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-value">۵</span>
+                            <span class="stat-label">چک‌های سررسید</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background-color: #f39c12;">
+                            <i class="fas fa-chalkboard-teacher"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-value">۸</span>
+                            <span class="stat-label">معلم‌های فعال</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-row">
+                    <div class="chart-container full-width">
+                        <div class="chart-header">
+                            <h2><i class="fas fa-chart-line"></i> عملکرد ماهانه کسب و کار</h2>
+                            <div class="chart-controls">
+                                <select id="chart-period" class="form-control">
+                                    <option value="7d">۷ روز اخیر</option>
+                                    <option value="1m">۱ ماه اخیر</option>
+                                    <option value="3m">۳ ماه اخیر</option>
+                                    <option value="6m">۶ ماه اخیر</option>
+                                    <option value="12m" selected>۱۲ ماه اخیر</option>
+                                </select>
+                        </div>
+                    </div>
+                        
+                        <!-- آپشن‌های نمودار -->
+                        <div class="chart-legend-custom">
+                            <div class="legend-item">
+                                <span class="legend-marker" style="background-color: #4285f4;"></span>
+                                <span class="legend-text">فروش</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-marker" style="background-color: #34a853;"></span>
+                                <span class="legend-text">سود خالص</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-marker" style="background-color: #ea4335;"></span>
+                                <span class="legend-text">تعداد چک</span>
+                            </div>
+                        </div>
+                        
+                        <div class="chart-wrapper">
+                            <div id="monthlyPerformanceChart"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-row">
+                    <div class="recent-transactions full-width">
+                        <div class="section-header">
+                            <h2><i class="fas fa-list"></i> آخرین تراکنش‌ها</h2>
+                            <div class="header-actions">
+                                <button class="btn secondary" onclick="showSection('sales-list')">
+                                    <i class="fas fa-eye"></i> مشاهده همه
+                                </button>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>تاریخ</th>
+                                        <th>نام خریدار</th>
+                                    <th>کالا</th>
+                                        <th>مبلغ فروش</th>
+                                        <th>روش پرداخت</th>
+                                    <th>وضعیت</th>
+                                </tr>
+                            </thead>
+                                <tbody id="recent-transactions-tbody">
+                                    <!-- داده‌ها به صورت داینامیک اضافه می‌شود -->
+                            </tbody>
+                        </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-row">
+                    <div class="upcoming-checks">
+                        <h2>چک‌های نزدیک به سررسید</h2>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>تاریخ سررسید</th>
+                                    <th>مبلغ</th>
+                                    <th>صادرکننده</th>
+                                    <th>عملیات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>۱۴۰۲/۰۵/۲۰</td>
+                                    <td>۵۰,۰۰۰,۰۰۰</td>
+                                    <td>بانک ملی</td>
+                                    <td><button class="small-btn primary">تمدید</button></td>
+                                </tr>
+                                <tr>
+                                    <td>۱۴۰۲/۰۵/۲۲</td>
+                                    <td>۳۰,۰۰۰,۰۰۰</td>
+                                    <td>بانک ملت</td>
+                                    <td><button class="small-btn primary">تمدید</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="top-sellers">
+                        <h2>برترین فروشندگان</h2>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>نام</th>
+                                    <th>تعداد فروش</th>
+                                    <th>مبلغ کل</th>
+                                    <th>پورسانت</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>محمد رضایی</td>
+                                    <td>۱۲</td>
+                                    <td>۸۵۰,۰۰۰,۰۰۰</td>
+                                    <td>۲۵,۵۰۰,۰۰۰</td>
+                                </tr>
+                                <tr>
+                                    <td>فاطمه محمدی</td>
+                                    <td>۸</td>
+                                    <td>۶۲۰,۰۰۰,۰۰۰</td>
+                                    <td>۱۸,۶۰۰,۰۰۰</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- بخش ثبت تراکنش -->
+            <section id="transactions" class="content-section">
+                <div class="section-header">
+                    <h2>ثبت تراکنش جدید</h2>
+                    <div class="header-actions">
+                        <button class="btn secondary" onclick="clearTransactionForm()">
+                            <i class="fas fa-plus-circle"></i> تراکنش جدید
+                        </button>
+                    <button class="btn primary">
+                        <i class="fas fa-save"></i> ذخیره تراکنش
+                    </button>
+                    </div>
+                </div>
+                
+                <div class="transaction-form">
+                    <div class="form-section">
+                        <h3><i class="fas fa-info-circle"></i> اطلاعات پایه</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="transaction-date"><i class="far fa-calendar-alt"></i> تاریخ</label>
+                                <div class="jalali-date-wrapper">
+                                    <input type="text" id="transaction-date" class="form-control jalali-date">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="customer-name"><i class="fas fa-user"></i> نام مشتری</label>
+                                <input type="text" id="customer-name" class="form-control" placeholder="نام مشتری را وارد کنید">
+                            </div>
+                            <div class="form-group">
+                                <label for="customer-phone"><i class="fas fa-phone"></i> شماره تماس</label>
+                                <input type="text" id="customer-phone" class="form-control" placeholder="شماره تماس مشتری را وارد کنید">
+                            </div>
+                            <div class="form-group">
+                                <label for="birth-date"><i class="fas fa-birthday-cake"></i> تاریخ تولد</label>
+                                <div class="jalali-date-wrapper">
+                                    <input type="text" id="birth-date" class="form-control jalali-date" placeholder="تاریخ تولد">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="customer-address"><i class="fas fa-map-marker-alt"></i> آدرس</label>
+                                <input type="text" id="customer-address" class="form-control" placeholder="آدرس مشتری را وارد کنید">
+                            </div>
+                            <div class="form-group">
+                                <label for="product-name"><i class="fas fa-piano"></i> نام کالا</label>
+                                <select id="product-name" class="form-control">
+                                    <option value="">انتخاب کنید</option>
+                                    <option value="yamaha-u1">پیانو یاماها U1</option>
+                                    <option value="kawai-k300">پیانو کاوایی K300</option>
+                                    <option value="roland-digital">پیانو دیجیتال Roland</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="product-type"><i class="fas fa-music"></i> نوع ساز</label>
+                                <input type="text" id="product-type" class="form-control" placeholder="مثلاً پیانو، گیتار ...">
+                            </div>
+                            <div class="form-group">
+                                <label for="serial-number"><i class="fas fa-barcode"></i> سریال نامبر</label>
+                                <input type="text" id="serial-number" class="form-control" placeholder="شماره سریال کالا">
+                            </div>
+                            <div class="form-group">
+                                <label for="province"><i class="fas fa-map"></i> استان</label>
+                                <select id="province" class="form-control">
+                                    <option value="">انتخاب استان</option>
+                                    <option>آذربایجان شرقی</option>
+                                    <option>آذربایجان غربی</option>
+                                    <option>اردبیل</option>
+                                    <option>اصفهان</option>
+                                    <option>البرز</option>
+                                    <option>ایلام</option>
+                                    <option>بوشهر</option>
+                                    <option>تهران</option>
+                                    <option>چهارمحال و بختیاری</option>
+                                    <option>خراسان جنوبی</option>
+                                    <option>خراسان رضوی</option>
+                                    <option>خراسان شمالی</option>
+                                    <option>خوزستان</option>
+                                    <option>زنجان</option>
+                                    <option>سمنان</option>
+                                    <option>سیستان و بلوچستان</option>
+                                    <option>فارس</option>
+                                    <option>قزوین</option>
+                                    <option>قم</option>
+                                    <option>کردستان</option>
+                                    <option>کرمان</option>
+                                    <option>کرمانشاه</option>
+                                    <option>کهگیلویه و بویراحمد</option>
+                                    <option>گلستان</option>
+                                    <option>گیلان</option>
+                                    <option>لرستان</option>
+                                    <option>مازندران</option>
+                                    <option>مرکزی</option>
+                                    <option>هرمزگان</option>
+                                    <option>همدان</option>
+                                    <option>یزد</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="city"><i class="fas fa-city"></i> شهر</label>
+                                <select id="city" class="form-control">
+                                    <option value="">ابتدا استان را انتخاب کنید</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3><i class="fas fa-money-bill-wave"></i> اطلاعات مالی</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="purchase-price"><i class="fas fa-shopping-cart"></i> مبلغ خرید</label>
+                                <input type="text" id="purchase-price" class="form-control" placeholder="مبلغ به تومان">
+                            </div>
+                            <div class="form-group">
+                                <label for="sale-price"><i class="fas fa-tag"></i> مبلغ فروش</label>
+                                <input type="text" id="sale-price" class="form-control" placeholder="مبلغ به تومان">
+                            </div>
+                            <div class="form-group">
+                                <label for="gross-profit"><i class="fas fa-coins"></i> سود ناخالص</label>
+                                <input type="text" id="gross-profit" class="form-control" readonly style="background:#f7f7f7;font-weight:bold;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- بخش هزینه‌های جانبی -->
+                    <div class="form-section">
+                        <h3><i class="fas fa-tools"></i> هزینه‌های جانبی</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="color-cost"><i class="fas fa-paint-roller"></i> هزینه رنگ</label>
+                                <input type="text" id="color-cost" class="form-control" value="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="regulation-cost"><i class="fas fa-sliders-h"></i> هزینه رگلاژ</label>
+                                <input type="text" id="regulation-cost" class="form-control" value="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="transport-cost"><i class="fas fa-truck"></i> هزینه حمل</label>
+                                <input type="text" id="transport-cost" class="form-control" value="0">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- بخش پورسانت‌ها -->
+                    <div class="form-section">
+                        <h3><i class="fas fa-users-cog"></i> پورسانت‌ها</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="teacher-name"><i class="fas fa-chalkboard-teacher"></i> معلم/همکار</label>
+                                <select id="teacher-name" class="form-control">
+                                    <option value="">انتخاب کنید</option>
+                                    <option value="ali-mohammadi">علی محمدی</option>
+                                    <option value="maryam-ahmadi">مریم احمدی</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="teacher-percent"><i class="fas fa-percentage"></i> درصد پورسانت</label>
+                                <input type="text" id="teacher-percent" class="form-control" value="10">
+                            </div>
+                            <div class="form-group">
+                                <label for="teacher-commission"><i class="fas fa-money-check-alt"></i> مبلغ پورسانت</label>
+                                <input type="text" id="teacher-commission" class="form-control" readonly>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="seller-name"><i class="fas fa-user-tie"></i> فروشنده</label>
+                                <select id="seller-name" class="form-control">
+                                    <option value="">انتخاب کنید</option>
+                                    <option value="mohammad-rezaei">محمد رضایی</option>
+                                    <option value="fatemeh-mohammadi">فاطمه محمدی</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="seller-percent"><i class="fas fa-percentage"></i> درصد فروشنده</label>
+                                <input type="text" id="seller-percent" class="form-control" value="5">
+                            </div>
+                            <div class="form-group">
+                                <label for="seller-commission"><i class="fas fa-money-check-alt"></i> مبلغ پورسانت</label>
+                                <input type="text" id="seller-commission" class="form-control" readonly>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- سود خالص پایین پورسانت‌ها -->
+                    <div class="form-section">
+                        <div class="form-row">
+                            <div class="form-group" style="width:100%;">
+                                <label for="net-profit"><i class="fas fa-hand-holding-usd"></i> سود خالص</label>
+                                <input type="text" id="net-profit" class="form-control" readonly style="font-size: 2rem; font-weight: bold; color: #1abc9c; background: #eafaf1; text-align: center; border: 2px solid #1abc9c;">
+                                <div id="net-profit-words" style="margin-top:10px; font-size:1.1rem; color:#2a2a36; font-weight:600; text-align:center;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3><i class="fas fa-money-check"></i> شرایط پرداخت</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="payment-method"><i class="fas fa-credit-card"></i> روش پرداخت</label>
+                                <select id="payment-method" class="form-control">
+                                    <option value="cash">نقدی</option>
+                                    <option value="installment">اقساط</option>
+                                </select>
+                            </div>
+                            <div class="form-group" id="advance-payment-group">
+                                <label for="advance-payment"><i class="fas fa-hand-holding-usd"></i> پیش پرداخت</label>
+                                <input type="text" id="advance-payment" class="form-control" value="0">
+                            </div>
+                        </div>
+                        <div id="check-details" class="check-details" style="display: none;">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="check-count"><i class="fas fa-sticky-note"></i> تعداد چک‌ها</label>
+                                    <input type="text" id="check-count" class="form-control" min="1" value="1">
+                                </div>
+                            </div>
+                            <div class="check-items">
+                                <div class="check-item">
+                                    <div class="form-group"><label><i class="fas fa-barcode"></i> شماره صیادی</label><input type="text" class="form-control check-sayadi"></div>
+                                    <div class="form-group"><label><i class="fas fa-list-ol"></i> سری چک</label><input type="text" class="form-control check-series"></div>
+                                    <div class="form-group"><label>بانک</label>
+                                      <select class="form-control check-bank">
+                                        <option value="">انتخاب بانک</option>
+                                        <option value="بانک ملی">بانک ملی</option>
+                                        <option value="بانک ملت">بانک ملت</option>
+                                        <option value="بانک سپه">بانک سپه</option>
+                                        <option value="بانک صادرات">بانک صادرات</option>
+                                        <option value="بانک پارسیان">بانک پارسیان</option>
+                                        <option value="بانک تجارت">بانک تجارت</option>
+                                        <option value="بانک رفاه">بانک رفاه</option>
+                                        <option value="بانک کشاورزی">بانک کشاورزی</option>
+                                        <option value="بانک مسکن">بانک مسکن</option>
+                                        <option value="بانک توسعه صادرات">بانک توسعه صادرات</option>
+                                        <option value="بانک صنعت و معدن">بانک صنعت و معدن</option>
+                                        <option value="بانک توسعه تعاون">بانک توسعه تعاون</option>
+                                        <option value="بانک آینده">بانک آینده</option>
+                                        <option value="بانک شهر">بانک شهر</option>
+                                        <option value="بانک دی">بانک دی</option>
+                                        <option value="بانک تات">بانک تات</option>
+                                        <option value="بانک سینا">بانک سینا</option>
+                                        <option value="بانک قرض‌الحسنه مهر">بانک قرض‌الحسنه مهر</option>
+                                        <option value="بانک قرض‌الحسنه رسالت">بانک قرض‌الحسنه رسالت</option>
+                                        <option value="بانک قرض‌الحسنه کوثر">بانک قرض‌الحسنه کوثر</option>
+                                        <option value="بانک قرض‌الحسنه انصار">بانک قرض‌الحسنه انصار</option>
+                                        <option value="بانک قرض‌الحسنه مهر ایران">بانک قرض‌الحسنه مهر ایران</option>
+                                        <option value="بانک قرض‌الحسنه کارآفرین">بانک قرض‌الحسنه کارآفرین</option>
+                                        <option value="بانک قرض‌الحسنه ایران‌زمین">بانک قرض‌الحسنه ایران‌زمین</option>
+                                        <option value="بانک قرض‌الحسنه عسکریه">بانک قرض‌الحسنه عسکریه</option>
+                                        <option value="بانک قرض‌الحسنه امام رضا">بانک قرض‌الحسنه امام رضا</option>
+                                        <option value="بانک قرض‌الحسنه ولیعصر">بانک قرض‌الحسنه ولیعصر</option>
+                                        <option value="بانک قرض‌الحسنه نور">بانک قرض‌الحسنه نور</option>
+                                        <option value="بانک قرض‌الحسنه قوامین">بانک قرض‌الحسنه قوامین</option>
+                                        <option value="بانک قرض‌الحسنه مهر اقتصاد">بانک قرض‌الحسنه مهر اقتصاد</option>
+                                        <option value="بانک قرض‌الحسنه کارگشا">بانک قرض‌الحسنه کارگشا</option>
+                                        <option value="بانک قرض‌الحسنه سامان">بانک قرض‌الحسنه سامان</option>
+                                        <option value="بانک قرض‌الحسنه نوین">بانک قرض‌الحسنه نوین</option>
+                                        <option value="بانک قرض‌الحسنه آینده">بانک قرض‌الحسنه آینده</option>
+                                        <option value="بانک قرض‌الحسنه شهر">بانک قرض‌الحسنه شهر</option>
+                                        <option value="بانک قرض‌الحسنه تات">بانک قرض‌الحسنه تات</option>
+                                        <option value="بانک قرض‌الحسنه دی">بانک قرض‌الحسنه دی</option>
+                                      </select>
+                                    </div>
+                                    <div class="form-group"><label>شعبه</label><input type="text" class="form-control check-branch"></div>
+                                    <div class="form-group"><label>نام صادرکننده</label><input type="text" class="form-control check-issuer"></div>
+                                    <div class="form-group"><label>در وجه</label><input type="text" class="form-control check-to"></div>
+                                    <div class="form-group"><label><i class="fas fa-id-card"></i> کدملی</label><input type="text" class="form-control check-national"></div>
+                                    <div class="form-group"><label><i class="fas fa-money-bill-wave"></i> مبلغ چک</label><input type="text" class="form-control check-amount"></div>
+                                    <div class="form-group"><label><i class="fas fa-calendar-alt"></i> تاریخ سررسید</label><div class="jalali-date-wrapper"><input type="text" class="form-control check-date jalali-date"></div></div>
+                                </div>
+                            </div>
+                            <button type="button" class="btn secondary" id="add-check-btn">
+                                <i class="fas fa-plus-circle"></i> افزودن چک
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- خلاصه تراکنش -->
+                <div id="transaction-summary" class="transaction-receipt" style="display:none; margin-top: 25px;"></div>
+            </section>
+
+            <!-- لیست تراکنش‌ها -->
+            <section id="sales-list" class="content-section">
+                <div class="section-header">
+                    <h2>لیست تراکنش‌ها</h2>
+                </div>
+                <div class="table-responsive">
+                    <table class="sales-table">
+                        <thead>
+                            <tr>
+                                <th>تاریخ</th>
+                                <th>نام خریدار</th>
+                                <th>شماره تماس</th>
+                                <th>نام کالا</th>
+                                <th>مبلغ فروش</th>
+                                <th>روش پرداخت</th>
+                                <th>استان</th>
+                                <th>شهر</th>
+                                <th>عملیات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- سطرهای تراکنش‌ها به صورت داینامیک اضافه می‌شود -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- بخش مدیریت چک‌ها -->
+            <section id="checks" class="content-section">
+                <!-- کارت‌های آماری -->
+                <div class="stats-cards">
+                    <!-- کارت تعداد کل چک‌ها -->
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value">۰</div>
+                            <div class="stat-label">تعداد کل چک‌ها</div>
+                        </div>
+                    </div>
+
+                    <!-- کارت جمع مبالغ -->
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);">
+                            <i class="fas fa-money-bill-wave"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value">۰ تومان</div>
+                            <div class="stat-label">جمع مبالغ</div>
+                        </div>
+                    </div>
+
+                    <!-- کارت چک‌های در جریان -->
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value">۰</div>
+                            <div class="stat-label">در جریان (۰ تومان)</div>
+                        </div>
+                    </div>
+
+                    <!-- کارت چک‌های وصول شده -->
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #2eaa72 0%, #3bc487 100%);">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value">۰</div>
+                            <div class="stat-label">وصول شده (۰ تومان)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="checks-status-chart-container" style="margin-bottom: 32px;">
+                  <h3 style="font-size: 1.2rem; color: #444; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;"><i class="fas fa-chart-pie" style="color:#fbc02d;"></i> نمودار وضعیت چک‌ها</h3>
+                  <svg width="0" height="0">
+                    <defs>
+                      <linearGradient id="modernYellow" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#ffe259"/>
+                        <stop offset="100%" stop-color="#fbc02d"/>
+                      </linearGradient>
+                      <linearGradient id="modernGreen" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#a8ff78"/>
+                        <stop offset="100%" stop-color="#43a047"/>
+                      </linearGradient>
+                      <linearGradient id="modernRed" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#ff5858"/>
+                        <stop offset="100%" stop-color="#e53935"/>
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                  <div id="checksStatusChart" style="width:100%;max-width:100%;min-width:0;padding:0 0 0 0;"></div>
+                </div>
+                <div class="checks-table">
+                  <!-- فیلترهای پیشرفته -->
+                  <div class="advanced-filters-container" style="background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); border-radius: 16px; padding: 20px; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border: 1px solid #e9ecef;">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid #e3f2fd;">
+                      <i class="fas fa-filter" style="color: #3498db; font-size: 18px;"></i>
+                      <h3 style="margin: 0; color: #2c3e50; font-size: 16px; font-weight: 600;">فیلترهای پیشرفته</h3>
+                      <div style="margin-right: auto; display: flex; gap: 8px;">
+                        <button id="expand-filters-btn" class="btn secondary" style="padding: 8px 16px; font-size: 13px; border-radius: 8px; position: relative;">
+                          <i class="fas fa-chevron-down"></i> فیلترهای بیشتر
+                        </button>
+                        <button id="reset-checks-btn" class="btn secondary" style="padding: 8px 16px; font-size: 13px; border-radius: 8px; background: #fff; color: #e74c3c; border: 1px solid #e74c3c;">
+                          <i class="fas fa-times"></i> پاک کردن
+                        </button>
+                      </div>
+                    </div>
+                    
+                    <!-- فیلترهای اصلی -->
+                    <div class="main-filters" style="display: flex; gap: 12px; align-items: flex-end; margin-bottom: 16px; flex-wrap: wrap; width: 100%;">
+                      <div class="filter-group" style="flex: 1; min-width: 200px;">
+                        <label style="display: block; margin-bottom: 6px; font-size: 13px; color: #666; font-weight: 500;">
+                          <i class="fas fa-user" style="margin-left: 6px; color: #3498db;"></i>نام خریدار
+                        </label>
+                        <input type="text" id="search-buyer" class="form-control search-input" placeholder="جستجو در نام خریدار..." style="width: 100%; border-radius: 10px; border: 1.5px solid #e3f2fd; padding: 12px 16px; font-size: 14px; transition: all 0.3s ease;">
+                      </div>
+                      
+                      <div class="filter-group" style="flex: 1; min-width: 200px;">
+                        <label style="display: block; margin-bottom: 6px; font-size: 13px; color: #666; font-weight: 500;">
+                          <i class="fas fa-credit-card" style="margin-left: 6px; color: #3498db;"></i>شماره صیادی
+                        </label>
+                        <input type="text" id="search-sayadi" class="form-control search-input" placeholder="جستجو در شماره صیادی..." style="width: 100%; border-radius: 10px; border: 1.5px solid #e3f2fd; padding: 12px 16px; font-size: 14px; transition: all 0.3s ease;">
+                      </div>
+                      
+                      <div class="filter-group" style="flex: 1; min-width: 160px;">
+                        <label style="display: block; margin-bottom: 6px; font-size: 13px; color: #666; font-weight: 500;">
+                          <i class="fas fa-money-bill-wave" style="margin-left: 6px; color: #3498db;"></i>مبلغ
+                        </label>
+                        <input type="text" id="search-amount" class="form-control search-input" placeholder="جستجو در مبلغ..." style="width: 100%; border-radius: 10px; border: 1.5px solid #e3f2fd; padding: 12px 16px; font-size: 14px; transition: all 0.3s ease;">
+                      </div>
+                      
+                      <div class="filter-group" style="flex: 1; min-width: 180px;">
+                        <label style="display: block; margin-bottom: 6px; font-size: 13px; color: #666; font-weight: 500;">
+                          <i class="fas fa-university" style="margin-left: 6px; color: #3498db;"></i>بانک یا صادرکننده
+                        </label>
+                        <select id="search-bank" class="form-control search-status-big" style="width: 100%; border-radius: 10px; border: 1.5px solid #e3f2fd; padding: 12px 16px; font-size: 14px; background: #fff; transition: all 0.3s ease;">
+                          <option value="">همه بانک‌ها</option>
+                          <option value="بانک ملی">بانک ملی</option>
+                          <option value="بانک ملت">بانک ملت</option>
+                          <option value="بانک سپه">بانک سپه</option>
+                          <option value="بانک صادرات">بانک صادرات</option>
+                          <option value="بانک پارسیان">بانک پارسیان</option>
+                          <option value="بانک تجارت">بانک تجارت</option>
+                          <option value="بانک رفاه">بانک رفاه</option>
+                          <option value="بانک کشاورزی">بانک کشاورزی</option>
+                          <option value="بانک مسکن">بانک مسکن</option>
+                          <option value="بانک توسعه صادرات">بانک توسعه صادرات</option>
+                          <option value="بانک صنعت و معدن">بانک صنعت و معدن</option>
+                          <option value="بانک توسعه تعاون">بانک توسعه تعاون</option>
+                          <option value="بانک آینده">بانک آینده</option>
+                          <option value="بانک شهر">بانک شهر</option>
+                          <option value="بانک دی">بانک دی</option>
+                          <option value="بانک تات">بانک تات</option>
+                          <option value="بانک سینا">بانک سینا</option>
+                          <option value="بانک قرض‌الحسنه مهر">بانک قرض‌الحسنه مهر</option>
+                          <option value="بانک قرض‌الحسنه رسالت">بانک قرض‌الحسنه رسالت</option>
+                          <option value="بانک قرض‌الحسنه کوثر">بانک قرض‌الحسنه کوثر</option>
+                          <option value="بانک قرض‌الحسنه انصار">بانک قرض‌الحسنه انصار</option>
+                          <option value="بانک قرض‌الحسنه مهر ایران">بانک قرض‌الحسنه مهر ایران</option>
+                          <option value="بانک قرض‌الحسنه کارآفرین">بانک قرض‌الحسنه کارآفرین</option>
+                          <option value="بانک قرض‌الحسنه ایران‌زمین">بانک قرض‌الحسنه ایران‌زمین</option>
+                          <option value="بانک قرض‌الحسنه عسکریه">بانک قرض‌الحسنه عسکریه</option>
+                          <option value="بانک قرض‌الحسنه امام رضا">بانک قرض‌الحسنه امام رضا</option>
+                          <option value="بانک قرض‌الحسنه ولیعصر">بانک قرض‌الحسنه ولیعصر</option>
+                          <option value="بانک قرض‌الحسنه نور">بانک قرض‌الحسنه نور</option>
+                          <option value="بانک قرض‌الحسنه قوامین">بانک قرض‌الحسنه قوامین</option>
+                          <option value="بانک قرض‌الحسنه مهر اقتصاد">بانک قرض‌الحسنه مهر اقتصاد</option>
+                          <option value="بانک قرض‌الحسنه کارگشا">بانک قرض‌الحسنه کارگشا</option>
+                          <option value="بانک قرض‌الحسنه سامان">بانک قرض‌الحسنه سامان</option>
+                          <option value="بانک قرض‌الحسنه نوین">بانک قرض‌الحسنه نوین</option>
+                          <option value="بانک قرض‌الحسنه آینده">بانک قرض‌الحسنه آینده</option>
+                          <option value="بانک قرض‌الحسنه شهر">بانک قرض‌الحسنه شهر</option>
+                          <option value="بانک قرض‌الحسنه تات">بانک قرض‌الحسنه تات</option>
+                          <option value="بانک قرض‌الحسنه دی">بانک قرض‌الحسنه دی</option>
+                            </select>
+                        </div>
+                      
+                      <div class="filter-group" style="flex: 1; min-width: 180px;">
+                        <label style="display: block; margin-bottom: 6px; font-size: 13px; color: #666; font-weight: 500;">
+                          <i class="fas fa-info-circle" style="margin-left: 6px; color: #3498db;"></i>وضعیت
+                        </label>
+                        <select id="search-status" class="form-control search-status-big" style="width: 100%; border-radius: 10px; border: 1.5px solid #e3f2fd; padding: 12px 16px; font-size: 14px; background: #fff; transition: all 0.3s ease;">
+                          <option value="">همه وضعیت‌ها</option>
+                          <option value="در جریان">در جریان</option>
+                          <option value="وصول شده">وصول شده</option>
+                          <option value="برگشتی">برگشتی</option>
+                        </select>
+                    </div>
+                </div>
+
+                    <!-- فیلترهای پیشرفته (Dropdown) -->
+                    <div id="advanced-filters" style="display: none; border-top: 1px solid #e3f2fd; padding-top: 16px; max-height: 0; overflow: hidden; transition: max-height 0.3s ease;">
+                      <div style="display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; width: 100%;">
+                        <div class="filter-group" style="flex: 1; min-width: 180px;">
+                          <label style="display: block; margin-bottom: 6px; font-size: 13px; color: #666; font-weight: 500;">
+                            <i class="fas fa-calendar-alt" style="margin-left: 6px; color: #3498db;"></i>تاریخ از
+                          </label>
+                          <input type="text" id="search-date-from" class="form-control jalali-date search-input" placeholder="تاریخ شروع..." style="width: 100%; border-radius: 10px; border: 1.5px solid #e3f2fd; padding: 12px 16px; font-size: 14px; transition: all 0.3s ease;">
+                        </div>
+                        
+                        <div class="filter-group" style="flex: 1; min-width: 180px;">
+                          <label style="display: block; margin-bottom: 6px; font-size: 13px; color: #666; font-weight: 500;">
+                            <i class="fas fa-calendar-check" style="margin-left: 6px; color: #3498db;"></i>تاریخ تا
+                          </label>
+                          <input type="text" id="search-date-to" class="form-control jalali-date search-input" placeholder="تاریخ پایان..." style="width: 100%; border-radius: 10px; border: 1.5px solid #e3f2fd; padding: 12px 16px; font-size: 14px; transition: all 0.3s ease;">
+                        </div>
+                        
+                        <div class="filter-group" style="flex: 1; min-width: 180px;">
+                          <label style="display: block; margin-bottom: 6px; font-size: 13px; color: #666; font-weight: 500;">
+                            <i class="fas fa-sort-amount-down" style="margin-left: 6px; color: #3498db;"></i>مرتب‌سازی
+                          </label>
+                          <select id="search-sort" class="form-control search-status-big" style="width: 100%; border-radius: 10px; border: 1.5px solid #e3f2fd; padding: 12px 16px; font-size: 14px; background: #fff; transition: all 0.3s ease;">
+                            <option value="date-desc">تاریخ سررسید (نزولی)</option>
+                            <option value="date-asc">تاریخ سررسید (صعودی)</option>
+                            <option value="amount-desc">مبلغ (نزولی)</option>
+                            <option value="amount-asc">مبلغ (صعودی)</option>
+                            <option value="buyer">نام خریدار</option>
+                          </select>
+                        </div>
+                        
+                        <div class="filter-group" style="flex: 1; min-width: 140px;">
+                          <label style="display: block; margin-bottom: 6px; font-size: 13px; color: #666; font-weight: 500;">
+                            <i class="fas fa-eye" style="margin-left: 6px; color: #3498db;"></i>نمایش
+                          </label>
+                          <select id="search-limit" class="form-control search-status-big" style="width: 100%; border-radius: 10px; border: 1.5px solid #e3f2fd; padding: 12px 16px; font-size: 14px; background: #fff; transition: all 0.3s ease;">
+                            <option value="all">همه</option>
+                            <option value="10">۱۰ مورد</option>
+                            <option value="25">۲۵ مورد</option>
+                            <option value="50">۵۰ مورد</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <!-- دکمه جستجو -->
+                    <div style="display: flex; justify-content: center; margin-top: 16px; padding-top: 16px; border-top: 1px solid #e3f2fd;">
+                      <button id="search-checks-btn" class="btn primary" style="padding: 12px 32px; font-size: 14px; border-radius: 10px; background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); border: none; color: white; font-weight: 600; transition: all 0.3s ease; min-width: 140px;">
+                        <i class="fas fa-search" style="margin-left: 8px;"></i>جستجو
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <!-- نمایش نتایج -->
+                  <div class="search-results-info" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding: 12px 16px; background: #e3f2fd; border-radius: 10px; border-right: 4px solid #3498db;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <i class="fas fa-info-circle" style="color: #3498db;"></i>
+                      <span style="font-size: 14px; color: #2c3e50;">نتایج جستجو: <strong id="results-count">۳</strong> چک یافت شد</span>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                      <span style="font-size: 12px; color: #666; background: #fff; padding: 4px 8px; border-radius: 6px;">مجموع: <strong>۱۲۵,۰۰۰,۰۰۰ تومان</strong></span>
+                    </div>
+                  </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>شماره صیادی</th>
+                                <th>در وجه</th>
+                                <th>مبلغ</th>
+                                <th>تاریخ سررسید</th>
+                                <th>صادرکننده</th>
+                                <th>وضعیت</th>
+                                <th>عملیات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>۱۲۳۴۵۶۷۸۹۰۱۲۳۴۵۶</td>
+                                <td>شرکت پیانو حساب</td>
+                                <td>۵۰,۰۰۰,۰۰۰</td>
+                                <td>۱۴۰۲/۰۵/۲۰</td>
+                                <td>بانک ملی</td>
+                                <td><span class="status-badge warning">در جریان</span></td>
+                                <td>
+                                    <button class="small-btn success"><i class="fas fa-check"></i></button>
+                                    <button class="small-btn danger"><i class="fas fa-times"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>۹۸۷۶۵۴۳۲۱۰۹۸۷۶۵۴</td>
+                                <td>شرکت پیانو حساب</td>
+                                <td>۳۰,۰۰۰,۰۰۰</td>
+                                <td>۱۴۰۲/۰۵/۲۲</td>
+                                <td>بانک ملت</td>
+                                <td><span class="status-badge warning">در جریان</span></td>
+                                <td>
+                                    <button class="small-btn success"><i class="fas fa-check"></i></button>
+                                    <button class="small-btn danger"><i class="fas fa-times"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>۱۱۱۲۲۲۳۳۳۴۴۴۵۵۵۶</td>
+                                <td>شرکت پیانو حساب</td>
+                                <td>۴۵,۰۰۰,۰۰۰</td>
+                                <td>۱۴۰۲/۰۴/۱۵</td>
+                                <td>بانک سپه</td>
+                                <td><span class="status-badge success">وصول شده</span></td>
+                                <td>
+                                    <button class="small-btn info"><i class="fas fa-eye"></i></button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            <!-- بخش مدیریت چک‌های خروجی -->
+            <section id="outgoing-checks" class="content-section">
+                <div class="section-header">
+                    <h2>مدیریت چک‌های خروجی</h2>
+                </div>
+                <div class="checks-table">
+                  <div id="outgoing-checks-search-bar" style="display:flex;gap:12px;align-items:center;margin-bottom:18px;flex-wrap:wrap;">
+                    <input type="text" class="form-control search-input" placeholder="نام ذینفع..." style="width:200px;">
+                    <input type="text" class="form-control search-input" placeholder="شماره صیادی..." style="width:200px;">
+                    <input type="text" class="form-control search-input" placeholder="مبلغ..." style="width:160px;">
+                    <input type="text" class="form-control jalali-date search-input" placeholder="تاریخ از..." style="width:180px;">
+                    <input type="text" class="form-control jalali-date search-input" placeholder="تاریخ تا..." style="width:180px;">
+                    <select class="form-control search-status-big" style="width:220px;min-height:48px;font-size:19px;padding:16px 18px;">
+                      <option value="">همه وضعیت‌ها</option>
+                      <option value="در جریان">در جریان</option>
+                      <option value="پرداخت شده">پرداخت شده</option>
+                      <option value="باطل شده">باطل شده</option>
+                    </select>
+                    <button class="btn primary" style="padding:8px 18px;font-size:13px;"><i class="fas fa-search"></i> جستجو</button>
+                  </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>شماره صیادی</th>
+                                <th>در وجه</th>
+                                <th>مبلغ</th>
+                                <th>تاریخ سررسید</th>
+                                <th>بانک</th>
+                                <th>وضعیت</th>
+                                <th>عملیات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>۲۲۳۳۴۴۵۵۶۶۷۷۸۸۹۹</td>
+                                <td>شرکت آداک</td>
+                                <td>۲۵,۰۰۰,۰۰۰</td>
+                                <td>۱۴۰۲/۰۶/۱۰</td>
+                                <td>بانک صادرات</td>
+                                <td><span class="status-badge warning">در جریان</span></td>
+                                <td>
+                                    <button class="small-btn success"><i class="fas fa-check"></i></button>
+                                    <button class="small-btn danger"><i class="fas fa-times"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>۳۳۴۴۵۵۶۶۷۷۸۸۹۹۰۰</td>
+                                <td>شرکت آداک</td>
+                                <td>۴۰,۰۰۰,۰۰۰</td>
+                                <td>۱۴۰۲/۰۷/۱۵</td>
+                                <td>بانک ملت</td>
+                                <td><span class="status-badge success">پرداخت شده</span></td>
+                                <td>
+                                    <button class="small-btn info"><i class="fas fa-eye"></i></button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- بخش مشتریان -->
+            <section id="customers" class="content-section">
+                <div class="section-header">
+                    <h2>مدیریت مشتریان</h2>
+                    <button class="btn primary">
+                        <i class="fas fa-plus-circle"></i> مشتری جدید
+                    </button>
+                </div>
+
+                <div class="customers-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>نام</th>
+                                <th>تلفن</th>
+                                <th>تاریخ تولد</th>
+                                <th>استان</th>
+                                <th>شهر</th>
+                                <th>نوع ساز</th>
+                                <th>تعداد خرید</th>
+                                <th>مجموع خریدها</th>
+                                <th>آخرین خرید</th>
+                                <th>عملیات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>رضا محمدی</td>
+                                <td>۰۹۱۲۱۲۳۴۵۶۷</td>
+                                <td>۱۳۷۵/۰۲/۱۵</td>
+                                <td>تهران</td>
+                                <td>تهران</td>
+                                <td>پیانو</td>
+                                <td>۲</td>
+                                <td>۳۲۰,۰۰۰,۰۰۰</td>
+                                <td>۱۴۰۲/۰۴/۲۰</td>
+                                <td>
+                                    <button class="small-btn primary"><i class="fas fa-edit"></i></button>
+                                    <button class="small-btn danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>فاطمه احمدی</td>
+                                <td>۰۹۳۵۵۶۷۸۹۱۲</td>
+                                <td>۱۳۶۸/۰۹/۰۵</td>
+                                <td>اصفهان</td>
+                                <td>اصفهان</td>
+                                <td>گیتار</td>
+                                <td>۱</td>
+                                <td>۱۸۰,۰۰۰,۰۰۰</td>
+                                <td>۱۴۰۲/۰۵/۰۵</td>
+                                <td>
+                                    <button class="small-btn primary"><i class="fas fa-edit"></i></button>
+                                    <button class="small-btn danger"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- بخش گزارشات -->
+            <section id="reports" class="content-section">
+                <div class="section-header">
+                    <h2>گزارشات تحلیلی</h2>
+                    <div class="header-actions">
+                        <div class="filter-group">
+                            <select class="form-control">
+                                <option>این ماه</option>
+                                <option>ماه گذشته</option>
+                                <option>۳ ماه اخیر</option>
+                                <option>سال جاری</option>
+                                <option>انتخاب بازه زمانی</option>
+                            </select>
+                        </div>
+                        <button class="btn secondary">
+                            <i class="fas fa-file-export"></i> خروجی Excel
+                        </button>
+                    </div>
+                </div>
+
+                <div class="report-filters">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>نوع گزارش</label>
+                            <select class="form-control">
+                                <option>گزارش فروش</option>
+                                <option>گزارش سود و زیان</option>
+                                <option>گزارش پورسانت‌ها</option>
+                                <option>گزارش چک‌ها</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>فروشنده</label>
+                            <select class="form-control">
+                                <option>همه فروشندگان</option>
+                                <option>محمد رضایی</option>
+                                <option>فاطمه محمدی</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>معلم</label>
+                            <select class="form-control">
+                                <option>همه معلم‌ها</option>
+                                <option>علی محمدی</option>
+                                <option>مریم احمدی</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="report-results">
+                    <div class="report-chart">
+                        <h3>نمودار فروش ماهانه</h3>
+                        <div class="chart-placeholder">
+                            [نمودار فروش ماهانه]
+                        </div>
+                    </div>
+                    <div class="report-summary">
+                        <h3>خلاصه گزارش</h3>
+                        <div class="summary-cards">
+                            <div class="summary-card">
+                                <span class="summary-label">تعداد فروش</span>
+                                <span class="summary-value">۱۵</span>
+                            </div>
+                            <div class="summary-card">
+                                <span class="summary-label">مجموع فروش</span>
+                                <span class="summary-value">۱,۲۵۰,۰۰۰,۰۰۰</span>
+                            </div>
+                            <div class="summary-card">
+                                <span class="summary-label">سود خالص</span>
+                                <span class="summary-value">۱۸۷,۵۰۰,۰۰۰</span>
+                            </div>
+                            <div class="summary-card">
+                                <span class="summary-label">پورسانت پرداختی</span>
+                                <span class="summary-value">۳۷,۵۰۰,۰۰۰</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="report-details">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>تاریخ</th>
+                                <th>کالا</th>
+                                <th>مبلغ فروش</th>
+                                <th>سود خالص</th>
+                                <th>فروشنده</th>
+                                <th>معلم</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>۱۴۰۲/۰۵/۱۵</td>
+                                <td>پیانو یاماها U1</td>
+                                <td>۲۵۰,۰۰۰,۰۰۰</td>
+                                <td>۳۷,۵۰۰,۰۰۰</td>
+                                <td>محمد رضایی</td>
+                                <td>علی محمدی</td>
+                            </tr>
+                            <tr>
+                                <td>۱۴۰۲/۰۵/۱۲</td>
+                                <td>پیانو کاوایی K300</td>
+                                <td>۱۸۰,۰۰۰,۰۰۰</td>
+                                <td>۲۷,۰۰۰,۰۰۰</td>
+                                <td>فاطمه محمدی</td>
+                                <td>مریم احمدی</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- بخش کارکنان -->
+            <section id="employees" class="content-section">
+                <div class="section-header">
+                    <h2>مدیریت کارکنان</h2>
+                    <button class="btn primary">
+                        <i class="fas fa-plus-circle"></i> کارمند جدید
+                    </button>
+                </div>
+
+                <div class="employees-tabs">
+                    <div class="tabs-header">
+                        <button class="tab-btn active" data-tab="sellers">فروشندگان</button>
+                        <button class="tab-btn" data-tab="teachers">معلم‌ها</button>
+                    </div>
+
+                    <div class="tab-content active" id="sellers-tab">
+                        <div class="employees-table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>نام</th>
+                                        <th>تلفن</th>
+                                        <th>تعداد فروش</th>
+                                        <th>مجموع فروش</th>
+                                        <th>پورسانت</th>
+                                        <th>عملیات</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>محمد رضایی</td>
+                                        <td>۰۹۱۲۳۴۵۶۷۸۹</td>
+                                        <td>۱۲</td>
+                                        <td>۸۵۰,۰۰۰,۰۰۰</td>
+                                        <td>۲۵,۵۰۰,۰۰۰</td>
+                                        <td>
+                                            <button class="small-btn primary"><i class="fas fa-edit"></i></button>
+                                            <button class="small-btn danger"><i class="fas fa-trash"></i></button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>فاطمه محمدی</td>
+                                        <td>۰۹۳۵۱۲۳۴۵۶۷</td>
+                                        <td>۸</td>
+                                        <td>۶۲۰,۰۰۰,۰۰۰</td>
+                                        <td>۱۸,۶۰۰,۰۰۰</td>
+                                        <td>
+                                            <button class="small-btn primary"><i class="fas fa-edit"></i></button>
+                                            <button class="small-btn danger"><i class="fas fa-trash"></i></button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="tab-content" id="teachers-tab">
+                        <div class="employees-table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>نام</th>
+                                        <th>تلفن</th>
+                                        <th>تعداد فروش</th>
+                                        <th>مجموع فروش</th>
+                                        <th>پورسانت</th>
+                                        <th>عملیات</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>علی محمدی</td>
+                                        <td>۰۹۱۲۱۲۳۴۵۶۷</td>
+                                        <td>۷</td>
+                                        <td>۵۲۰,۰۰۰,۰۰۰</td>
+                                        <td>۵۲,۰۰۰,۰۰۰</td>
+                                        <td>
+                                            <button class="small-btn primary"><i class="fas fa-edit"></i></button>
+                                            <button class="small-btn danger"><i class="fas fa-trash"></i></button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>مریم احمدی</td>
+                                        <td>۰۹۳۵۵۶۷۸۹۱۲</td>
+                                        <td>۵</td>
+                                        <td>۳۸۰,۰۰۰,۰۰۰</td>
+                                        <td>۳۸,۰۰۰,۰۰۰</td>
+                                        <td>
+                                            <button class="small-btn primary"><i class="fas fa-edit"></i></button>
+                                            <button class="small-btn danger"><i class="fas fa-trash"></i></button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- دکمه گزارش جامع چک‌ها -->
+            <div class="comprehensive-report-btn" id="comprehensiveReportBtn" title="گزارش جامع چک‌ها">
+              <div class="report-btn-icon">
+                <i class="fas fa-chart-line"></i>
+              </div>
+              <div class="report-btn-text">
+                <span>گزارش جامع</span>
+                <small>آمار و رتبه‌بندی</small>
+              </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- مودال گزارش جامع چک‌ها -->
+    <div class="modal-overlay" id="comprehensiveReportModal" style="display:none;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <span class="modal-title"><i class="fas fa-chart-line"></i> گزارش جامع چک‌های ورودی</span>
+          <button class="modal-close" id="closeComprehensiveReportModal"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+          <!-- تب‌های گزارش -->
+          <div class="report-tabs">
+            <button class="tab-btn active" data-tab="monthly-stats">
+              <i class="fas fa-calendar-alt"></i>
+              آمار ماهانه
+            </button>
+            <button class="tab-btn" data-tab="bank-ranking">
+              <i class="fas fa-university"></i>
+              رتبه‌بندی بانک‌ها
+            </button>
+            <button class="tab-btn" data-tab="buyer-ranking">
+              <i class="fas fa-users"></i>
+              رتبه‌بندی خریداران
+            </button>
+          </div>
+          <!-- محتوای تب آمار ماهانه -->
+          <div class="tab-content active" id="monthly-stats">
+            <div class="tab-header" style="display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+              <h3 style="margin: 0; display: flex; align-items: center;"><i class="fas fa-calendar-alt" style="margin-left: 8px;"></i> آمار ماهانه چک‌ها (فروردین تا اسفند)</h3>
+              <div class="sort-controls" style="display: flex; align-items: center; gap: 8px;">
+                <label class="sort-label" style="font-size: 15px; color: #555; margin-left: 8px;">مرتب‌سازی بر اساس تعداد چک:</label>
+                <div class="sort-toggle" style="display: flex; align-items: center; gap: 8px;">
+                  <button class="sort-btn active" id="sortDescBtn" data-sort="desc" title="بیشترین تعداد" type="button" style="padding: 6px 14px; border-radius: 8px; border: 1px solid #e3f2fd; background: #f5faff; color: #1976d2; font-weight: bold; cursor: pointer;">
+                    <i class="fas fa-sort-amount-up"></i> بیشترین
+                  </button>
+                  <button class="sort-btn" id="sortAscBtn" data-sort="asc" title="کمترین تعداد" type="button" style="padding: 6px 14px; border-radius: 8px; border: 1px solid #e3f2fd; background: #fff; color: #1976d2; font-weight: bold; cursor: pointer;">
+                    <i class="fas fa-sort-amount-down"></i> کمترین
+                  </button>
+                  <button class="sort-btn" id="sortNoneBtn" data-sort="none" title="بدون فیلتر" type="button" style="padding: 6px 14px; border-radius: 8px; border: 1px solid #e3f2fd; background: #fff; color: #1976d2; font-weight: bold; cursor: pointer;">
+                    <i class="fas fa-calendar"></i> بدون فیلتر
+                  </button>
+                </div>
+              </div>
+            </div>
+            <table class="report-table">
+              <thead>
+                <tr>
+                  <th>ماه</th>
+                  <th>تعداد چک</th>
+                  <th>مبلغ هر چک</th>
+                  <th>جمع مبالغ (تومان)</th>
+                  <th>درصد از کل</th>
+                </tr>
+              </thead>
+              <tbody id="monthlyStatsTableBody">
+                <!-- داده‌ها با جاوااسکریپت پر می‌شود -->
+              </tbody>
+            </table>
+          </div>
+          <!-- محتوای تب رتبه‌بندی بانک‌ها -->
+          <div class="tab-content" id="bank-ranking" style="display:none;">
+            <div class="tab-header">
+              <h3><i class="fas fa-university"></i> رتبه‌بندی بانک‌ها</h3>
+            </div>
+            <p style="color: #666; text-align: center; padding:20px;">این بخش در مراحل بعدی تکمیل خواهد شد</p>
+          </div>
+          <!-- محتوای تب رتبه‌بندی خریداران -->
+          <div class="tab-content" id="buyer-ranking" style="display:none;">
+            <div class="tab-header">
+              <h3><i class="fas fa-users"></i> رتبه‌بندی خریداران</h3>
+            </div>
+            <p style="color: #666; text-align: center; padding:20px;">این بخش در مراحل بعدی تکمیل خواهد شد</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@majidh1/jalalidatepicker/dist/jalalidatepicker.min.js"></script>
+    <script src="comprehensive-report.js"></script>
+    <style>
+.search-input {
+  border-radius: 10px !important;
+  box-shadow: 0 2px 8px #e3f2fd33;
+  font-size: 17px;
+  padding: 16px 18px !important;
+  min-height: 48px;
+  border: 1.5px solid #e3f2fd !important;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.search-input:focus {
+  border-color: #3498db !important;
+  box-shadow: 0 0 0 3px #e3f2fd99;
+  outline: none;
+}
+.search-status-big {
+  border-radius: 10px !important;
+  box-shadow: 0 2px 8px #e3f2fd33;
+  font-size: 19px !important;
+  padding: 16px 18px !important;
+  min-height: 48px;
+  border: 1.5px solid #e3f2fd !important;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  background: #fff;
+}
+.search-status-big:focus {
+  border-color: #3498db !important;
+  box-shadow: 0 0 0 3px #e3f2fd99;
+  outline: none;
+}
+.search-reset-btn {
+  padding: 16px 32px !important;
+  font-size: 18px !important;
+  font-weight: 900 !important;
+  border: 2.5px solid #e74c3c !important;
+  color: #e74c3c !important;
+  background: #fff !important;
+  border-radius: 10px !important;
+  min-height: 48px;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+.search-reset-btn:hover {
+  background: #e74c3c !important;
+  color: #fff !important;
+  border-color: #e74c3c !important;
+}
+@media (min-width: 1024px) and (max-width: 1440px) {
+  #checks-search-bar .search-input {
+    width: 120px !important;
+    min-width: 0 !important;
+    font-size: 15px;
+    padding: 12px 10px !important;
+  }
+  #checks-search-bar .jalali-date.search-input {
+    width: 110px !important;
+  }
+  #checks-search-bar .search-status-big {
+    width: 150px !important;
+    font-size: 16px !important;
+    padding: 12px 10px !important;
+  }
+}
+@media (max-width: 900px) {
+  #checks-search-bar .search-input,
+  #checks-search-bar .search-status-big {
+    width: 100% !important;
+    min-width: 0 !important;
+    font-size: 15px;
+    padding: 10px 8px !important;
+    margin-bottom: 8px;
+  }
+  #checks-search-bar {
+    flex-direction: column;
+    gap: 6px !important;
+  }
+}
+</style>
+</body>
+</html>

@@ -1,0 +1,118 @@
+/* آیکون‌های محلی سیستم حسابداری آداک */
+
+/* Font Awesome Icons - Local Fallback */
+/* در صورت عدم دسترسی به CDN، از آیکون‌های محلی استفاده می‌شود */
+
+/* Sidebar Icons */
+.icon-piano::before { content: "🎹"; }
+.icon-home::before { content: "🏠"; }
+.icon-cash-register::before { content: "💰"; }
+.icon-list::before { content: "📋"; }
+.icon-file-invoice::before { content: "📄"; }
+.icon-file-export::before { content: "📤"; }
+.icon-users::before { content: "👥"; }
+.icon-chart-line::before { content: "📈"; }
+.icon-user-tie::before { content: "👔"; }
+.icon-sign-out::before { content: "🚪"; }
+
+/* Dashboard Icons */
+.icon-wallet::before { content: "💳"; }
+.icon-shopping-cart::before { content: "🛒"; }
+.icon-exclamation-triangle::before { content: "⚠️"; }
+.icon-chalkboard-teacher::before { content: "👨‍🏫"; }
+.icon-search::before { content: "🔍"; }
+.icon-bell::before { content: "🔔"; }
+
+/* Check Management Icons */
+.icon-money-bill-wave::before { content: "💸"; }
+.icon-clock::before { content: "⏰"; }
+.icon-check-circle::before { content: "✅"; }
+.icon-chart-pie::before { content: "📊"; }
+.icon-barcode::before { content: "📊"; }
+.icon-list-ol::before { content: "📝"; }
+.icon-university::before { content: "🏦"; }
+.icon-map-marker-alt::before { content: "📍"; }
+.icon-user-edit::before { content: "✏️"; }
+.icon-user-tag::before { content: "🏷️"; }
+.icon-id-card::before { content: "🆔"; }
+.icon-calendar-alt::before { content: "📅"; }
+.icon-trash::before { content: "🗑️"; }
+
+/* Report Icons */
+.icon-trophy::before { content: "🏆"; }
+.icon-medal::before { content: "🥇"; }
+.icon-sort::before { content: "↕️"; }
+.icon-sort-up::before { content: "⬆️"; }
+.icon-sort-down::before { content: "⬇️"; }
+.icon-times::before { content: "✖️"; }
+
+/* Action Icons */
+.icon-edit::before { content: "✏️"; }
+.icon-save::before { content: "💾"; }
+.icon-plus-circle::before { content: "➕"; }
+.icon-eye::before { content: "👁️"; }
+.icon-chevron-right::before { content: "▶️"; }
+.icon-chevron-left::before { content: "◀️"; }
+
+/* Status Icons */
+.icon-success::before { content: "✅"; }
+.icon-warning::before { content: "⚠️"; }
+.icon-danger::before { content: "❌"; }
+.icon-info::before { content: "ℹ️"; }
+
+/* Utility Icons */
+.icon-spinner::before { content: "🔄"; }
+.icon-download::before { content: "⬇️"; }
+.icon-upload::before { content: "⬆️"; }
+.icon-print::before { content: "🖨️"; }
+.icon-share::before { content: "📤"; }
+
+/* Custom Icon Classes */
+.icon-fallback {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  line-height: 1;
+  text-align: center;
+  font-style: normal;
+  font-variant: normal;
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Icon Sizes */
+.icon-xs { font-size: 0.75em; }
+.icon-sm { font-size: 0.875em; }
+.icon-lg { font-size: 1.25em; }
+.icon-xl { font-size: 1.5em; }
+.icon-2x { font-size: 2em; }
+.icon-3x { font-size: 3em; }
+
+/* Icon Colors */
+.icon-primary { color: #3498db; }
+.icon-success { color: #2ecc71; }
+.icon-warning { color: #f39c12; }
+.icon-danger { color: #e74c3c; }
+.icon-info { color: #17a2b8; }
+.icon-light { color: #f8f9fa; }
+.icon-dark { color: #343a40; }
+
+/* Animation for Icons */
+.icon-spin {
+  animation: icon-spin 2s linear infinite;
+}
+
+@keyframes icon-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.icon-pulse {
+  animation: icon-pulse 1s steps(8) infinite;
+}
+
+@keyframes icon-pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+} 

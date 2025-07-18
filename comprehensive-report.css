@@ -1,0 +1,217 @@
+/* مودال گزارش جامع چک‌ها */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(44, 62, 80, 0.25);
+  z-index: 2000;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  overflow-y: auto;
+  padding: 32px 0 32px 0;
+}
+.modal-content {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 8px 32px rgba(52,152,219,0.18), 0 2px 8px rgba(0,0,0,0.08);
+  padding: 0;
+  min-width: 340px;
+  max-width: 1200px;
+  width: 98vw;
+  animation: modalIn 0.35s cubic-bezier(.68,-0.55,.27,1.55);
+  overflow-x: auto;
+}
+@keyframes modalIn {
+  0% { transform: scale(0.85) translateY(60px); opacity: 0; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px 12px 18px;
+  border-bottom: 1.5px solid #e3f2fd;
+  background: linear-gradient(135deg, #e3f2fd 0%, #fff 100%);
+}
+.modal-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1976d2;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.modal-close {
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 20px;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.modal-close:hover {
+  color: #e74c3c;
+}
+.modal-body {
+  padding: 32px 32px 32px 32px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+.report-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+  font-size: 15px;
+  min-width: 700px;
+}
+.report-table th, .report-table td {
+  padding: 10px 8px;
+  text-align: center;
+}
+.report-table th {
+  background: #e3f2fd;
+  color: #1976d2;
+  font-weight: 700;
+  border-bottom: 2px solid #bbdefb;
+}
+.report-table tr:nth-child(even) {
+  background: #f8fafb;
+}
+.report-table tr:nth-child(odd) {
+  background: #fff;
+}
+.report-table td {
+  color: #333;
+  font-weight: 500;
+}
+/* --- Sort Toggle for Monthly Stats --- */
+.sort-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.sort-label {
+  font-size: 15px;
+  color: #555;
+  margin-left: 8px;
+}
+.sort-toggle {
+  display: flex;
+  gap: 4px;
+}
+.sort-btn {
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 1.5px solid #e3f2fd;
+  background: #fff;
+  color: #1976d2;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+  outline: none;
+}
+.sort-btn.active {
+  background: #f5faff;
+  color: #1976d2;
+  border-color: #1976d2;
+}
+.sort-btn:hover:not(.active) {
+  background: #e3f2fd;
+  color: #1565c0;
+}
+
+/* فاصله بین تب‌ها و هدر تب */
+.report-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+.tab-header {
+  margin-top: 0;
+  margin-bottom: 18px;
+}
+
+/* دکمه‌های تب مدرن */
+.tab-btn {
+  background: #f5faff;
+  color: #1976d2;
+  border: 1.5px solid #e3f2fd;
+  border-radius: 12px 12px 0 0;
+  padding: 10px 28px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 8px #e3f2fd33;
+  transition: background 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+  position: relative;
+  z-index: 1;
+}
+.tab-btn.active {
+  background: #1976d2;
+  color: #fff;
+  border-color: #1976d2 #1976d2 #fff #1976d2;
+  box-shadow: 0 4px 16px #1976d233;
+}
+.tab-btn:not(.active):hover {
+  background: #e3f2fd;
+  color: #1565c0;
+  border-color: #90caf9;
+}
+
+.medal-icon {
+  display: inline-block;
+  vertical-align: middle;
+  font-size: 1.25em;
+  margin-left: 6px;
+  line-height: 1;
+}
+
+.percent-sign {
+  margin-left: 2px;
+  font-weight: bold;
+}
+.gold-row {
+  background: linear-gradient(90deg, #fffbe6 0%, #fff3b0 100%);
+  color: #bfa100 !important;
+  font-weight: bold;
+}
+.gold-row td {
+  border-color: #ffe066 !important;
+}
+
+@media (max-width: 900px) {
+  .modal-content {
+    width: 100vw;
+    min-width: unset;
+    max-width: 100vw;
+    border-radius: 0;
+    padding: 0;
+  }
+  .modal-header, .modal-body {
+    padding: 12px 8px;
+  }
+  .report-table th, .report-table td {
+    padding: 7px 3px;
+    font-size: 13px;
+  }
+  .modal-body {
+    padding: 12px 4px;
+    max-height: 90vh;
+  }
+  .report-table {
+    min-width: 500px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 600px) {
+  .tab-btn {
+    padding: 8px 10px;
+    font-size: 14px;
+  }
+  .report-tabs {
+    gap: 4px;
+    margin-bottom: 14px;
+  }
+} 
