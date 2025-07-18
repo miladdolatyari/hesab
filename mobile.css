@@ -479,4 +479,141 @@
     padding-right: 12px !important;
     direction: rtl !important;
   }
+  /* =================== آخرین تراکنش‌ها - استایل مستقل =================== */
+  .recent-transactions {
+    width: 100% !important;
+    max-width: 100vw !important;
+    min-width: 0 !important;
+    padding: 0 12px !important;
+    margin: 0 auto !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+  }
+  .recent-transactions .table-responsive {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+    overflow-x: visible !important;
+  }
+  .recent-transactions table {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    border-collapse: separate !important;
+    border-spacing: 0 0 !important;
+    background: none !important;
+  }
+  .recent-transactions table tbody {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    display: block !important;
+  }
+  .recent-transactions table tbody tr {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    margin: 16px 0 !important;
+    box-sizing: border-box !important;
+    display: block !important;
+  }
+
+  /* =================== چک‌های نزدیک به سررسید - استایل مستقل =================== */
+  .upcoming-checks {
+    width: 100% !important;
+    max-width: 100vw !important;
+    min-width: 0 !important;
+    padding: 0 12px !important;
+    margin: 0 auto !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+  }
+  .upcoming-checks .table-responsive {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+    overflow-x: visible !important;
+  }
+  .upcoming-checks table {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    border-collapse: separate !important;
+    border-spacing: 0 0 !important;
+    background: none !important;
+  }
+  .upcoming-checks table tbody {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    display: block !important;
+  }
+  .upcoming-checks table tbody tr {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    margin: 16px 0 !important;
+    box-sizing: border-box !important;
+    display: block !important;
+  }
+
+  /* =================== برترین فروشندگان - استایل مستقل =================== */
+  .top-sellers {
+    width: 100% !important;
+    max-width: 100vw !important;
+    min-width: 0 !important;
+    padding: 0 12px !important;
+    margin: 0 auto !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+  }
+  .top-sellers .table-responsive {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+    overflow-x: visible !important;
+  }
+  .top-sellers table {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    border-collapse: separate !important;
+    border-spacing: 0 0 !important;
+    background: none !important;
+  }
+  .top-sellers table tbody {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    display: block !important;
+  }
+  .top-sellers table tbody tr {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    margin: 16px 0 !important;
+    box-sizing: border-box !important;
+    display: block !important;
+  }
 } 
