@@ -1960,6 +1960,19 @@ tr:hover {
     font-size: 10px !important;
   }
 }
-
 =======
 >>>>>>> 6f2a2d3 (fix: finalize local Yekan Bakh font setup and resolve all conflicts):STYLE.CSS
+
+/* اطمینان از بارگذاری آیکون‌ها */
+.fa, .fas, .far, .fab {
+  font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands" !important;
+  font-weight: 900 !important;
+}
+.far {
+  font-weight: 400 !important;
+}
+.fab {
+  font-family: "Font Awesome 6 Brands" !important;
+  font-weight: 400 !important;
+}
+

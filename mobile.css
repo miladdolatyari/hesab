@@ -1,14 +1,34 @@
+/* =================== تنظیمات فونت و آیکون برای موبایل =================== */
+@import url('https://fonts.googleapis.com/css2?family=Yekan+Bakh:wght@100;200;300;400;500;600;700;800;900&display=swap');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css');
+
 /* =================== استایل موبایل اختصاصی هر بخش =================== */
 @media (max-width: 600px) {
+  /* تنظیمات کلی فونت و آیکون */
   body, html {
     overflow-x: hidden !important;
     background: #fafdff !important;
-    font-family: 'Yekan Bakh', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    font-family: 'Yekan Bakh', 'Vazir', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    font-display: swap !important;
   }
+  
+  /* اطمینان از بارگذاری آیکون‌ها */
+  .fa, .fas, .far, .fab {
+    font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands" !important;
+    font-weight: 900 !important;
+  }
+  .far {
+    font-weight: 400 !important;
+  }
+  .fab {
+    font-family: "Font Awesome 6 Brands" !important;
+    font-weight: 400 !important;
+  }
+  
   .main-content {
     overflow-x: visible !important;
     padding: 0 !important;
-    font-family: 'Yekan Bakh', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    font-family: 'Yekan Bakh', 'Vazir', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
   }
 
   /* داشبورد */
@@ -19,7 +39,7 @@
     box-sizing: border-box !important;
     flex-direction: column !important;
     gap: 10px !important;
-    font-family: 'Yekan Bakh', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    font-family: 'Yekan Bakh', 'Vazir', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
   }
 
   /* جدول آخرین تراکنش‌ها */
@@ -40,7 +60,7 @@
     border-spacing: 0 0 !important;
     background: none !important;
     font-size: 15px !important;
-    font-family: 'Yekan Bakh', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    font-family: 'Yekan Bakh', 'Vazir', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
   }
   .recent-transactions table thead {
     display: none !important;
@@ -72,7 +92,7 @@
     width: 100% !important;
     box-sizing: border-box !important;
     position: relative;
-    font-family: 'Yekan Bakh', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    font-family: 'Yekan Bakh', 'Vazir', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
   }
   .recent-transactions table td:last-child {
     border-bottom: none !important;
@@ -88,13 +108,13 @@
     letter-spacing: -0.2px;
     display: inline-block;
     flex-shrink: 0;
-    font-family: 'Yekan Bakh', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    font-family: 'Yekan Bakh', 'Vazir', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
   }
   .recent-transactions .status-badge {
     font-size: 13px !important;
     padding: 4px 10px !important;
     border-radius: 8px !important;
-    font-family: 'Yekan Bakh', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    font-family: 'Yekan Bakh', 'Vazir', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
   }
   .recent-transactions .small-btn {
     margin: 8px auto 0 auto !important;
@@ -103,7 +123,7 @@
     font-size: 16px !important;
     display: flex !important;
     justify-content: center !important;
-    font-family: 'Yekan Bakh', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    font-family: 'Yekan Bakh', 'Vazir', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
   }
 
   /* دیزاین حرفه‌ای چک‌های نزدیک به سررسید */
@@ -178,25 +198,25 @@
     border: 1.5px solid #42a5f5 !important;
   }
   .upcoming-checks .status-badge.success::before {
-    content: '\f00c';
-    font-family: 'Font Awesome 5 Free';
-    font-weight: 900;
+    content: '\f00c'; /* check */
+    font-family: "Font Awesome 6 Free" !important;
+    font-weight: 900 !important;
     color: #2eaa72;
     margin-left: 6px;
     font-size: 16px;
   }
   .upcoming-checks .status-badge.warning::before {
-    content: '\f017';
-    font-family: 'Font Awesome 5 Free';
-    font-weight: 900;
+    content: '\f017'; /* clock */
+    font-family: "Font Awesome 6 Free" !important;
+    font-weight: 900 !important;
     color: #f1c40f;
     margin-left: 6px;
     font-size: 16px;
   }
   .upcoming-checks .status-badge.danger::before {
-    content: '\f06a';
-    font-family: 'Font Awesome 5 Free';
-    font-weight: 900;
+    content: '\f06a'; /* exclamation-circle */
+    font-family: "Font Awesome 6 Free" !important;
+    font-weight: 900 !important;
     color: #e74c3c;
     margin-left: 6px;
     font-size: 16px;
@@ -623,5 +643,132 @@
     margin: 16px 0 !important;
     box-sizing: border-box !important;
     display: block !important;
+  }
+  @keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  /* =================== استایل Quickview Content برای موبایل =================== */
+  #transaction-quickview-modal .quickview-content {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 90vh !important;
+    max-height: 90vh !important;
+    min-height: 300px !important;
+    padding: 0 !important;
+    min-width: 0 !important;
+    width: 98vw !important;
+    max-width: 98vw !important;
+    border-radius: 12px !important;
+    overflow: hidden !important;
+    position: relative !important;
+    background: #fff !important;
+  }
+  #transaction-quickview-modal .quickview-close {
+    position: absolute !important;
+    top: 12px !important;
+    left: 12px !important;
+    z-index: 10 !important;
+    background: rgba(230, 230, 230, 0.9) !important;
+    border: none !important;
+    color: #888 !important;
+    font-size: 1.8em !important;
+    cursor: pointer !important;
+    border-radius: 50% !important;
+    width: 36px !important;
+    height: 36px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: 0 2px 8px rgba(52,152,219,0.15) !important;
+    transition: background 0.2s, color 0.2s, box-shadow 0.2s !important;
+  }
+  #transaction-quickview-modal .quickview-close:hover {
+    background: #e74c3c !important;
+    color: #fff !important;
+    box-shadow: 0 4px 16px rgba(231,76,60,0.25) !important;
+  }
+  .quickview-content h3 {
+    color: #1976d2 !important;
+    font-size: 18px !important;
+    margin-bottom: 16px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.5px !important;
+    font-family: 'Yekan Bakh', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    padding: 16px 16px 8px 48px !important;
+    background: #fafdff !important;
+    border-bottom: 1px solid #e3f2fd !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 5 !important;
+  }
+  .quickview-content .receipt-container {
+    flex: 1 !important;
+    overflow-y: auto !important;
+    padding: 16px 12px 20px 12px !important;
+    background: #fff !important;
+    min-height: 0 !important;
+    max-height: calc(90vh - 60px) !important;
+  }
+  .quickview-content .receipt-row {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    margin-bottom: 12px !important;
+    font-size: 15px !important;
+    background: rgba(230,245,255,0.55) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 2px 8px #1976d211 !important;
+    padding: 10px 14px !important;
+    transition: box-shadow 0.2s, background 0.2s !important;
+    font-family: 'Yekan Bakh', 'Vazir', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  }
+  .quickview-content .receipt-row:hover {
+    background: #e3f2fd !important;
+    box-shadow: 0 4px 16px #1976d222 !important;
+  }
+  .quickview-content .receipt-label {
+    color: #1976d2 !important;
+    font-weight: 700 !important;
+    font-size: 14px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    font-family: 'Yekan Bakh', 'Vazir', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  }
+  .quickview-content .receipt-value {
+    font-weight: 800 !important;
+    color: #222 !important;
+    font-size: 15px !important;
+    letter-spacing: 0.2px !important;
+    text-align: left !important;
+    font-family: 'Yekan Bakh', 'Vazir', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  }
+  .quickview-content .receipt-total {
+    border-top: 2px dashed #b2f2ff !important;
+    margin-top: 18px !important;
+    padding-top: 12px !important;
+    font-size: 18px !important;
+    color: #00b894 !important;
+    font-weight: bold !important;
+    text-align: center !important;
+    background: linear-gradient(90deg, #e3f2fd 0%, #fff 100%) !important;
+    border-radius: 0 0 12px 12px !important;
+    box-shadow: 0 2px 8px #00b89422 !important;
+    font-family: 'Yekan Bakh', 'Vazir', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  }
+  .quickview-content .receipt-footer {
+    margin-top: 16px !important;
+    text-align: center !important;
+    color: #aaa !important;
+    font-size: 12px !important;
+    font-style: italic !important;
+    letter-spacing: 0.1px !important;
+    font-family: 'Yekan Bakh', 'Vazir', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
   }
 } 
