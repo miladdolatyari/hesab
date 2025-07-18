@@ -1,16 +1,30 @@
 /* Reset and Base Styles */
+
+/* اطمینان از بارگذاری آیکون‌ها */
+.fa, .fas, .far, .fab {
+  font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands" !important;
+  font-weight: 900 !important;
+}
+.far {
+  font-weight: 400 !important;
+}
+.fab {
+  font-family: "Font Awesome 6 Brands" !important;
+  font-weight: 400 !important;
+}
+
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Yekan Bakh', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    font-family: var(--font-primary) !important;
 }
 
 body {
     background-color: #f5f7fa;
     color: #333;
     direction: rtl;
-    font-family: 'Yekan Bakh', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    font-family: var(--font-primary) !important;
 }
 
 /* App Container */
@@ -1960,19 +1974,5 @@ tr:hover {
     font-size: 10px !important;
   }
 }
-=======
->>>>>>> 6f2a2d3 (fix: finalize local Yekan Bakh font setup and resolve all conflicts):STYLE.CSS
 
-/* اطمینان از بارگذاری آیکون‌ها */
-.fa, .fas, .far, .fab {
-  font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands" !important;
-  font-weight: 900 !important;
-}
-.far {
-  font-weight: 400 !important;
-}
-.fab {
-  font-family: "Font Awesome 6 Brands" !important;
-  font-weight: 400 !important;
-}
 

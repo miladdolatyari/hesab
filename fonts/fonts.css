@@ -56,7 +56,7 @@
   font-display: swap;
 }
 
-/* Fallback Fonts */
+/* Fallback Fonts - Multiple sources */
 @font-face {
   font-family: 'Vazir';
   src: url('https://cdn.fontcdn.ir/Font/Persian/Vazir/Vazir.woff2') format('woff2'),
@@ -66,10 +66,29 @@
   font-display: swap;
 }
 
+/* Additional fallback for Yekan Bakh from CDN */
+@font-face {
+  font-family: 'Yekan Bakh CDN';
+  src: url('https://cdn.fontcdn.ir/Font/Persian/YekanBakh/YekanBakh-Regular.woff2') format('woff2'),
+       url('https://cdn.fontcdn.ir/Font/Persian/YekanBakh/YekanBakh-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Yekan Bakh CDN';
+  src: url('https://cdn.fontcdn.ir/Font/Persian/YekanBakh/YekanBakh-Bold.woff2') format('woff2'),
+       url('https://cdn.fontcdn.ir/Font/Persian/YekanBakh/YekanBakh-Bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* Font Variables */
 :root {
-  --font-primary: 'Yekan Bakh', 'Vazir', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  --font-secondary: 'Vazir', 'Yekan Bakh', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  --font-primary: 'Yekan Bakh', 'Yekan Bakh CDN', 'Vazir', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  --font-secondary: 'Vazir', 'Yekan Bakh', 'Yekan Bakh CDN', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 /* Global Font Application */
