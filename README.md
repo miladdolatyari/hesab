@@ -21,7 +21,7 @@
 ### نصب
 1. پروژه را کلون کنید:
 ```bash
-git clone https://github.com/yourusername/hesab.git
+git clone https://github.com/miladdolatyari/hesab.git
 cd hesab
 ```
 
