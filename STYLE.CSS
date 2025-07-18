@@ -3,7 +3,7 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Yekan Bakh', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Yekan Bakh' !important;
 }
 
 body {
@@ -1355,5 +1355,3 @@ tr:hover {
   .report-table th, .report-table td {
     padding: 7px 3px;
     font-size: 13px;
-    }
-}
