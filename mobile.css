@@ -1,0 +1,482 @@
+/* =================== استایل موبایل اختصاصی هر بخش =================== */
+@media (max-width: 600px) {
+  body, html {
+    overflow-x: hidden !important;
+    background: #fafdff !important;
+  }
+  .main-content {
+    overflow-x: visible !important;
+    padding: 0 !important;
+  }
+
+  /* داشبورد */
+  .dashboard-row {
+    width: 100% !important;
+    margin: 0 0 14px 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+
+  /* جدول آخرین تراکنش‌ها */
+  .recent-transactions .table-responsive {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    margin: 0 -8px !important;
+    padding: 0 !important;
+    overflow-x: hidden !important;
+    background: none !important;
+    box-shadow: none !important;
+  }
+  .recent-transactions table {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    margin: 0 !important;
+    border-collapse: separate !important;
+    border-spacing: 0 0 !important;
+    background: none !important;
+    font-size: 15px !important;
+  }
+  .recent-transactions table thead {
+    display: none !important;
+  }
+  .recent-transactions table tbody tr {
+    width: 365px !important;
+    max-width: 420px !important;
+    margin: 14px auto !important;
+    border-radius: 16px !important;
+    box-shadow: 0 4px 18px #1976d222 !important;
+    border: 1.5px solid #e3f2fd !important;
+    background: #fff !important;
+    padding: 12px 10px !important;
+    display: block !important;
+    min-height: 80px !important;
+    transition: box-shadow 0.2s, transform 0.15s;
+    position: relative;
+  }
+  .recent-transactions table td {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+    padding: 10px 4px !important;
+    font-size: 15px !important;
+    border: none !important;
+    border-bottom: 1px solid #f0f0f0 !important;
+    background: none !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    position: relative;
+  }
+  .recent-transactions table td:last-child {
+    border-bottom: none !important;
+  }
+  .recent-transactions table td::before {
+    content: attr(data-label);
+    font-size: 13px;
+    color: #1976d2;
+    font-weight: 700;
+    min-width: 80px;
+    margin-left: 8px;
+    opacity: 0.85;
+    letter-spacing: -0.2px;
+    display: inline-block;
+    flex-shrink: 0;
+  }
+  .recent-transactions .status-badge {
+    font-size: 13px !important;
+    padding: 4px 10px !important;
+    border-radius: 8px !important;
+  }
+  .recent-transactions .small-btn {
+    margin: 8px auto 0 auto !important;
+    padding: 12px 24px !important;
+    border-radius: 12px !important;
+    font-size: 16px !important;
+    display: flex !important;
+    justify-content: center !important;
+  }
+
+  /* دیزاین حرفه‌ای چک‌های نزدیک به سررسید */
+  .upcoming-checks table tbody tr {
+    width: 350px !important;
+    margin: 18px auto !important;
+    border-radius: 20px !important;
+    box-shadow: 0 6px 24px #42a5f544 !important;
+    border: 2.5px solid #2196f3 !important;
+    background: linear-gradient(135deg, #fafdff 85%, #e3f2fd88 100%) !important;
+    padding: 16px 10px 14px 10px !important;
+    display: block !important;
+    min-height: 90px !important;
+    transition: box-shadow 0.2s, transform 0.15s;
+    position: relative;
+  }
+  .upcoming-checks table td {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 0 !important;
+    padding: 10px 4px !important;
+    font-size: 15.5px !important;
+    border: none !important;
+    border-bottom: 1px solid #e3f2fd !important;
+    background: none !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    position: relative;
+    text-align: right !important;
+  }
+  .upcoming-checks table td:last-child {
+    border-bottom: none !important;
+  }
+  .upcoming-checks table td::before {
+    content: attr(data-label);
+    font-size: 14.5px;
+    color: #1976d2;
+    font-weight: 900;
+    min-width: 90px;
+    margin-left: 10px;
+    opacity: 1;
+    letter-spacing: -0.2px;
+    display: inline-block;
+    flex-shrink: 0;
+    text-align: right;
+    order: 1;
+  }
+  .upcoming-checks .td-value, .upcoming-checks table td span:not([class]) {
+    color: #222 !important;
+    font-weight: 800 !important;
+    font-size: 15.5px !important;
+    text-align: left !important;
+    display: inline-block !important;
+    direction: ltr !important;
+    margin-right: auto !important;
+    order: 2;
+    flex: 1;
+  }
+  .upcoming-checks .status-badge {
+    font-size: 14px !important;
+    padding: 5px 14px !important;
+    border-radius: 10px !important;
+    font-weight: 700 !important;
+    box-shadow: 0 2px 8px #1976d111;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    background: #e3f2fd !important;
+    color: #1976d2 !important;
+    border: 1.5px solid #42a5f5 !important;
+  }
+  .upcoming-checks .status-badge.success::before {
+    content: '\f00c';
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    color: #2eaa72;
+    margin-left: 6px;
+    font-size: 16px;
+  }
+  .upcoming-checks .status-badge.warning::before {
+    content: '\f017';
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    color: #f1c40f;
+    margin-left: 6px;
+    font-size: 16px;
+  }
+  .upcoming-checks .status-badge.danger::before {
+    content: '\f06a';
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    color: #e74c3c;
+    margin-left: 6px;
+    font-size: 16px;
+  }
+  .upcoming-checks .small-btn {
+    margin: 8px auto 0 auto !important;
+    padding: 8px 18px !important;
+    border-radius: 18px !important;
+    font-size: 15px !important;
+    display: table-caption !important;
+    justify-content: center !important;
+    align-items: center !important;
+    background: linear-gradient(135deg, #42a5f5 0%, #1976d2 100%) !important;
+    color: #fff !important;
+    font-weight: 800 !important;
+    border: none !important;
+    box-shadow: 0 2px 8px #1976d111 !important;
+    transition: background 0.2s, color 0.2s;
+    min-width: 90px !important;
+    min-height: 38px !important;
+    letter-spacing: 0.2px;
+  }
+  .upcoming-checks .small-btn:hover {
+    background: linear-gradient(135deg, #1976d2 0%, #42a5f5 100%) !important;
+    color: #fff !important;
+  }
+
+  /* برترین فروشندگان */
+  .top-sellers {
+    width: 100% !important;
+    padding: 0 8px !important;
+    background: #fff !important;
+    border-radius: 18px !important;
+    box-shadow: 0 6px 24px #1976d233 !important;
+    margin-bottom: 18px !important;
+    box-sizing: border-box !important;
+  }
+  .top-sellers h2 {
+    font-size: 1.18em !important;
+    font-weight: 800 !important;
+    color: #1976d2 !important;
+    margin-bottom: 12px !important;
+    text-align: center !important;
+    width: 100%;
+  }
+  .top-sellers .table-responsive {
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: none !important;
+    box-shadow: none !important;
+    overflow-x: auto !important;
+  }
+  .top-sellers table {
+    width: 100% !important;
+    margin: 0 !important;
+    background: none !important;
+    border-collapse: separate !important;
+    border-spacing: 0 10px !important;
+  }
+  .top-sellers table thead {
+    display: none !important;
+  }
+  .top-sellers table tbody tr {
+    width: 100% !important;
+    margin: 12px 0 !important;
+    border-radius: 14px !important;
+    box-shadow: 0 2px 8px #1976d111 !important;
+    border: 1.5px solid #e3f2fd !important;
+    background: #fff !important;
+    padding: 12px 8px !important;
+    display: block !important;
+    min-height: 80px !important;
+    transition: box-shadow 0.2s, transform 0.15s;
+  }
+  .top-sellers table td {
+    padding: 8px 4px !important;
+    font-size: 15px !important;
+    border: none !important;
+    border-bottom: 1px solid #f0f0f0 !important;
+    background: none !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 8px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  .top-sellers table td:last-child {
+    border-bottom: none !important;
+  }
+  .top-sellers .status-badge {
+    font-size: 13px !important;
+    padding: 4px 10px !important;
+    border-radius: 8px !important;
+  }
+  .top-sellers .small-btn {
+    margin: 8px auto 0 auto !important;
+    padding: 12px 24px !important;
+    border-radius: 12px !important;
+    font-size: 16px !important;
+    display: flex !important;
+    justify-content: center !important;
+  }
+
+  /* فرم تراکنش */
+  .transaction-form, .form-section {
+    width: 98vw !important;
+    max-width: 420px !important;
+    margin: 0 auto 18px auto !important;
+    padding: 10px 8px !important;
+    border-radius: 14px !important;
+    background: #fff !important;
+    box-shadow: 0 2px 8px #1976d111 !important;
+  }
+  .form-row {
+    flex-direction: column !important;
+    gap: 10px !important;
+    align-items: stretch !important;
+  }
+  .form-group label {
+    font-size: 15px !important;
+    margin-bottom: 4px !important;
+    text-align: right !important;
+  }
+  .form-control {
+    font-size: 15px !important;
+    padding: 10px 8px !important;
+    border-radius: 8px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  .btn, .btn.primary, .btn.secondary {
+    width: 100% !important;
+    margin: 8px 0 !important;
+    font-size: 16px !important;
+    border-radius: 10px !important;
+    display: flex !important;
+    justify-content: center !important;
+  }
+
+  /* کارت‌های آمار داشبورد */
+  .stats-cards {
+    display: flex !important;
+    overflow-x: auto !important;
+    gap: 12px !important;
+    padding: 8px 0 8px 0 !important;
+    margin-bottom: 8px !important;
+    scroll-snap-type: x mandatory;
+    flex-wrap: wrap !important;
+    flex-direction: column !important;
+    align-content: stretch !important;
+  }
+  .stat-card {
+    min-width: 180px !important;
+    /* max-width: حذف شد چون مقدار نداشت */
+    flex: 0 0 auto !important;
+    border-radius: 14px !important;
+    box-shadow: 0 2px 8px #1976d211 !important;
+    margin: 0 !important;
+    scroll-snap-align: start;
+    background: #fff !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    padding: 16px 10px !important;
+  }
+
+  .recent-transactions .header-actions .btn,
+  .recent-transactions .header-actions .btn.primary,
+  .recent-transactions .header-actions .btn.secondary {
+    width: 100% !important;
+    font-size: 16px !important;
+    border-radius: 10px !important;
+    display: flex !important;
+    justify-content: center !important;
+    margin: 0 0 8px 0 !important;
+    padding: 12px 0 !important;
+  }
+
+  /* استایل تخصصی هدر هر بخش */
+  .section-header {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 15px !important;
+    margin-bottom: 14px !important;
+    padding: 0 0 8px 0 !important;
+    border-bottom: 1px solid #e3f2fd44 !important;
+  }
+  .section-header h2 {
+    font-size: 1.18em !important;
+    font-weight: 800 !important;
+    color: #1976d2 !important;
+    margin-bottom: 0 !important;
+    margin-top: 15px !important;
+    text-align: center !important;
+    width: 100%;
+    letter-spacing: -0.5px;
+  }
+
+  /* دکمه ثانویه (secondary) فقط در موبایل */
+  .btn.secondary {
+    width: 100% !important;
+    font-size: 16px !important;
+    border-radius: 10px !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    margin: 0 0 8px 0 !important;
+    padding: 12px 0 !important;
+    background: #e3f2fd !important;
+    color: #1976d2 !important;
+    border: 1.5px solid #bbdefb !important;
+    font-weight: 700 !important;
+    box-shadow: 0 2px 8px #1976d211 !important;
+    transition: background 0.2s, color 0.2s;
+  }
+  .btn.secondary:hover {
+    background: #bbdefb !important;
+    color: #145ea8 !important;
+  }
+
+  .chart-container h2,
+  .recent-transactions h2,
+  .upcoming-checks h2,
+  .top-sellers h2 {
+    font-size: 1.22em !important;
+    font-weight: 900 !important;
+    color: #1976d2 !important;
+    margin: 18px 0 14px 0 !important;
+    text-align: center !important;
+    width: 100%;
+    letter-spacing: -0.5px;
+    border-radius: 12px !important;
+    background: #e3f2fd33 !important;
+    padding: 10px 0 !important;
+    box-shadow: 0 2px 8px #1976d111 !important;
+    display: block !important;
+  }
+  .top-sellers table tbody tr {
+    width: 370px !important;
+  }
+
+  .chart-header {
+    background: #fafdff !important;
+    border-radius: 14px !important;
+    box-shadow: 0 2px 8px #1976d111 !important;
+    padding: 12px 10px 10px 10px !important;
+    margin-bottom: 12px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+  .chart-header h2 i,
+  .chart-controls i {
+    margin-left: 8px !important;
+    margin-right: 0 !important;
+    font-size: 1.1em !important;
+    vertical-align: middle !important;
+    position: static !important;
+    display: inline-block !important;
+  }
+  .chart-header h2 {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+  }
+  .chart-controls select {
+    border: 1px solid #ddd !important;
+    border-radius: 8px !important;
+    background: white !important;
+    font-size: 0.9rem !important;
+    color: #495057 !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    text-align: right !important;
+    text-align-last: right !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    appearance: none !important;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e") !important;
+    background-repeat: no-repeat !important;
+    background-position: left 8px center !important;
+    background-size: 16px !important;
+    padding-right: 12px !important;
+    direction: rtl !important;
+  }
+} 

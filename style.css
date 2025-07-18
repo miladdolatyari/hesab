@@ -696,14 +696,14 @@ tr:hover {
   box-shadow: none;
 }
 .form-section:last-child {
-  border-bottom: none;
+    border-bottom: none;
 }
 .form-section h3 {
   font-size: 18px;
   margin-bottom: 16px;
   color: #222;
-  display: flex;
-  align-items: center;
+    display: flex;
+    align-items: center;
   gap: 10px;
   background: #f5f7fa;
   padding: 12px 18px;
@@ -718,18 +718,18 @@ tr:hover {
   margin-left: 6px;
 }
 .form-row {
-  display: grid;
+    display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 16px;
   margin-bottom: 16px;
 }
 .form-group label {
-  color: #555;
+    color: #555;
   font-weight: 600;
 }
 /* --- Improved Modern Form Field Styles --- */
 .form-control {
-  width: 100%;
+    width: 100%;
   padding: 13px 16px;
   border: 1.5px solid #e3f2fd;
   border-radius: 9px;
@@ -741,7 +741,7 @@ tr:hover {
   font-family: inherit;
 }
 .form-control:focus {
-  outline: none;
+    outline: none;
   border-color: #1976d2;
   box-shadow: 0 0 0 3px #e3f2fd99;
   background: #fff;
@@ -1192,7 +1192,7 @@ tr:hover {
   border: 1.5px solid #e0e0e0;
   padding: 28px 24px 20px 24px;
   margin: 30px 0 0 0;
-  width: 100%;
+        width: 100%;
   max-width: 100%;
   font-size: 16px;
   color: #222;
@@ -1424,13 +1424,8 @@ tr:hover {
   .report-table th, .report-table td {
     padding: 7px 3px;
     font-size: 13px;
-<<<<<<< HEAD:style.css
   }
 }
-=======
-    }
-}
->>>>>>> fb77997 (fix: rename STYLE.CSS to style.css for GitHub Pages compatibility):STYLE.CSS
 
 /* --- Modern Custom Alert Styles --- */
 .custom-alert {
@@ -1701,3 +1696,266 @@ tr:hover {
   font-style: italic;
   letter-spacing: 0.1px;
 }
+
+/* --- Responsive: Mobile & Tablet --- */
+@media (max-width: 900px) {
+  .sidebar {
+    position: fixed;
+    top: 0; right: -260px; left: auto;
+    width: 240px;
+    height: 100vh;
+    z-index: 2002;
+    background: #1976d2;
+    color: #fff;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    border-radius: 0 0 18px 0;
+    box-shadow: 0 2px 16px #1976d244;
+    padding: 0 0 0 0;
+    transition: right 0.35s cubic-bezier(.68,-0.55,.27,1.55);
+    overflow-y: auto;
+    min-width: 0;
+  }
+  .sidebar.open {
+    right: 0;
+  }
+  #mobile-menu-toggle {
+    display: flex !important;
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 2100;
+    background: #1976d2;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    width: 44px;
+    height: 44px;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.7em;
+    box-shadow: 0 2px 8px #1976d222;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  #mobile-menu-toggle:active {
+    background: #145ea8;
+  }
+  #sidebar-toggle {
+    display: none !important;
+  }
+  #mobile-sidebar-backdrop {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(44,62,80,0.25);
+    z-index: 2001;
+    transition: opacity 0.3s;
+  }
+  #mobile-sidebar-backdrop.active {
+        display: block;
+    opacity: 1;
+  }
+  .sidebar .logo {
+    color: #fff;
+    font-size: 20px;
+    padding: 24px 18px 12px 18px;
+    width: 100%;
+    border-bottom: 1.5px solid #e3f2fd33;
+    margin-bottom: 0;
+  }
+  .sidebar .main-nav {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin-top: 12px;
+  }
+  .sidebar .main-nav ul {
+    flex-direction: column;
+    width: 100%;
+    padding: 0;
+  }
+  .sidebar .main-nav li {
+    width: 100%;
+    margin: 0;
+  }
+  .sidebar .main-nav a {
+    color: #fff;
+    padding: 14px 24px;
+    font-size: 1.1em;
+    border-radius: 0;
+    border-bottom: 1px solid #e3f2fd22;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background 0.18s;
+  }
+  .sidebar .main-nav a:hover, .sidebar .main-nav li.active a {
+    background: #1565c0;
+    color: #fff;
+  }
+  .sidebar .sidebar-footer {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+    padding: 18px 18px 12px 18px;
+    border-top: 1.5px solid #e3f2fd33;
+    margin-top: auto;
+  }
+  .sidebar .user-panel {
+    flex-direction: row;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .sidebar .user-panel img {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+  }
+  .sidebar .logout-btn {
+    width: 100%;
+    margin: 0;
+    background: #fff;
+    color: #1976d2;
+    border-radius: 8px;
+    font-size: 1em;
+    padding: 10px 0;
+    margin-top: 8px;
+  }
+  .main-content {
+    margin-left: 0 !important;
+    width: 100vw !important;
+    padding: 0 2vw !important;
+    min-width: 0;
+  }
+  .content-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 12px 0 0 0;
+  }
+  .content-header h1 {
+    font-size: 1.2em;
+    margin-bottom: 0;
+  }
+  .transaction-form, .form-section {
+    padding: 10px 2vw !important;
+    box-shadow: none !important;
+    border-radius: 10px !important;
+    margin-bottom: 18px !important;
+  }
+  .form-row {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+  .form-control, select.form-control {
+    font-size: 15px !important;
+    padding: 12px 10px !important;
+    border-radius: 8px !important;
+  }
+  .btn, .btn.primary, .btn.secondary {
+    font-size: 15px !important;
+    padding: 12px 0 !important;
+    width: 100% !important;
+    margin: 0 0 8px 0 !important;
+    border-radius: 8px !important;
+  }
+  .small-btn {
+    font-size: 14px !important;
+    padding: 8px 12px !important;
+    border-radius: 7px !important;
+    min-width: 38px;
+  }
+  .section-header, .dashboard-row, .stats-cards {
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+  .stat-card {
+    width: 100% !important;
+    min-width: 0 !important;
+    margin-bottom: 10px !important;
+    border-radius: 12px !important;
+  }
+  .table-responsive, table {
+    width: 100vw !important;
+    overflow-x: auto !important;
+    display: block !important;
+  }
+  table thead {
+    display: none !important;
+  }
+  table tbody tr {
+    display: block !important;
+    margin-bottom: 16px !important;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px #1976d211;
+    padding: 10px 8px;
+  }
+  table td {
+    display: flex !important;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 4px !important;
+    font-size: 15px !important;
+    border: none !important;
+    border-bottom: 1px solid #f0f0f0 !important;
+  }
+  table td:last-child {
+    border-bottom: none !important;
+  }
+  .modal-overlay, #transaction-quickview-modal {
+    align-items: flex-end !important;
+    justify-content: center !important;
+    padding: 0 !important;
+  }
+  .modal-content, .quickview-content {
+    width: 100vw !important;
+    min-width: 0 !important;
+    max-width: 100vw !important;
+    border-radius: 18px 18px 0 0 !important;
+    padding: 18px 6px 18px 6px !important;
+    box-shadow: 0 -2px 16px #1976d222 !important;
+  }
+  .modal-header, .modal-body {
+    padding: 10px 4px !important;
+  }
+  .modal-close, .quickview-close {
+    top: 8px !important;
+    left: 8px !important;
+    font-size: 1.5em !important;
+    width: 32px !important;
+    height: 32px !important;
+  }
+  .custom-alert, .custom-alert-internal {
+    min-width: 90vw !important;
+    max-width: 98vw !important;
+    font-size: 1em !important;
+    padding: 10px 8px 10px 8px !important;
+    border-radius: 10px !important;
+    top: 12px !important;
+  }
+  .comprehensive-report-btn {
+    left: 8px !important;
+    bottom: 8px !important;
+    padding: 8px 12px 8px 10px !important;
+    font-size: 13px !important;
+    border-radius: 22px !important;
+  }
+  .report-btn-icon {
+    width: 28px !important;
+    height: 28px !important;
+    font-size: 15px !important;
+    margin-left: 4px !important;
+  }
+  .report-btn-text span {
+    font-size: 13px !important;
+  }
+  .report-btn-text small {
+    font-size: 10px !important;
+  }
+}
+

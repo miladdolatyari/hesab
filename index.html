@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@majidh1/jalalidatepicker/dist/jalalidatepicker.min.css">
     <script src="apexcharts.min.js"></script>
     <link rel="stylesheet" href="comprehensive-report.css">
+    <link rel="stylesheet" href="mobile.css" media="only screen and (max-width:600px)">
 </head>
 <body>
     <div class="app-container">
@@ -46,22 +47,16 @@
                 </button>
             </div>
         </aside>
+        <div id="mobile-sidebar-backdrop" style="display:none;"></div>
 
         <!-- محتوای اصلی -->
         <main class="main-content">
             <!-- هدر صفحه -->
             <header class="content-header">
+                <button id="mobile-menu-toggle" class="sidebar-toggle" aria-label="باز کردن منو">
+                    <i class="fas fa-bars"></i>
+                </button>
                 <h1 id="page-title">داشبورد</h1>
-                <div class="header-actions">
-                    <div class="search-box">
-                        <input type="text" placeholder="جستجو...">
-                        <i class="fas fa-search"></i>
-                    </div>
-                    <div class="notifications">
-                        <i class="fas fa-bell"></i>
-                        <span class="badge">3</span>
-                    </div>
-                </div>
             </header>
 
             <!-- بخش داشبورد -->
@@ -186,16 +181,16 @@
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td>۱۴۰۲/۰۵/۲۰</td>
-                                    <td>۵۰,۰۰۰,۰۰۰</td>
-                                    <td>بانک ملی</td>
-                                    <td><button class="small-btn primary">تمدید</button></td>
+                                    <td><span class="td-label">تاریخ سررسید:</span><span class="td-value">۱۴۰۲/۰۵/۲۰</span></td>
+                                    <td><span class="td-label">مبلغ:</span><span class="td-value">۵۰,۰۰۰,۰۰۰</span></td>
+                                    <td><span class="td-label">صادرکننده:</span><span class="td-value">بانک ملی</span></td>
+                                    <td><span class="td-label">عملیات:</span><span class="td-value"><button class="small-btn primary">تمدید</button></span></td>
                                 </tr>
                                 <tr>
-                                    <td>۱۴۰۲/۰۵/۲۲</td>
-                                    <td>۳۰,۰۰۰,۰۰۰</td>
-                                    <td>بانک ملت</td>
-                                    <td><button class="small-btn primary">تمدید</button></td>
+                                    <td><span class="td-label">تاریخ سررسید:</span><span class="td-value">۱۴۰۲/۰۵/۲۲</span></td>
+                                    <td><span class="td-label">مبلغ:</span><span class="td-value">۳۰,۰۰۰,۰۰۰</span></td>
+                                    <td><span class="td-label">صادرکننده:</span><span class="td-value">بانک ملت</span></td>
+                                    <td><span class="td-label">عملیات:</span><span class="td-value"><button class="small-btn primary">تمدید</button></span></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -213,16 +208,16 @@
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td>محمد رضایی</td>
-                                    <td>۱۲</td>
-                                    <td>۸۵۰,۰۰۰,۰۰۰</td>
-                                    <td>۲۵,۵۰۰,۰۰۰</td>
+                                    <td><span class="td-label">نام:</span><span class="td-value">محمد رضایی</span></td>
+                                    <td><span class="td-label">تعداد فروش:</span><span class="td-value">۱۲</span></td>
+                                    <td><span class="td-label">مبلغ کل:</span><span class="td-value">۸۵۰,۰۰۰,۰۰۰</span></td>
+                                    <td><span class="td-label">پورسانت:</span><span class="td-value">۲۵,۵۰۰,۰۰۰</span></td>
                                 </tr>
                                 <tr>
-                                    <td>فاطمه محمدی</td>
-                                    <td>۸</td>
-                                    <td>۶۲۰,۰۰۰,۰۰۰</td>
-                                    <td>۱۸,۶۰۰,۰۰۰</td>
+                                    <td><span class="td-label">نام:</span><span class="td-value">فاطمه محمدی</span></td>
+                                    <td><span class="td-label">تعداد فروش:</span><span class="td-value">۸</span></td>
+                                    <td><span class="td-label">مبلغ کل:</span><span class="td-value">۶۲۰,۰۰۰,۰۰۰</span></td>
+                                    <td><span class="td-label">پورسانت:</span><span class="td-value">۱۸,۶۰۰,۰۰۰</span></td>
                                 </tr>
                             </tbody>
                         </table>

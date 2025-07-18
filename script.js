@@ -888,16 +888,12 @@ function createMonthlyPerformanceChart() {
 function updateRecentTransactionsTable() {
   const tbody = document.getElementById('recent-transactions-tbody');
   if (!tbody) return;
-  
   tbody.innerHTML = '';
-  
   // گرفتن ۵ تراکنش آخر
   const recentSales = sales.slice(-5).reverse();
-  
   recentSales.forEach(sale => {
     const buyer = buyers.find(b => b.id === sale.buyerId);
     const tr = document.createElement('tr');
-    
     // تعیین وضعیت بر اساس روش پرداخت
     let status = 'تکمیل شده';
     let statusClass = 'success';
@@ -905,24 +901,20 @@ function updateRecentTransactionsTable() {
       status = 'اقساط';
       statusClass = 'warning';
     }
-    
     // تبدیل اعداد به فارسی
     const persianPrice = toPersianDigits((sale.price || 0).toLocaleString());
-    
     // تبدیل تاریخ به فارسی
     const persianDate = sale.date ? toPersianDigits(sale.date) : '-';
-    
     tr.innerHTML = `
-      <td>${persianDate}</td>
-      <td>${buyer ? buyer.name : '-'}</td>
-      <td>${sale.product || '-'}</td>
-      <td>${persianPrice} تومان</td>
-      <td>${sale.paymentMethod === 'cash' ? 'نقدی' : 'اقساط'}</td>
-      <td><span class="status-badge ${statusClass}">${status}</span></td>
+      <td data-label="تاریخ">${persianDate}</td>
+      <td data-label="نام خریدار">${buyer ? buyer.name : '-'}</td>
+      <td data-label="کالا">${sale.product || '-'}</td>
+      <td data-label="مبلغ فروش">${persianPrice} تومان</td>
+      <td data-label="روش پرداخت">${sale.paymentMethod === 'cash' ? 'نقدی' : 'اقساط'}</td>
+      <td data-label="وضعیت"><span class="status-badge ${statusClass}">${status}</span></td>
     `;
     tbody.appendChild(tr);
   });
-  
   // اگر تراکنشی وجود ندارد
   if (recentSales.length === 0) {
     const tr = document.createElement('tr');
@@ -2991,3 +2983,32 @@ function hideTransactionQuickView() {
 }
 
 // ... existing code ...
+
+// ... موجود ...
+window.addEventListener('DOMContentLoaded', function() {
+  // ... موجود ...
+  // منوی همبرگری موبایل
+  const sidebar = document.getElementById('sidebar');
+  const mobileToggle = document.getElementById('mobile-menu-toggle');
+  const mobileBackdrop = document.getElementById('mobile-sidebar-backdrop');
+  if (mobileToggle && sidebar && mobileBackdrop) {
+    mobileToggle.onclick = function(e) {
+      e.stopPropagation();
+      sidebar.classList.toggle('open');
+      mobileBackdrop.classList.toggle('active', sidebar.classList.contains('open'));
+    };
+    mobileBackdrop.onclick = function() {
+      sidebar.classList.remove('open');
+      mobileBackdrop.classList.remove('active');
+    };
+    // بستن منو با لمس لینک یا دکمه خروج
+    sidebar.querySelectorAll('a, .logout-btn').forEach(el => {
+      el.addEventListener('click', function() {
+        sidebar.classList.remove('open');
+        mobileBackdrop.classList.remove('active');
+      });
+    });
+  }
+  // ... موجود ...
+});
+// ... موجود ...
