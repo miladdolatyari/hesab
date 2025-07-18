@@ -3,13 +3,14 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Yekan Bakh', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Yekan Bakh', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
 }
 
 body {
     background-color: #f5f7fa;
     color: #333;
     direction: rtl;
+    font-family: 'Yekan Bakh', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
 }
 
 /* App Container */
@@ -1424,6 +1425,7 @@ tr:hover {
   .report-table th, .report-table td {
     padding: 7px 3px;
     font-size: 13px;
+<<<<<<< HEAD:style.css
   }
 }
 
@@ -1959,3 +1961,5 @@ tr:hover {
   }
 }
 
+=======
+>>>>>>> 6f2a2d3 (fix: finalize local Yekan Bakh font setup and resolve all conflicts):STYLE.CSS

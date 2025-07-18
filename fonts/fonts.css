@@ -3,35 +3,35 @@
 /* Yekan Bakh Font Family */
 @font-face {
   font-family: 'Yekan Bakh';
-  src: url('./YekanBakh-Light.woff2') format('woff2');
-  font-weight: 300;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Yekan Bakh';
-  src: url('./YekanBakh-Regular.woff2') format('woff2');
+  src: url('https://cdn.fontcdn.ir/Font/Persian/YekanBakh/YekanBakh-Regular.woff2') format('woff2'),
+       url('https://cdn.fontcdn.ir/Font/Persian/YekanBakh/YekanBakh-Regular.woff') format('woff');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: 'Yekan Bakh';
-  src: url('./YekanBakh-Medium.woff2') format('woff2');
+  src: url('https://cdn.fontcdn.ir/Font/Persian/YekanBakh/YekanBakh-Medium.woff2') format('woff2'),
+       url('https://cdn.fontcdn.ir/Font/Persian/YekanBakh/YekanBakh-Medium.woff') format('woff');
   font-weight: 500;
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: 'Yekan Bakh';
-  src: url('./YekanBakh-Fat.woff2') format('woff2');
-  font-weight: 800;
+  src: url('https://cdn.fontcdn.ir/Font/Persian/YekanBakh/YekanBakh-Bold.woff2') format('woff2'),
+       url('https://cdn.fontcdn.ir/Font/Persian/YekanBakh/YekanBakh-Bold.woff') format('woff');
+  font-weight: 700;
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: 'Yekan Bakh';
-  src: url('./YekanBakh-Heavy.woff2') format('woff2');
+  src: url('https://cdn.fontcdn.ir/Font/Persian/YekanBakh/YekanBakh-Heavy.woff2') format('woff2'),
+       url('https://cdn.fontcdn.ir/Font/Persian/YekanBakh/YekanBakh-Heavy.woff') format('woff');
   font-weight: 900;
   font-style: normal;
   font-display: swap;
@@ -54,8 +54,8 @@
 }
 
 /* Global Font Application */
-body, * {
-  font-family: 'Yekan Bakh' !important;
+* {
+  font-family: var(--font-primary);
 }
 
 /* Font Weight Utilities */
