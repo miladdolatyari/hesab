@@ -91,13 +91,20 @@ function loadAllData() {
 
 // ثبت تراکنش جدید
 function saveTransaction() {
+  if (window.isEditingTransaction && window.editingTransactionIndex !== undefined) {
+    showCustomAlert('در حال به‌روزرسانی...', 'info');
+  }
   const customerName = document.getElementById('customer-name').value.trim();
-  const customerPhone = document.getElementById('customer-phone').value.trim();
-  const customerAddress = document.getElementById('customer-address').value.trim();
   const productName = document.getElementById('product-name').value;
-  const saleDate = getJalaliDateValue(document.getElementById('transaction-date'));
   const salePriceRaw = document.getElementById('sale-price').value;
   const salePrice = parseNumberWithDots(faToEnWithDots(salePriceRaw));
+  const saleDate = getJalaliDateValue(document.getElementById('transaction-date'));
+
+  // اعتبارسنجی فیلدهای ضروری
+  if (!customerName || !productName || productName === '' || !salePrice || salePrice === 0 || !saleDate) {
+    showCustomAlert('لطفاً تمام فیلدهای ضروری (نام مشتری، کالا، تاریخ و مبلغ فروش) را وارد کنید.', 'error');
+    return;
+  }
   const paymentMethod = document.getElementById('payment-method').value;
   const advancePaymentRaw = document.getElementById('advance-payment').value;
   const advancePayment = parseInt(faToEn(advancePaymentRaw)) || 0;
@@ -132,8 +139,8 @@ function saveTransaction() {
     buyer = {
       id: generateId(buyers),
       name: customerName,
-      phone: customerPhone,
-      address: customerAddress,
+      phone: '',
+      address: '',
       birthDate: birthDate,
       province: province,
       city: city,
@@ -145,8 +152,8 @@ function saveTransaction() {
     buyers.push(buyer);
   } else {
     // اگر مشتری قبلاً وجود داشته، اطلاعات تماس و آدرس و سایر اطلاعات را به‌روزرسانی کن
-    buyer.phone = customerPhone;
-    buyer.address = customerAddress;
+    buyer.phone = '';
+    buyer.address = '';
     buyer.birthDate = birthDate;
     buyer.province = province;
     buyer.city = city;
@@ -250,7 +257,11 @@ function saveTransaction() {
     updateDashboard();
     createMonthlyPerformanceChart();
     saveAllData();
-    alert('تراکنش با موفقیت به‌روزرسانی شد!');
+    clearTransactionForm();
+    // نمایش پیام موفقیت بعد از آماده شدن فرم
+    setTimeout(function() {
+      showCustomAlert('تراکنش با موفقیت به‌روزرسانی شد!', 'success');
+    }, 400);
     
   } else {
     // حالت جدید - تراکنش جدید بساز
@@ -328,7 +339,8 @@ function saveTransaction() {
     updateDashboard();
     createMonthlyPerformanceChart();
     saveAllData();
-    alert('تراکنش با موفقیت ثبت شد!');
+    clearTransactionForm();
+    showCustomAlert('تراکنش جدید با موفقیت ثبت شد!', 'success');
   }
 }
 
@@ -977,6 +989,7 @@ function updateSalesTable() {
       <td>
         <button class="small-btn primary" data-action="edit" data-idx="${idx}"><i class="fas fa-edit"></i></button>
         <button class="small-btn danger" data-action="delete" data-idx="${idx}"><i class="fas fa-trash"></i></button>
+        <button class="small-btn info" data-action="quickview" data-idx="${idx}" title="نمایش سریع"><i class="fas fa-eye"></i></button>
       </td>
     `;
     tbody.appendChild(tr);
@@ -1010,12 +1023,15 @@ function updateSalesTable() {
         document.getElementById('customer-address').value = buyer.address || '';
         document.getElementById('birth-date').value = buyer.birthDate || '';
         document.getElementById('province').value = buyer.province || '';
-        // ابتدا استان را ست کن، سپس مقدار شهر را با تاخیر ست کن تا optionها ساخته شوند
-        setTimeout(() => {
-          if (document.getElementById('city')) {
-            document.getElementById('city').value = buyer.city || '';
-          }
-        }, 120);
+        // ابتدا استان را ست کن، سپس رویداد change را اجرا کن تا شهرها بارگذاری شوند و بعد مقدار شهر را ست کن
+        const provinceSelect = document.getElementById('province');
+        const citySelect = document.getElementById('city');
+        if (provinceSelect && citySelect) {
+          provinceSelect.dispatchEvent(new Event('change'));
+          setTimeout(() => {
+            citySelect.value = buyer.city || '';
+          }, 100);
+        }
         if (document.getElementById('product-type')) {
           document.getElementById('product-type').value = buyer.instrument || '';
         }
@@ -1106,6 +1122,13 @@ function updateSalesTable() {
       calculateProfits();
       calculateInstallmentInfo();
       updateTransactionSummary();
+    });
+  });
+  // نمایش سریع تراکنش
+  tbody.querySelectorAll('button[data-action="quickview"]').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const idx = parseInt(this.getAttribute('data-idx'));
+      showTransactionQuickView(idx);
     });
   });
 }
@@ -2849,3 +2872,122 @@ window.addEventListener('DOMContentLoaded', function() {
     if (e.target === overlay) hideComprehensiveReportModal();
   });
 });
+
+// ... existing code ...
+function showCustomAlert(message, type = 'info') {
+  // Remove any existing alert
+  let oldAlert = document.querySelector('.custom-alert-internal');
+  if (oldAlert) oldAlert.remove();
+
+  // Create alert wrapper
+  const wrapper = document.createElement('div');
+  wrapper.className = 'custom-alert-internal ' + (type === 'success' ? 'success' : type === 'error' ? 'error' : 'info');
+
+  // Choose icon
+  let icon = '';
+  if (type === 'error') icon = '❌';
+  else if (type === 'info') icon = 'ℹ️';
+
+  // Create alert HTML
+  wrapper.innerHTML = `
+    ${icon ? `<span class="alert-icon">${icon}</span>` : ''}
+    <span>${message}</span>
+    <button class="alert-close" aria-label="بستن">×</button>
+  `;
+  document.body.appendChild(wrapper);
+
+  // Show with animation
+  setTimeout(() => wrapper.classList.add('show'), 10);
+
+  // Close on button click
+  wrapper.querySelector('.alert-close').onclick = () => {
+    wrapper.classList.remove('show');
+    setTimeout(() => { if (wrapper) wrapper.remove(); }, 400);
+  };
+
+  // Auto-dismiss after 3 seconds
+  setTimeout(() => {
+    wrapper.classList.remove('show');
+    setTimeout(() => { if (wrapper) wrapper.remove(); }, 400);
+  }, 3000);
+}
+// ... existing code ...
+// Example usage (replace with real transaction events):
+// showCustomAlert('تراکنش جدید با موفقیت ثبت شد!', 'success');
+// showCustomAlert('تراکنش بروزرسانی شد.', 'info');
+// showCustomAlert('خطا در ثبت تراکنش!', 'error');
+
+// ... existing code ...
+function updateCheckCountField() {
+  const count = document.querySelectorAll('.check-item').length;
+  const checkCountInput = document.getElementById('check-count');
+  if (checkCountInput) checkCountInput.value = count;
+}
+// ... existing code ...
+// Patch in updateCheckItems (after adding all check items and after remove)
+const originalUpdateCheckItems = updateCheckItems;
+updateCheckItems = function() {
+  originalUpdateCheckItems.apply(this, arguments);
+  updateCheckCountField();
+  // Patch remove-check-btns to update count after remove
+  document.querySelectorAll('.remove-check-btn').forEach(btn => {
+    btn.onclick = function() {
+      this.closest('.check-item').remove();
+      updateCheckCountField();
+    };
+  });
+};
+// Patch add-check-btn to update count after add
+const addCheckBtn = document.getElementById('add-check-btn');
+if (addCheckBtn) {
+  const originalAddCheckHandler = addCheckBtn.onclick;
+  addCheckBtn.onclick = function(e) {
+    if (originalAddCheckHandler) originalAddCheckHandler.call(this, e);
+    updateCheckCountField();
+  };
+}
+
+// ... existing code ...
+function showTransactionQuickView(idx) {
+  const sale = sales[idx];
+  if (!sale) return;
+  const buyer = buyers.find(b => b.id === sale.buyerId) || {};
+  // ساخت خلاصه سفارش
+  let html = '';
+  html += `<h3><i class='fas fa-receipt'></i> خلاصه سفارش</h3>`;
+  if (buyer.name) html += `<div class='receipt-row'><span class='receipt-label'>مشتری:</span><span class='receipt-value'>${buyer.name}</span></div>`;
+  if (sale.product) html += `<div class='receipt-row'><span class='receipt-label'>کالا:</span><span class='receipt-value'>${sale.product}</span></div>`;
+  if (sale.date) html += `<div class='receipt-row'><span class='receipt-label'>تاریخ:</span><span class='receipt-value'>${toPersianDigits(sale.date)}</span></div>`;
+  if (sale.price) html += `<div class='receipt-row'><span class='receipt-label'>مبلغ فروش:</span><span class='receipt-value'>${toPersianDigits(sale.price.toLocaleString())} تومان</span></div>`;
+  if (sale.grossProfit !== undefined) html += `<div class='receipt-row'><span class='receipt-label'>سود ناخالص:</span><span class='receipt-value'>${toPersianDigits(sale.grossProfit.toLocaleString())} تومان</span></div>`;
+  if (sale.colorCost !== undefined || sale.regulationCost !== undefined || sale.transportCost !== undefined) html += `<div class='receipt-row'><span class='receipt-label'>هزینه‌ها:</span><span class='receipt-value'>رنگ: ${toPersianDigits((sale.colorCost||0).toLocaleString())} | رگلاژ: ${toPersianDigits((sale.regulationCost||0).toLocaleString())} | حمل: ${toPersianDigits((sale.transportCost||0).toLocaleString())}</span></div>`;
+  if (sale.teacherCommission !== undefined) html += `<div class='receipt-row'><span class='receipt-label'>پورسانت معلم:</span><span class='receipt-value'>${toPersianDigits((sale.teacherCommission||0).toLocaleString())} تومان</span></div>`;
+  if (sale.sellerCommission !== undefined) html += `<div class='receipt-row'><span class='receipt-label'>پورسانت فروشنده:</span><span class='receipt-value'>${toPersianDigits((sale.sellerCommission||0).toLocaleString())} تومان</span></div>`;
+  if (sale.netProfit !== undefined) html += `<div class='receipt-row'><span class='receipt-label'>سود خالص:</span><span class='receipt-value'>${toPersianDigits((sale.netProfit||0).toLocaleString())} تومان</span></div>`;
+  if (sale.paymentMethod) html += `<div class='receipt-row'><span class='receipt-label'>روش پرداخت:</span><span class='receipt-value'>${sale.paymentMethod === 'cash' ? 'نقدی' : 'اقساط'}</span></div>`;
+  if (sale.advancePayment !== undefined) html += `<div class='receipt-row'><span class='receipt-label'>پیش‌پرداخت:</span><span class='receipt-value'>${toPersianDigits((sale.advancePayment||0).toLocaleString())} تومان</span></div>`;
+  if (sale.paymentMethod !== 'cash' && sale.price && sale.advancePayment !== undefined) {
+    const remain = sale.price - (sale.advancePayment||0);
+    html += `<div class='receipt-row'><span class='receipt-label'>مبلغ قابل پرداخت با چک/اقساط:</span><span class='receipt-value'>${toPersianDigits(remain.toLocaleString())} تومان</span></div>`;
+  }
+  html += `<div class='receipt-total'>${toPersianDigits((sale.price||0).toLocaleString())} تومان</div>`;
+  html += `<div class='receipt-footer'>این رسید غیررسمی است و صرفاً جهت مشاهده خلاصه سفارش می‌باشد.</div>`;
+  document.getElementById('transaction-quickview-content').innerHTML = html;
+  const modal = document.getElementById('transaction-quickview-modal');
+  modal.style.display = 'flex';
+  setTimeout(() => modal.classList.add('show'), 10);
+  // بستن با کلیک روی بک‌دراپ
+  modal.onclick = function(e) {
+    if (e.target === modal) hideTransactionQuickView();
+  };
+  // بستن با دکمه ضربدر
+  const closeBtn = modal.querySelector('.quickview-close');
+  if (closeBtn) closeBtn.onclick = hideTransactionQuickView;
+}
+function hideTransactionQuickView() {
+  const modal = document.getElementById('transaction-quickview-modal');
+  modal.classList.remove('show');
+  setTimeout(() => { modal.style.display = 'none'; }, 450);
+}
+
+// ... existing code ...
