@@ -175,9 +175,15 @@ class DatabaseManager {
             const { data, error } = await this.supabase
                 .from('checks')
                 .insert([{
-                    check_number: checkData.checkNumber,
-                    amount: parseFloat(checkData.amount),
+                    transaction_id: checkData.transactionId,
+                    sayadi_number: checkData.sayadiNumber,
+                    series_number: checkData.seriesNumber,
                     bank_name: checkData.bankName,
+                    branch_name: checkData.branchName,
+                    issuer_name: checkData.issuerName,
+                    payee_name: checkData.payeeName,
+                    national_code: checkData.nationalCode,
+                    amount: parseFloat(checkData.amount),
                     due_date: checkData.dueDate,
                     status: checkData.status || 'pending'
                 }])
@@ -500,6 +506,198 @@ class DatabaseManager {
     // Format date
     formatDate(date) {
         return new Date(date).toLocaleDateString('fa-IR');
+    }
+
+    // ==================== OUTGOING CHECKS ====================
+    async addOutgoingCheck(checkData) {
+        try {
+            // ذخیره در localStorage
+            const outgoingChecks = JSON.parse(localStorage.getItem('outgoing_checks') || '[]');
+            
+            const newCheck = {
+                id: Date.now(),
+                sayadi_number: checkData.sayadiNumber || null,
+                series_number: checkData.seriesNumber || null,
+                bank_name: checkData.bankName,
+                branch_name: checkData.branchName || null,
+                payee_name: checkData.payeeName,
+                national_code: checkData.nationalCode || null,
+                amount: parseFloat(checkData.amount) || 0,
+                due_date: checkData.dueDate || null,
+                reason: checkData.reason || null,
+                description: checkData.description || null,
+                status: checkData.status || 'در جریان',
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+            };
+            
+            outgoingChecks.unshift(newCheck);
+            localStorage.setItem('outgoing_checks', JSON.stringify(outgoingChecks));
+            
+            // Clear cache
+            this.cache.delete('outgoing_checks');
+            this.cache.delete('outgoing_check_stats');
+            
+            return newCheck;
+        } catch (error) {
+            console.error('خطا در افزودن چک خروجی:', error);
+            this.showNotification('خطا در ثبت چک خروجی', 'error');
+            throw error;
+        }
+    }
+
+    async getOutgoingChecks(limit = 50, forceRefresh = false) {
+        const cacheKey = `outgoing_checks_${limit}`;
+        
+        if (!forceRefresh && this.cache.has(cacheKey)) {
+            return this.cache.get(cacheKey);
+        }
+
+        return this.executeRequest(cacheKey, async () => {
+            try {
+                // خواندن از localStorage
+                const outgoingChecks = JSON.parse(localStorage.getItem('outgoing_checks') || '[]');
+                return outgoingChecks.slice(0, limit);
+            } catch (error) {
+                console.error('Error getting outgoing checks:', error);
+                return [];
+            }
+        });
+    }
+
+    async updateOutgoingCheckStatus(id, status) {
+        try {
+            const outgoingChecks = JSON.parse(localStorage.getItem('outgoing_checks') || '[]');
+            const checkIndex = outgoingChecks.findIndex(check => check.id == id);
+            
+            if (checkIndex === -1) {
+                throw new Error('چک مورد نظر یافت نشد');
+            }
+            
+            outgoingChecks[checkIndex].status = status;
+            outgoingChecks[checkIndex].updated_at = new Date().toISOString();
+            
+            localStorage.setItem('outgoing_checks', JSON.stringify(outgoingChecks));
+            
+            // Clear cache
+            this.cache.delete('outgoing_checks');
+            this.cache.delete('outgoing_check_stats');
+            
+            return outgoingChecks[checkIndex];
+        } catch (error) {
+            console.error('Error updating outgoing check status:', error);
+            this.showNotification('خطا در بروزرسانی وضعیت چک', 'error');
+            throw error;
+        }
+    }
+
+    async updateOutgoingCheck(id, checkData) {
+        try {
+            const outgoingChecks = JSON.parse(localStorage.getItem('outgoing_checks') || '[]');
+            const checkIndex = outgoingChecks.findIndex(check => check.id == id);
+            
+            if (checkIndex === -1) {
+                throw new Error('چک مورد نظر یافت نشد');
+            }
+            
+            outgoingChecks[checkIndex] = {
+                ...outgoingChecks[checkIndex],
+                sayadi_number: checkData.sayadiNumber || null,
+                series_number: checkData.seriesNumber || null,
+                bank_name: checkData.bankName,
+                branch_name: checkData.branchName || null,
+                payee_name: checkData.payeeName,
+                national_code: checkData.nationalCode || null,
+                amount: parseFloat(checkData.amount) || 0,
+                due_date: checkData.dueDate || null,
+                reason: checkData.reason || null,
+                description: checkData.description || null,
+                updated_at: new Date().toISOString()
+            };
+            
+            localStorage.setItem('outgoing_checks', JSON.stringify(outgoingChecks));
+            
+            // Clear cache
+            this.cache.delete('outgoing_checks');
+            this.cache.delete('outgoing_check_stats');
+            
+            return outgoingChecks[checkIndex];
+        } catch (error) {
+            console.error('Error updating outgoing check:', error);
+            this.showNotification('خطا در بروزرسانی چک خروجی', 'error');
+            throw error;
+        }
+    }
+
+    async deleteOutgoingCheck(id) {
+        try {
+            const outgoingChecks = JSON.parse(localStorage.getItem('outgoing_checks') || '[]');
+            const checkIndex = outgoingChecks.findIndex(check => check.id == id);
+            
+            if (checkIndex === -1) {
+                throw new Error('چک مورد نظر یافت نشد');
+            }
+            
+            outgoingChecks.splice(checkIndex, 1);
+            localStorage.setItem('outgoing_checks', JSON.stringify(outgoingChecks));
+            
+            // Clear cache
+            this.cache.delete('outgoing_checks');
+            this.cache.delete('outgoing_check_stats');
+            
+            return true;
+        } catch (error) {
+            console.error('Error deleting outgoing check:', error);
+            this.showNotification('خطا در حذف چک خروجی', 'error');
+            throw error;
+        }
+    }
+
+    async getOutgoingCheckStats(forceRefresh = false) {
+        const cacheKey = 'outgoing_check_stats';
+        
+        if (!forceRefresh && this.cache.has(cacheKey)) {
+            return this.cache.get(cacheKey);
+        }
+
+        return this.executeRequest(cacheKey, async () => {
+            try {
+                // خواندن از localStorage
+                const outgoingChecks = JSON.parse(localStorage.getItem('outgoing_checks') || '[]');
+                
+                const totalCount = outgoingChecks.length;
+                const totalAmount = outgoingChecks.reduce((sum, check) => sum + parseFloat(check.amount || 0), 0);
+                
+                const pendingChecks = outgoingChecks.filter(check => check.status === 'در جریان');
+                const pendingCount = pendingChecks.length;
+                const pendingAmount = pendingChecks.reduce((sum, check) => sum + parseFloat(check.amount || 0), 0);
+                
+                const paidChecks = outgoingChecks.filter(check => check.status === 'پرداخت شده');
+                const paidCount = paidChecks.length;
+                const paidAmount = paidChecks.reduce((sum, check) => sum + parseFloat(check.amount || 0), 0);
+
+                const stats = {
+                    totalCount: totalCount,
+                    totalAmount: totalAmount,
+                    pendingCount: pendingCount,
+                    pendingAmount: pendingAmount,
+                    paidCount: paidCount,
+                    paidAmount: paidAmount
+                };
+
+                return stats;
+            } catch (error) {
+                console.error('Error getting outgoing check stats:', error);
+                return {
+                    totalCount: 0,
+                    totalAmount: 0,
+                    pendingCount: 0,
+                    pendingAmount: 0,
+                    paidCount: 0,
+                    paidAmount: 0
+                };
+            }
+        });
     }
 }
 

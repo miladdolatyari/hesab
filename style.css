@@ -802,6 +802,18 @@ tr:hover {
   background: #ededed;
   color: #222;
 }
+
+.btn.warning {
+  background: #ffc107;
+  color: #212529;
+  border: 1.5px solid #ffc107;
+}
+
+.btn.warning:hover {
+  background: #e0a800;
+  color: #212529;
+  border-color: #e0a800;
+}
 @media (max-width: 700px) {
   .transaction-form {
     padding: 12px 2px;
@@ -1439,7 +1451,6 @@ tr:hover {
   .report-table th, .report-table td {
     padding: 7px 3px;
     font-size: 13px;
-<<<<<<< HEAD:style.css
   }
 }
 
@@ -1973,6 +1984,284 @@ tr:hover {
   .report-btn-text small {
     font-size: 10px !important;
   }
+}
+
+/* ==================== OUTGOING CHECKS STYLES ==================== */
+.outgoing-check-form {
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    border: 1px solid #e9ecef;
+}
+
+.outgoing-check-form h3 {
+    color: #2c3e50;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.outgoing-check-form .form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.outgoing-check-form .form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.outgoing-check-form .form-group label {
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #555;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.outgoing-check-form .form-group label i {
+    color: #3498db;
+    font-size: 14px;
+}
+
+.outgoing-check-form .form-control {
+    padding: 12px 16px;
+    border: 1.5px solid #e3f2fd;
+    border-radius: 10px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    background: #fff;
+}
+
+.outgoing-check-form .form-control:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    outline: none;
+}
+
+.outgoing-check-form textarea.form-control {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.outgoing-check-form select.form-control {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 12px center;
+    background-repeat: no-repeat;
+    background-size: 16px;
+    padding-right: 40px;
+}
+
+/* آمار چک‌های خروجی */
+#outgoing-checks .stats-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+#outgoing-checks .stat-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    border: 1px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+#outgoing-checks .stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+}
+
+#outgoing-checks .stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+}
+
+#outgoing-checks .stat-icon i {
+    font-size: 20px;
+    color: white;
+}
+
+#outgoing-checks .stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 4px;
+}
+
+#outgoing-checks .stat-label {
+    font-size: 0.9rem;
+    color: #666;
+    font-weight: 500;
+}
+
+/* جدول چک‌های خروجی */
+#outgoing-checks-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+
+#outgoing-checks-table thead {
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    color: white;
+}
+
+#outgoing-checks-table th {
+    padding: 16px 12px;
+    text-align: right;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+#outgoing-checks-table td {
+    padding: 12px;
+    border-bottom: 1px solid #e9ecef;
+    font-size: 14px;
+}
+
+#outgoing-checks-table tbody tr:hover {
+    background: #f8f9fa;
+}
+
+#outgoing-checks-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* دکمه‌های عملیات */
+.outgoing-check-action-btn {
+    padding: 6px 10px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-left: 4px;
+    font-size: 12px;
+    transition: all 0.2s ease;
+}
+
+.outgoing-check-action-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+/* گروه‌بندی چک‌ها */
+.payee-group-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    transition: all 0.3s ease;
+}
+
+.payee-group-header:hover {
+    background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.payee-check-row {
+    transition: all 0.2s ease;
+    border-left: 2px solid transparent;
+}
+
+.payee-check-row:hover {
+    background: #f8f9fa !important;
+    border-left-color: #e74c3c;
+    transform: translateX(2px);
+    box-shadow: 0 2px 8px rgba(231, 76, 60, 0.1);
+}
+
+.payee-check-row td:first-child {
+    position: relative;
+}
+
+.payee-check-row:hover td:first-child::before {
+    content: '';
+    position: absolute;
+    left: -2px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #e74c3c;
+    border-radius: 0 2px 2px 0;
+}
+
+.payee-group-header.collapsed {
+    background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%) !important;
+    opacity: 0.8;
+}
+
+.payee-group-header.collapsed .group-toggle-icon {
+    transform: rotate(-90deg);
+}
+
+.payee-check-row {
+    transition: all 0.3s ease, opacity 0.3s ease;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .outgoing-check-form .form-row {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    .outgoing-check-form {
+        padding: 16px;
+        margin-bottom: 16px;
+    }
+    
+    #outgoing-checks .stats-cards {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+    
+    #outgoing-checks-table {
+        font-size: 12px;
+    }
+    
+    #outgoing-checks-table th,
+    #outgoing-checks-table td {
+        padding: 8px 6px;
+    }
+    
+    .outgoing-check-action-btn {
+        padding: 4px 6px;
+        font-size: 10px;
+        margin-left: 2px;
+    }
+}
+
+@media (max-width: 480px) {
+    #outgoing-checks .stats-cards {
+        grid-template-columns: 1fr;
+    }
+    
+    #outgoing-checks-table {
+        display: block;
+        overflow-x: auto;
+    }
+    
+    .outgoing-check-form .form-control {
+        font-size: 16px; /* Prevent zoom on iOS */
+    }
 }
 
 

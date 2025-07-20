@@ -67,6 +67,28 @@ CREATE TABLE checks (
   created_at TIMESTAMP DEFAULT NOW()
 );
 
+-- جدول چک‌های خروجی (جدید)
+CREATE TABLE outgoing_checks (
+  id SERIAL PRIMARY KEY,
+  
+  -- اطلاعات چک
+  sayadi_number VARCHAR(50) NOT NULL,
+  series_number VARCHAR(50),
+  bank_name VARCHAR(100) NOT NULL,
+  branch_name VARCHAR(100),
+  payee_name VARCHAR(255) NOT NULL,
+  national_code VARCHAR(20),
+  amount DECIMAL(15,2) NOT NULL,
+  due_date DATE NOT NULL,
+  
+  -- اطلاعات اضافی
+  reason VARCHAR(100),
+  description TEXT,
+  status VARCHAR(50) DEFAULT 'در جریان',
+  
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
 -- جدول محصولات
 CREATE TABLE products (
   id SERIAL PRIMARY KEY,
@@ -82,4 +104,7 @@ CREATE INDEX idx_transactions_customer ON transactions(customer_name);
 CREATE INDEX idx_transactions_product ON transactions(product_name);
 CREATE INDEX idx_checks_transaction ON checks(transaction_id);
 CREATE INDEX idx_checks_status ON checks(status);
-CREATE INDEX idx_checks_due_date ON checks(due_date); 
+CREATE INDEX idx_checks_due_date ON checks(due_date);
+CREATE INDEX idx_outgoing_checks_status ON outgoing_checks(status);
+CREATE INDEX idx_outgoing_checks_due_date ON outgoing_checks(due_date);
+CREATE INDEX idx_outgoing_checks_payee ON outgoing_checks(payee_name); 

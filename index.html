@@ -839,23 +839,313 @@
             <section id="outgoing-checks" class="content-section">
                 <div class="section-header">
                     <h2>مدیریت چک‌های خروجی</h2>
+                    <div class="header-actions">
+                        <button class="btn secondary" onclick="toggleOutgoingCheckForm()">
+                            <i class="fas fa-plus-circle"></i> چک جدید
+                        </button>
                 </div>
-                <div class="checks-table">
-                  <div id="outgoing-checks-search-bar" style="display:flex;gap:12px;align-items:center;margin-bottom:18px;flex-wrap:wrap;">
-                    <input type="text" class="form-control search-input" placeholder="نام ذینفع..." style="width:200px;">
-                    <input type="text" class="form-control search-input" placeholder="شماره صیادی..." style="width:200px;">
-                    <input type="text" class="form-control search-input" placeholder="مبلغ..." style="width:160px;">
-                    <input type="text" class="form-control jalali-date search-input" placeholder="تاریخ از..." style="width:180px;">
-                    <input type="text" class="form-control jalali-date search-input" placeholder="تاریخ تا..." style="width:180px;">
-                    <select class="form-control search-status-big" style="width:220px;min-height:48px;font-size:19px;padding:16px 18px;">
+                </div>
+
+                <!-- کارت‌های آماری -->
+                <div class="stats-cards" style="margin-bottom: 24px;">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="outgoing-total-count">۰</div>
+                            <div class="stat-label">تعداد کل چک‌ها</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);">
+                            <i class="fas fa-money-bill-wave"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="outgoing-total-amount">۰ تومان</div>
+                            <div class="stat-label">جمع مبالغ</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="outgoing-pending-count">۰</div>
+                            <div class="stat-label">در جریان</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="outgoing-paid-count">۰</div>
+                            <div class="stat-label">پرداخت شده</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- نمودار وضعیت چک‌های خروجی -->
+                <div class="outgoing-checks-status-chart-container" style="margin-bottom: 32px;">
+                    <h3 style="font-size: 1.2rem; color: #444; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-chart-pie" style="color:#e74c3c;"></i> 
+                        نمودار وضعیت چک‌های خروجی
+                    </h3>
+                    <svg width="0" height="0">
+                        <defs>
+                            <linearGradient id="outgoingRed" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#ff6b6b"/>
+                                <stop offset="100%" stop-color="#e74c3c"/>
+                            </linearGradient>
+                            <linearGradient id="outgoingOrange" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#ffa726"/>
+                                <stop offset="100%" stop-color="#f39c12"/>
+                            </linearGradient>
+                            <linearGradient id="outgoingGreen" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#66bb6a"/>
+                                <stop offset="100%" stop-color="#27ae60"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                    <div id="outgoingChecksStatusChart" style="width:100%;max-width:100%;min-width:0;padding:0 0 0 0;"></div>
+                </div>
+
+                <!-- فرم ثبت چک خروجی (Dropdown) -->
+                <div class="outgoing-check-form" id="outgoing-check-form" style="display: none; background: #f8f9fa; border-radius: 16px; padding: 24px; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3 style="color: #2c3e50; margin: 0; display: flex; align-items: center; gap: 8px;">
+                            <i class="fas fa-file-invoice-dollar" style="color: #e74c3c;"></i>
+                            ثبت چک خروجی جدید
+                        </h3>
+                        <button class="btn secondary" onclick="toggleOutgoingCheckForm()" style="padding: 8px 12px; font-size: 14px;">
+                            <i class="fas fa-times"></i> بستن
+                        </button>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="outgoing-sayadi"><i class="fas fa-barcode"></i> شماره صیادی</label>
+                            <input type="text" id="outgoing-sayadi" class="form-control" placeholder="شماره صیادی چک">
+                        </div>
+                        <div class="form-group">
+                            <label for="outgoing-series"><i class="fas fa-list-ol"></i> سری چک</label>
+                            <input type="text" id="outgoing-series" class="form-control" placeholder="شماره سری چک">
+                        </div>
+                        <div class="form-group">
+                            <label for="outgoing-bank"><i class="fas fa-university"></i> بانک</label>
+                            <select id="outgoing-bank" class="form-control">
+                                <option value="">انتخاب بانک</option>
+                                <option value="بانک ملی">بانک ملی</option>
+                                <option value="بانک ملت">بانک ملت</option>
+                                <option value="بانک سپه">بانک سپه</option>
+                                <option value="بانک صادرات">بانک صادرات</option>
+                                <option value="بانک پارسیان">بانک پارسیان</option>
+                                <option value="بانک تجارت">بانک تجارت</option>
+                                <option value="بانک رفاه">بانک رفاه</option>
+                                <option value="بانک کشاورزی">بانک کشاورزی</option>
+                                <option value="بانک مسکن">بانک مسکن</option>
+                                <option value="بانک توسعه صادرات">بانک توسعه صادرات</option>
+                                <option value="بانک صنعت و معدن">بانک صنعت و معدن</option>
+                                <option value="بانک توسعه تعاون">بانک توسعه تعاون</option>
+                                <option value="بانک آینده">بانک آینده</option>
+                                <option value="بانک شهر">بانک شهر</option>
+                                <option value="بانک دی">بانک دی</option>
+                                <option value="بانک تات">بانک تات</option>
+                                <option value="بانک سینا">بانک سینا</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="outgoing-branch"><i class="fas fa-building"></i> شعبه</label>
+                            <input type="text" id="outgoing-branch" class="form-control" placeholder="نام شعبه">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="outgoing-payee"><i class="fas fa-user"></i> در وجه</label>
+                            <input type="text" id="outgoing-payee" class="form-control" placeholder="نام ذینفع">
+                        </div>
+                        <div class="form-group">
+                            <label for="outgoing-national"><i class="fas fa-id-card"></i> کد ملی</label>
+                            <input type="text" id="outgoing-national" class="form-control" placeholder="کد ملی ذینفع">
+                        </div>
+                        <div class="form-group">
+                            <label for="outgoing-amount"><i class="fas fa-money-bill-wave"></i> مبلغ</label>
+                            <input type="text" id="outgoing-amount" class="form-control" placeholder="مبلغ به تومان">
+                        </div>
+                        <div class="form-group">
+                            <label for="outgoing-date"><i class="fas fa-calendar-alt"></i> تاریخ سررسید</label>
+                            <div class="jalali-date-wrapper">
+                                <input type="text" id="outgoing-date" class="form-control jalali-date" placeholder="تاریخ سررسید">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="outgoing-reason"><i class="fas fa-sticky-note"></i> علت صدور</label>
+                            <select id="outgoing-reason" class="form-control">
+                                <option value="">انتخاب کنید</option>
+                                <option value="خرید کالا">خرید کالا</option>
+                                <option value="پرداخت خدمات">پرداخت خدمات</option>
+                                <option value="پرداخت حقوق">پرداخت حقوق</option>
+                                <option value="پرداخت اجاره">پرداخت اجاره</option>
+                                <option value="پرداخت مالیات">پرداخت مالیات</option>
+                                <option value="سایر">سایر</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="outgoing-description"><i class="fas fa-comment"></i> توضیحات</label>
+                            <textarea id="outgoing-description" class="form-control" rows="3" placeholder="توضیحات اضافی..."></textarea>
+                        </div>
+                    </div>
+                    
+                    <!-- دکمه‌های عملیات فرم -->
+                    <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px; padding-top: 20px; border-top: 1px solid #e9ecef;">
+                        <button class="btn secondary" onclick="clearOutgoingCheckForm()">
+                            <i class="fas fa-eraser"></i> پاک کردن
+                        </button>
+                        <button class="btn warning" onclick="prepareForNextCheck()" id="next-check-btn" style="display: none;">
+                            <i class="fas fa-plus"></i> چک بعدی
+                        </button>
+                        <button class="btn primary" onclick="saveOutgoingCheck()">
+                            <i class="fas fa-save"></i> ذخیره چک
+                        </button>
+                    </div>
+                </div>
+
+                <!-- فیلترهای پیشرفته -->
+                <div class="advanced-filters-container" style="background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); border-radius: 16px; padding: 20px; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border: 1px solid #e9ecef;">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid #e3f2fd;">
+                        <i class="fas fa-filter" style="color: #e74c3c; font-size: 18px;"></i>
+                        <h3 style="margin: 0; color: #2c3e50; font-size: 16px; font-weight: 600;">فیلترهای پیشرفته</h3>
+                        <div style="margin-right: auto; display: flex; gap: 8px;">
+                            <button id="expand-outgoing-filters-btn" class="btn secondary" style="padding: 8px 16px; font-size: 13px; border-radius: 8px; position: relative;">
+                                <i class="fas fa-chevron-down"></i> فیلترهای بیشتر
+                            </button>
+                            <button id="reset-outgoing-checks-btn" class="btn secondary" style="padding: 8px 16px; font-size: 13px; border-radius: 8px; background: #fff; color: #e74c3c; border: 1px solid #e74c3c;">
+                                <i class="fas fa-times"></i> پاک کردن
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- فیلترهای اصلی -->
+                    <div class="main-filters" style="display: flex; gap: 12px; align-items: flex-end; margin-bottom: 16px; flex-wrap: wrap; width: 100%;">
+                        <div class="filter-group" style="flex: 1; min-width: 200px;">
+                            <label style="display: block; margin-bottom: 6px; font-size: 13px; color: #666; font-weight: 500;">
+                                <i class="fas fa-user" style="margin-left: 6px; color: #e74c3c;"></i>نام ذینفع
+                            </label>
+                            <input type="text" id="search-outgoing-payee" class="form-control search-input" placeholder="جستجو در نام ذینفع..." style="width: 100%; border-radius: 10px; border: 1.5px solid #e3f2fd; padding: 12px 16px; font-size: 14px; transition: all 0.3s ease;">
+                        </div>
+                        
+                        <div class="filter-group" style="flex: 1; min-width: 200px;">
+                            <label style="display: block; margin-bottom: 6px; font-size: 13px; color: #666; font-weight: 500;">
+                                <i class="fas fa-barcode" style="margin-left: 6px; color: #e74c3c;"></i>شماره صیادی
+                            </label>
+                            <input type="text" id="search-outgoing-sayadi" class="form-control search-input" placeholder="جستجو در شماره صیادی..." style="width: 100%; border-radius: 10px; border: 1.5px solid #e3f2fd; padding: 12px 16px; font-size: 14px; transition: all 0.3s ease;">
+                        </div>
+                        
+                        <div class="filter-group" style="flex: 1; min-width: 160px;">
+                            <label style="display: block; margin-bottom: 6px; font-size: 13px; color: #666; font-weight: 500;">
+                                <i class="fas fa-money-bill-wave" style="margin-left: 6px; color: #e74c3c;"></i>مبلغ
+                            </label>
+                            <input type="text" id="search-outgoing-amount" class="form-control search-input" placeholder="جستجو در مبلغ..." style="width: 100%; border-radius: 10px; border: 1.5px solid #e3f2fd; padding: 12px 16px; font-size: 14px; transition: all 0.3s ease;">
+                        </div>
+                        
+                        <div class="filter-group" style="flex: 1; min-width: 180px;">
+                            <label style="display: block; margin-bottom: 6px; font-size: 13px; color: #666; font-weight: 500;">
+                                <i class="fas fa-info-circle" style="margin-left: 6px; color: #e74c3c;"></i>وضعیت
+                            </label>
+                            <select id="search-outgoing-status" class="form-control search-status-big" style="width: 100%; border-radius: 10px; border: 1.5px solid #e3f2fd; padding: 12px 16px; font-size: 14px; background: #fff; transition: all 0.3s ease;">
                       <option value="">همه وضعیت‌ها</option>
                       <option value="در جریان">در جریان</option>
                       <option value="پرداخت شده">پرداخت شده</option>
                       <option value="باطل شده">باطل شده</option>
                     </select>
-                    <button class="btn primary" style="padding:8px 18px;font-size:13px;"><i class="fas fa-search"></i> جستجو</button>
                   </div>
-                    <table>
+                    </div>
+
+                    <!-- فیلترهای پیشرفته (Dropdown) -->
+                    <div id="advanced-outgoing-filters" style="display: none; border-top: 1px solid #e3f2fd; padding-top: 16px; max-height: 0; overflow: hidden; transition: max-height 0.3s ease;">
+                        <div style="display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; width: 100%;">
+                            <div class="filter-group" style="flex: 1; min-width: 180px;">
+                                <label style="display: block; margin-bottom: 6px; font-size: 13px; color: #666; font-weight: 500;">
+                                    <i class="fas fa-calendar-alt" style="margin-left: 6px; color: #e74c3c;"></i>تاریخ از
+                                </label>
+                                <input type="text" id="search-outgoing-date-from" class="form-control jalali-date search-input" placeholder="تاریخ شروع..." style="width: 100%; border-radius: 10px; border: 1.5px solid #e3f2fd; padding: 12px 16px; font-size: 14px; transition: all 0.3s ease;">
+                            </div>
+                            
+                            <div class="filter-group" style="flex: 1; min-width: 180px;">
+                                <label style="display: block; margin-bottom: 6px; font-size: 13px; color: #666; font-weight: 500;">
+                                    <i class="fas fa-calendar-check" style="margin-left: 6px; color: #e74c3c;"></i>تاریخ تا
+                                </label>
+                                <input type="text" id="search-outgoing-date-to" class="form-control jalali-date search-input" placeholder="تاریخ پایان..." style="width: 100%; border-radius: 10px; border: 1.5px solid #e3f2fd; padding: 12px 16px; font-size: 14px; transition: all 0.3s ease;">
+                            </div>
+                            
+                            <div class="filter-group" style="flex: 1; min-width: 180px;">
+                                <label style="display: block; margin-bottom: 6px; font-size: 13px; color: #666; font-weight: 500;">
+                                    <i class="fas fa-university" style="margin-left: 6px; color: #e74c3c;"></i>بانک
+                                </label>
+                                <select id="search-outgoing-bank" class="form-control search-status-big" style="width: 100%; border-radius: 10px; border: 1.5px solid #e3f2fd; padding: 12px 16px; font-size: 14px; background: #fff; transition: all 0.3s ease;">
+                                    <option value="">همه بانک‌ها</option>
+                                    <option value="بانک ملی">بانک ملی</option>
+                                    <option value="بانک ملت">بانک ملت</option>
+                                    <option value="بانک سپه">بانک سپه</option>
+                                    <option value="بانک صادرات">بانک صادرات</option>
+                                    <option value="بانک پارسیان">بانک پارسیان</option>
+                                    <option value="بانک تجارت">بانک تجارت</option>
+                                    <option value="بانک رفاه">بانک رفاه</option>
+                                    <option value="بانک کشاورزی">بانک کشاورزی</option>
+                                    <option value="بانک مسکن">بانک مسکن</option>
+                                    <option value="بانک توسعه صادرات">بانک توسعه صادرات</option>
+                                    <option value="بانک صنعت و معدن">بانک صنعت و معدن</option>
+                                    <option value="بانک توسعه تعاون">بانک توسعه تعاون</option>
+                                    <option value="بانک آینده">بانک آینده</option>
+                                    <option value="بانک شهر">بانک شهر</option>
+                                    <option value="بانک دی">بانک دی</option>
+                                    <option value="بانک تات">بانک تات</option>
+                                    <option value="بانک سینا">بانک سینا</option>
+                                </select>
+                            </div>
+                            
+                            <div class="filter-group" style="flex: 1; min-width: 140px;">
+                                <label style="display: block; margin-bottom: 6px; font-size: 13px; color: #666; font-weight: 500;">
+                                    <i class="fas fa-eye" style="margin-left: 6px; color: #e74c3c;"></i>نمایش
+                                </label>
+                                <select id="search-outgoing-limit" class="form-control search-status-big" style="width: 100%; border-radius: 10px; border: 1.5px solid #e3f2fd; padding: 12px 16px; font-size: 14px; background: #fff; transition: all 0.3s ease;">
+                                    <option value="all">همه</option>
+                                    <option value="10">۱۰ مورد</option>
+                                    <option value="25">۲۵ مورد</option>
+                                    <option value="50">۵۰ مورد</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- دکمه جستجو -->
+                    <div style="display: flex; justify-content: center; margin-top: 16px; padding-top: 16px; border-top: 1px solid #e3f2fd;">
+                        <button id="search-outgoing-checks-btn" class="btn primary" onclick="searchOutgoingChecks()" style="padding: 12px 32px; font-size: 14px; border-radius: 10px; background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); border: none; color: white; font-weight: 600; transition: all 0.3s ease; min-width: 140px;">
+                            <i class="fas fa-search" style="margin-left: 8px;"></i>جستجو
+                        </button>
+                    </div>
+                </div>
+
+                <!-- نمایش نتایج -->
+                <div class="search-results-info" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding: 12px 16px; background: #e3f2fd; border-radius: 10px; border-right: 4px solid #e74c3c;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-info-circle" style="color: #e74c3c;"></i>
+                        <span style="font-size: 14px; color: #2c3e50;">نتایج جستجو: <strong id="outgoing-results-count">۰</strong> چک یافت شد</span>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <span style="font-size: 12px; color: #666; background: #fff; padding: 4px 8px; border-radius: 6px;">مجموع: <strong id="outgoing-results-total">۰ تومان</strong></span>
+                    </div>
+                </div>
+
+                <!-- جدول چک‌های خروجی -->
+                <div class="checks-table">
+
+                    <table id="outgoing-checks-table">
                         <thead>
                             <tr>
                                 <th>شماره صیادی</th>
@@ -863,34 +1153,13 @@
                                 <th>مبلغ</th>
                                 <th>تاریخ سررسید</th>
                                 <th>بانک</th>
+                                <th>علت صدور</th>
                                 <th>وضعیت</th>
                                 <th>عملیات</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr>
-                                <td>۲۲۳۳۴۴۵۵۶۶۷۷۸۸۹۹</td>
-                                <td>شرکت آداک</td>
-                                <td>۲۵,۰۰۰,۰۰۰</td>
-                                <td>۱۴۰۲/۰۶/۱۰</td>
-                                <td>بانک صادرات</td>
-                                <td><span class="status-badge warning">در جریان</span></td>
-                                <td>
-                                    <button class="small-btn success"><i class="fas fa-check"></i></button>
-                                    <button class="small-btn danger"><i class="fas fa-times"></i></button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>۳۳۴۴۵۵۶۶۷۷۸۸۹۹۰۰</td>
-                                <td>شرکت آداک</td>
-                                <td>۴۰,۰۰۰,۰۰۰</td>
-                                <td>۱۴۰۲/۰۷/۱۵</td>
-                                <td>بانک ملت</td>
-                                <td><span class="status-badge success">پرداخت شده</span></td>
-                                <td>
-                                    <button class="small-btn info"><i class="fas fa-eye"></i></button>
-                                </td>
-                            </tr>
+                        <tbody id="outgoing-checks-tbody">
+                            <!-- داده‌ها به صورت داینامیک اضافه می‌شود -->
                         </tbody>
                     </table>
                 </div>
@@ -1269,6 +1538,8 @@
     <script src="https://cdn.jsdelivr.net/npm/@majidh1/jalalidatepicker/dist/jalalidatepicker.min.js"></script>
     <script src="comprehensive-report.js"></script>
     <script src="main.js"></script>
+    <script src="database.js"></script>
+    <script src="outgoing-checks.js"></script>
     <style>
 .search-input {
   border-radius: 10px !important;
