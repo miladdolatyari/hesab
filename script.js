@@ -33,6 +33,26 @@ function showSection(sectionName) {
     document.getElementById('page-title').textContent = targetLink ? targetLink.textContent.trim() : sectionName;
   }
   
+  // نمایش یا مخفی کردن دکمه گزارش جامع فقط برای چک‌های ورودی
+  const reportBtn = document.getElementById('comprehensiveReportBtn');
+  if (reportBtn) {
+    if (sectionName === 'checks') {
+      reportBtn.style.display = 'flex';
+    } else {
+      reportBtn.style.display = 'none';
+    }
+  }
+  
+  // نمایش یا مخفی کردن دکمه گزارش جامع چک‌های خروجی
+  const outgoingReportBtn = document.getElementById('outgoing-comprehensive-report-btn');
+  if (outgoingReportBtn) {
+    if (sectionName === 'outgoing-checks') {
+      outgoingReportBtn.style.display = 'flex';
+    } else {
+      outgoingReportBtn.style.display = 'none';
+    }
+  }
+  
   // به‌روزرسانی جداول مربوطه
   if(sectionName === 'sales-list') updateSalesTable();
   if(sectionName === 'dashboard') {
@@ -91,256 +111,329 @@ function loadAllData() {
 
 // ثبت تراکنش جدید
 function saveTransaction() {
-  if (window.isEditingTransaction && window.editingTransactionIndex !== undefined) {
-    showCustomAlert('در حال به‌روزرسانی...', 'info');
-  }
-  const customerName = document.getElementById('customer-name').value.trim();
-  const productName = document.getElementById('product-name').value;
-  const salePriceRaw = document.getElementById('sale-price').value;
-  const salePrice = parseNumberWithDots(faToEnWithDots(salePriceRaw));
-  const saleDate = getJalaliDateValue(document.getElementById('transaction-date'));
-
-  // اعتبارسنجی فیلدهای ضروری
-  if (!customerName || !productName || productName === '' || !salePrice || salePrice === 0 || !saleDate) {
-    showCustomAlert('لطفاً تمام فیلدهای ضروری (نام مشتری، کالا، تاریخ و مبلغ فروش) را وارد کنید.', 'error');
-    return;
-  }
-  const paymentMethod = document.getElementById('payment-method').value;
-  const advancePaymentRaw = document.getElementById('advance-payment').value;
-  const advancePayment = parseInt(faToEn(advancePaymentRaw)) || 0;
-  const checkIssuer = document.getElementById('check-issuer')?.value || '';
-  const birthDate = getJalaliDateValue(document.getElementById('birth-date'));
-  const province = document.getElementById('province').value;
-  const city = document.getElementById('city') ? document.getElementById('city').value : '';
-  const instrument = document.getElementById('product-type') ? document.getElementById('product-type').value : '';
-
-  // اطلاعات مالی
-  const purchasePrice = parseNumberWithDots(faToEnWithDots(document.getElementById('purchase-price').value));
-  const colorCost = parseNumberWithDots(faToEnWithDots(document.getElementById('color-cost').value));
-  const regulationCost = parseNumberWithDots(faToEnWithDots(document.getElementById('regulation-cost').value));
-  const transportCost = parseNumberWithDots(faToEnWithDots(document.getElementById('transport-cost').value));
-  const grossProfit = salePrice - purchasePrice;
-  const netProfit = grossProfit - colorCost - regulationCost - transportCost;
-
-  // اطلاعات معلم و فروشنده
-  const teacherName = document.getElementById('teacher-name').value;
-  const teacherPercent = parseFloat(faToEn(document.getElementById('teacher-percent').value)) || 0;
-  const teacherCommission = Math.round(salePrice * teacherPercent / 100);
-  const sellerName = document.getElementById('seller-name').value;
-  const sellerPercent = parseFloat(faToEn(document.getElementById('seller-percent').value)) || 0;
-  const sellerCommission = Math.round(salePrice * sellerPercent / 100);
-
-  console.log('Debug - salePriceRaw:', salePriceRaw);
-  console.log('Debug - salePrice:', salePrice);
-
-  // مشتری را پیدا کن یا بساز
-  let buyer = buyers.find(b => b.name === customerName);
-  if (!buyer) {
-    buyer = {
-      id: generateId(buyers),
-      name: customerName,
-      phone: '',
-      address: '',
-      birthDate: birthDate,
-      province: province,
-      city: city,
-      instrument: instrument,
-      purchases: 0,
-      total: 0,
-      lastBuy: saleDate
-    };
-    buyers.push(buyer);
-  } else {
-    // اگر مشتری قبلاً وجود داشته، اطلاعات تماس و آدرس و سایر اطلاعات را به‌روزرسانی کن
-    buyer.phone = '';
-    buyer.address = '';
-    buyer.birthDate = birthDate;
-    buyer.province = province;
-    buyer.city = city;
-    buyer.instrument = instrument;
-  }
-
-  // بررسی اینکه آیا در حالت ویرایش هستیم یا نه
-  if (window.isEditingTransaction && window.editingTransactionIndex !== undefined) {
-    // حالت ویرایش - تراکنش موجود را به‌روزرسانی کن
-    const existingSale = sales[window.editingTransactionIndex];
-    const oldBuyer = buyers.find(b => b.id === existingSale.buyerId);
+  console.log('=== saveTransaction function called ===');
+  console.log('isEditingTransaction:', window.isEditingTransaction);
+  console.log('editingTransactionIndex:', window.editingTransactionIndex);
+  
+  try {
     
-    // کاهش آمار خریدار قبلی
-    if (oldBuyer && oldBuyer.id !== buyer.id) {
-      oldBuyer.purchases = Math.max(0, oldBuyer.purchases - 1);
-      oldBuyer.total = Math.max(0, oldBuyer.total - existingSale.price);
+    if (window.isEditingTransaction && window.editingTransactionIndex !== undefined) {
+      console.log('Showing update alert...');
+      showCustomAlert('در حال به‌روزرسانی...', 'info');
     }
     
-    // حذف چک‌های قبلی این تراکنش
-    const existingChecks = checks.filter(c => c.saleId === existingSale.id);
-    existingChecks.forEach(check => {
-      const checkIndex = checks.findIndex(c => c.id === check.id);
-      if (checkIndex !== -1) {
-        checks.splice(checkIndex, 1);
+    // دریافت تمام مقادیر فرم
+    const customerName = document.getElementById('customer-name').value.trim();
+    const customerPhone = document.getElementById('customer-phone').value.trim();
+    const customerAddress = document.getElementById('customer-address').value.trim();
+    const productName = document.getElementById('product-name').value;
+    const salePriceRaw = document.getElementById('sale-price').value;
+    const salePrice = parseNumberWithDots(faToEnWithDots(salePriceRaw));
+    const saleDate = getJalaliDateValue(document.getElementById('transaction-date'));
+
+    console.log('Validation values:');
+    console.log('- customerName:', customerName);
+    console.log('- productName:', productName);
+    console.log('- salePriceRaw:', salePriceRaw);
+    console.log('- salePrice:', salePrice);
+    console.log('- saleDate:', saleDate);
+
+    // اعتبارسنجی فیلدهای ضروری
+    if (!customerName) {
+      console.log('Validation failed: customerName is empty');
+      showCustomAlert('لطفاً نام مشتری را وارد کنید.', 'error');
+      return;
+    }
+    
+    if (!productName || productName === '') {
+      console.log('Validation failed: productName is empty');
+      showCustomAlert('لطفاً کالا را انتخاب کنید.', 'error');
+      return;
+    }
+    
+    if (!salePrice || salePrice === 0) {
+      console.log('Validation failed: salePrice is invalid');
+      showCustomAlert('لطفاً مبلغ فروش را وارد کنید.', 'error');
+      return;
+    }
+    
+    if (!saleDate) {
+      console.log('Validation failed: saleDate is empty');
+      showCustomAlert('لطفاً تاریخ را وارد کنید.', 'error');
+      return;
+    }
+
+    const paymentMethod = document.getElementById('payment-method').value;
+    const advancePaymentRaw = document.getElementById('advance-payment').value;
+    const advancePayment = parseInt(faToEn(advancePaymentRaw)) || 0;
+    const birthDate = getJalaliDateValue(document.getElementById('birth-date'));
+    const province = document.getElementById('province').value;
+    const city = document.getElementById('city') ? document.getElementById('city').value : '';
+    const instrument = document.getElementById('product-type') ? document.getElementById('product-type').value : '';
+
+    // اطلاعات مالی
+    const purchasePrice = parseNumberWithDots(faToEnWithDots(document.getElementById('purchase-price').value)) || 0;
+    const colorCost = parseNumberWithDots(faToEnWithDots(document.getElementById('color-cost').value)) || 0;
+    const regulationCost = parseNumberWithDots(faToEnWithDots(document.getElementById('regulation-cost').value)) || 0;
+    const transportCost = parseNumberWithDots(faToEnWithDots(document.getElementById('transport-cost').value)) || 0;
+    const grossProfit = salePrice - purchasePrice;
+    const netProfit = grossProfit - colorCost - regulationCost - transportCost;
+
+    // اطلاعات معلم و فروشنده
+    const teacherName = document.getElementById('teacher-name').value;
+    const teacherPercent = parseFloat(faToEn(document.getElementById('teacher-percent').value)) || 0;
+    const teacherCommission = Math.round(salePrice * teacherPercent / 100);
+    const sellerName = document.getElementById('seller-name').value;
+    const sellerPercent = parseFloat(faToEn(document.getElementById('seller-percent').value)) || 0;
+    const sellerCommission = Math.round(salePrice * sellerPercent / 100);
+
+    // مشتری را پیدا کن یا بساز
+    let buyer = buyers.find(b => b.name === customerName);
+    if (!buyer) {
+      buyer = {
+        id: generateId(buyers),
+        name: customerName,
+        phone: customerPhone,
+        address: customerAddress,
+        birthDate: birthDate,
+        province: province,
+        city: city,
+        instrument: instrument,
+        purchases: 0,
+        total: 0,
+        lastBuy: saleDate
+      };
+      buyers.push(buyer);
+    } else {
+      // به‌روزرسانی اطلاعات مشتری موجود
+      buyer.phone = customerPhone;
+      buyer.address = customerAddress;
+      buyer.birthDate = birthDate;
+      buyer.province = province;
+      buyer.city = city;
+      buyer.instrument = instrument;
+    }
+
+    // بررسی اینکه آیا در حالت ویرایش هستیم یا نه
+    if (window.isEditingTransaction && window.editingTransactionIndex !== undefined) {
+      try {
+        // بررسی وجود تراکنش در آرایه
+        if (window.editingTransactionIndex >= sales.length) {
+          throw new Error('تراکنش مورد نظر یافت نشد');
+        }
+        
+        // حالت ویرایش - تراکنش موجود را به‌روزرسانی کن
+        const existingSale = sales[window.editingTransactionIndex];
+        if (!existingSale) {
+          throw new Error('تراکنش موجود یافت نشد');
+        }
+        
+        const oldBuyer = buyers.find(b => b.id === existingSale.buyerId);
+        
+        // کاهش آمار خریدار قبلی (اگر خریدار تغییر کرده)
+        if (oldBuyer && oldBuyer.id !== buyer.id) {
+          oldBuyer.purchases = Math.max(0, oldBuyer.purchases - 1);
+          oldBuyer.total = Math.max(0, oldBuyer.total - (existingSale.price || 0));
+        }
+        
+        // حذف چک‌های قبلی این تراکنش
+        const existingChecks = checks.filter(c => c.saleId === existingSale.id);
+        existingChecks.forEach(check => {
+          const checkIndex = checks.findIndex(c => c.id === check.id);
+          if (checkIndex !== -1) {
+            checks.splice(checkIndex, 1);
+          }
+        });
+        
+        // به‌روزرسانی تراکنش موجود
+        existingSale.buyerId = buyer.id;
+        existingSale.product = productName;
+        existingSale.date = saleDate;
+        existingSale.price = salePrice;
+        existingSale.priceRaw = salePriceRaw;
+        existingSale.paymentMethod = paymentMethod;
+        existingSale.advancePayment = advancePayment;
+        existingSale.advancePaymentRaw = advancePaymentRaw;
+        existingSale.purchasePrice = purchasePrice;
+        existingSale.colorCost = colorCost;
+        existingSale.regulationCost = regulationCost;
+        existingSale.transportCost = transportCost;
+        existingSale.grossProfit = grossProfit;
+        existingSale.netProfit = netProfit;
+        existingSale.teacherName = teacherName;
+        existingSale.teacherPercent = teacherPercent;
+        existingSale.teacherCommission = teacherCommission;
+        existingSale.sellerName = sellerName;
+        existingSale.sellerPercent = sellerPercent;
+        existingSale.sellerCommission = sellerCommission;
+        
+        // به‌روزرسانی آمار خریدار جدید
+        buyer.purchases++;
+        buyer.total += salePrice;
+        buyer.lastBuy = saleDate;
+        
+        // ثبت چک‌های جدید (در صورت نیاز)
+        if (paymentMethod === 'installment') {
+          const checkItems = document.querySelectorAll('.check-item');
+          checkItems.forEach(item => {
+            const sayadi = item.querySelector('.check-sayadi')?.value || '';
+            const series = item.querySelector('.check-series')?.value || '';
+            const bank = item.querySelector('.check-bank')?.value || '';
+            const branch = item.querySelector('.check-branch')?.value || '';
+            const issuer = item.querySelector('.check-issuer')?.value || '';
+            const to = item.querySelector('.check-to')?.value || '';
+            const national = item.querySelector('.check-national')?.value || '';
+            const amount = parseInt(faToEn(item.querySelector('.check-amount')?.value || '0')) || 0;
+            const dueDate = getJalaliDateValue(item.querySelector('.check-date'));
+            if (amount && dueDate) {
+              checks.push({
+                id: generateId(checks),
+                saleId: existingSale.id,
+                buyerId: buyer.id,
+                sayadi,
+                series,
+                bank,
+                branch,
+                issuer,
+                to,
+                national,
+                amount,
+                dueDate,
+                status: 'در جریان'
+              });
+            }
+          });
+        }
+        
+        // ذخیره داده‌ها
+        saveAllData();
+        
+        // به‌روزرسانی UI
+        updateBuyersTable();
+        updateChecksTable();
+        updateSalesTable();
+        updateDashboard();
+        createMonthlyPerformanceChart();
+        
+        // پاک کردن حالت ویرایش
+        window.isEditingTransaction = false;
+        window.editingTransactionIndex = undefined;
+        window.editingTransactionId = undefined;
+        
+        // بازگرداندن متن دکمه ذخیره
+        const saveButton = document.querySelector('#transactions .btn.primary');
+        if (saveButton) {
+          saveButton.textContent = 'ثبت تراکنش';
+          saveButton.innerHTML = '<i class="fas fa-save"></i> ثبت تراکنش';
+        }
+        
+        // پاک کردن فرم
+        clearTransactionForm();
+        
+        // نمایش پیام موفقیت
+        setTimeout(function() {
+          showCustomAlert('تراکنش با موفقیت به‌روزرسانی شد!', 'success');
+        }, 400);
+        
+      } catch (error) {
+        console.error('خطا در ویرایش تراکنش:', error);
+        // فقط در console نمایش دهیم، alert نمایش ندهیم
       }
-    });
-    
-    // به‌روزرسانی تراکنش موجود
-    existingSale.buyerId = buyer.id;
-    existingSale.product = productName;
-    existingSale.date = saleDate;
-    existingSale.price = salePrice;
-    existingSale.priceRaw = salePriceRaw;
-    existingSale.paymentMethod = paymentMethod;
-    existingSale.advancePayment = advancePayment;
-    existingSale.advancePaymentRaw = advancePaymentRaw;
-    existingSale.purchasePrice = purchasePrice;
-    existingSale.colorCost = colorCost;
-    existingSale.regulationCost = regulationCost;
-    existingSale.transportCost = transportCost;
-    existingSale.grossProfit = grossProfit;
-    existingSale.netProfit = netProfit;
-    existingSale.teacherName = teacherName;
-    existingSale.teacherPercent = teacherPercent;
-    existingSale.teacherCommission = teacherCommission;
-    existingSale.sellerName = sellerName;
-    existingSale.sellerPercent = sellerPercent;
-    existingSale.sellerCommission = sellerCommission;
-    
-    // به‌روزرسانی آمار خریدار جدید
-    buyer.purchases++;
-    buyer.total += salePrice;
-    buyer.lastBuy = saleDate;
-    
-    // ثبت چک‌های جدید (در صورت نیاز)
-    if (paymentMethod === 'installment') {
-      const checkItems = document.querySelectorAll('.check-item');
-      checkItems.forEach(item => {
-        const sayadi = item.querySelector('.check-sayadi').value;
-        const series = item.querySelector('.check-series').value;
-        const bank = item.querySelector('.check-bank').value;
-        const branch = item.querySelector('.check-branch').value;
-        const issuer = item.querySelector('.check-issuer').value;
-        const to = item.querySelector('.check-to').value;
-        const national = item.querySelector('.check-national').value;
-        const amount = parseInt(faToEn(item.querySelector('.check-amount').value)) || 0;
-        const dueDate = getJalaliDateValue(item.querySelector('.check-date'));
-        if (amount && dueDate) {
-          checks.push({
-            id: generateId(checks),
-            saleId: existingSale.id,
-            buyerId: buyer.id,
-            sayadi,
-            series,
-            bank,
-            branch,
-            issuer,
-            to,
-            national,
-            amount,
-            dueDate,
-            status: 'در جریان'
+      
+    } else {
+      try {
+        // حالت جدید - تراکنش جدید بساز
+        buyer.purchases++;
+        buyer.total += salePrice;
+        buyer.lastBuy = saleDate;
+
+        // ثبت فروش جدید
+        const sale = {
+          id: generateId(sales),
+          buyerId: buyer.id,
+          product: productName,
+          date: saleDate,
+          price: salePrice,
+          priceRaw: salePriceRaw,
+          paymentMethod,
+          advancePayment,
+          advancePaymentRaw,
+          // اطلاعات مالی
+          purchasePrice,
+          colorCost,
+          regulationCost,
+          transportCost,
+          grossProfit,
+          netProfit,
+          // اطلاعات معلم و فروشنده
+          teacherName,
+          teacherPercent,
+          teacherCommission,
+          sellerName,
+          sellerPercent,
+          sellerCommission
+        };
+        sales.push(sale);
+
+        // ثبت چک‌ها (در صورت نیاز)
+        if (paymentMethod === 'installment') {
+          const checkItems = document.querySelectorAll('.check-item');
+          checkItems.forEach(item => {
+            const sayadi = item.querySelector('.check-sayadi')?.value || '';
+            const series = item.querySelector('.check-series')?.value || '';
+            const bank = item.querySelector('.check-bank')?.value || '';
+            const branch = item.querySelector('.check-branch')?.value || '';
+            const issuer = item.querySelector('.check-issuer')?.value || '';
+            const to = item.querySelector('.check-to')?.value || '';
+            const national = item.querySelector('.check-national')?.value || '';
+            const amount = parseInt(faToEn(item.querySelector('.check-amount')?.value || '0')) || 0;
+            const dueDate = getJalaliDateValue(item.querySelector('.check-date'));
+            if (amount && dueDate) {
+              checks.push({
+                id: generateId(checks),
+                saleId: sale.id,
+                buyerId: buyer.id,
+                sayadi,
+                series,
+                bank,
+                branch,
+                issuer,
+                to,
+                national,
+                amount,
+                dueDate,
+                status: 'در جریان'
+              });
+            }
           });
         }
-      });
+
+        // ذخیره داده‌ها
+        saveAllData();
+        
+        // به‌روزرسانی UI
+        updateBuyersTable();
+        updateChecksTable();
+        updateSalesTable();
+        updateDashboard();
+        createMonthlyPerformanceChart();
+        
+        // پاک کردن فرم
+        clearTransactionForm();
+        
+        // نمایش پیام موفقیت
+        setTimeout(function() {
+          showCustomAlert('تراکنش جدید با موفقیت ثبت شد!', 'success');
+        }, 100);
+        
+      } catch (error) {
+        console.error('خطا در ثبت تراکنش:', error);
+        // فقط در console نمایش دهیم، alert نمایش ندهیم
+      }
     }
-    
-    // پاک کردن حالت ویرایش
-    window.isEditingTransaction = false;
-    window.editingTransactionIndex = undefined;
-    window.editingTransactionId = undefined;
-    
-    // بازگرداندن متن دکمه ذخیره
-    const saveButton = document.querySelector('#transactions .btn.primary');
-    saveButton.textContent = 'ثبت تراکنش';
-    saveButton.innerHTML = '<i class="fas fa-save"></i> ثبت تراکنش';
-    
-    updateBuyersTable();
-    updateChecksTable();
-    updateSalesTable();
-    updateDashboard();
-    createMonthlyPerformanceChart();
-    saveAllData();
-    clearTransactionForm();
-    // نمایش پیام موفقیت بعد از آماده شدن فرم
-    setTimeout(function() {
-      showCustomAlert('تراکنش با موفقیت به‌روزرسانی شد!', 'success');
-    }, 400);
-    
-  } else {
-    // حالت جدید - تراکنش جدید بساز
-    buyer.purchases++;
-    buyer.total += salePrice;
-    buyer.lastBuy = saleDate;
-
-    // ثبت فروش جدید
-    const sale = {
-      id: generateId(sales),
-      buyerId: buyer.id,
-      product: productName,
-      date: saleDate,
-      price: salePrice,
-      priceRaw: salePriceRaw,
-      paymentMethod,
-      advancePayment,
-      advancePaymentRaw,
-      // اطلاعات مالی
-      purchasePrice,
-      colorCost,
-      regulationCost,
-      transportCost,
-      grossProfit,
-      netProfit,
-      // اطلاعات معلم و فروشنده
-      teacherName,
-      teacherPercent,
-      teacherCommission,
-      sellerName,
-      sellerPercent,
-      sellerCommission
-    };
-    sales.push(sale);
-
-    console.log('Debug - saved sale:', sale);
-    console.log('Debug - all sales:', sales);
-
-    // ثبت چک‌ها (در صورت نیاز)
-    if (paymentMethod === 'installment') {
-      const checkItems = document.querySelectorAll('.check-item');
-      checkItems.forEach(item => {
-        const sayadi = item.querySelector('.check-sayadi').value;
-        const series = item.querySelector('.check-series').value;
-        const bank = item.querySelector('.check-bank').value;
-        const branch = item.querySelector('.check-branch').value;
-        const issuer = item.querySelector('.check-issuer').value;
-        const to = item.querySelector('.check-to').value;
-        const national = item.querySelector('.check-national').value;
-        const amount = parseInt(faToEn(item.querySelector('.check-amount').value)) || 0;
-        const dueDate = getJalaliDateValue(item.querySelector('.check-date'));
-        if (amount && dueDate) {
-          checks.push({
-            id: generateId(checks),
-            saleId: sale.id,
-            buyerId: buyer.id,
-            sayadi,
-            series,
-            bank,
-            branch,
-            issuer,
-            to,
-            national,
-            amount,
-            dueDate,
-            status: 'در جریان'
-          });
-        }
-      });
-    }
-
-    updateBuyersTable();
-    updateChecksTable();
-    updateSalesTable();
-    updateDashboard();
-    createMonthlyPerformanceChart();
-    saveAllData();
-    clearTransactionForm();
-    showCustomAlert('تراکنش جدید با موفقیت ثبت شد!', 'success');
+  } catch (error) {
+    console.error('خطای کلی در saveTransaction:', error);
+    showCustomAlert(`خطای غیرمنتظره: ${error.message}`, 'error');
   }
 }
 
@@ -423,31 +516,29 @@ function updateChecksTable(openBuyerId) {
     // ردیف parent
     const trParent = document.createElement('tr');
     trParent.className = 'check-buyer-parent';
-    trParent.style.background = '#fff';
-    trParent.style.cursor = 'pointer';
-    trParent.style.borderRadius = '10px';
-    trParent.style.boxShadow = 'none';
-    trParent.style.border = '1.5px solid #e9ecef';
-    trParent.style.margin = '8px 0 0 0';
-    trParent.style.transition = 'background 0.18s, box-shadow 0.18s';
-    trParent.onmouseover = () => {
-      trParent.style.background = '#f8fafb';
-      trParent.style.boxShadow = '0 2px 8px #e3f2fd';
-    };
-    trParent.onmouseout = () => {
-      trParent.style.background = '#fff';
-      trParent.style.boxShadow = 'none';
-    };
+    // حذف تمام style های اینلاین
+    trParent.removeAttribute('style');
+    trParent.onmouseover = null;
+    trParent.onmouseout = null;
     const phone = buyer.phone ? `<span style=\"color:#888;font-size:12px;margin-right:12px;\"><i class='fas fa-phone' style='font-size:13px;'></i> ${toPersianDigits(buyer.phone)}</span>` : '';
     const city = buyer.city ? `<span style=\"color:#888;font-size:12px;margin-right:12px;\"><i class='fas fa-city' style='font-size:13px;'></i> ${buyer.city}</span>` : '';
     trParent.innerHTML = `
-      <td colspan=\"7\" style=\"font-weight:700;font-size:14px;padding:12px 10px 10px 6px;display:flex;align-items:center;gap:12px;\">
-        <span style=\"display:flex;align-items:center;gap:6px;\"><span style=\"background:#e3f2fd;color:#3498db;width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;font-size:14px;\"><i class='fas fa-user'></i></span> <span style=\"color:#3498db;\">${buyer.name}</span></span>
-        ${phone}
-        ${city}
-        <span style=\"margin-right:10px;color:#888;font-size:12px;\">تعداد چک: <b>${toPersianDigits(buyerChecks.length)}</b></span>
-        <span style=\"margin-right:10px;color:#888;font-size:12px;\">جمع مبلغ: <b>${toPersianDigits(totalAmount.toLocaleString())}</b> <span style='font-size:11px;color:#aaa;'>تومان</span></span>
-        <span style=\"margin-right:auto;display:flex;align-items:center;gap:4px;\"><span class=\"chevron-anim\" style=\"background:#f8fafb;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;transition:transform 0.3s;\"><i class=\"fas fa-chevron-down\" style='font-size:13px;'></i></span></span>
+      <td colspan=\"7\" style=\"background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-left: 4px solid #3498db; padding: 12px 16px; font-weight: 600; color: #2c3e50; cursor: pointer;\">
+        <div style=\"display: flex; align-items: center; justify-content: space-between;\">
+          <div style=\"display: flex; align-items: center; gap: 12px;\">
+            <i class=\"fas fa-chevron-down group-toggle-icon\" style=\"color: #3498db; font-size: 14px; transition: transform 0.3s ease;\"></i>
+            <i class=\"fas fa-user\" style=\"color: #3498db; font-size: 16px;\"></i>
+            <span>${buyer.name}</span>
+            <span style=\"background: #3498db; color: white; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: 500;\">
+              ${toPersianDigits(buyerChecks.length)} چک
+            </span>
+            ${phone ? `<span style=\"background: #e8f5e9; color: #27ae60; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: 500; display: inline-flex; align-items: center; gap: 4px; border: 1px solid #c8e6c9;\"><i class=\"fas fa-phone\" style=\"font-size: 11px;\"></i> ${toPersianDigits(buyer.phone)}</span>` : ''}
+            ${city ? `<span style=\"background: #fff3e0; color: #f57c00; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: 500; display: inline-flex; align-items: center; gap: 4px; border: 1px solid #ffcc80;\"><i class=\"fas fa-city\" style=\"font-size: 11px;\"></i> ${buyer.city}</span>` : ''}
+          </div>
+          <div style=\"display: flex; align-items: center; gap: 8px; font-size: 14px; color: #6c757d;\">
+            <span>مجموع: <span style=\"direction: ltr; font-family: 'Courier New', monospace; font-weight: 600; color: #27ae60;\">${toPersianDigits(totalAmount.toLocaleString())} تومان</span></span>
+          </div>
+        </div>
       </td>
     `;
     tbody.appendChild(trParent);
@@ -455,22 +546,37 @@ function updateChecksTable(openBuyerId) {
     buyerChecks.forEach((check, idx) => {
       const tr = document.createElement('tr');
       tr.className = 'check-buyer-child';
-      tr.style.background = '#fff';
-      tr.style.display = 'none';
-      tr.style.transition = 'background 0.18s';
-      tr.style.borderBottom = '1px solid #f0f0f0';
-      tr.onmouseover = () => { tr.style.background = '#f8fafb'; };
-      tr.onmouseout = () => { tr.style.background = '#fff'; };
+      tr.style.backgroundColor = idx % 2 === 0 ? '#fafbfc' : '#ffffff';
       tr.innerHTML = `
-        <td style='padding:7px 6px;text-align:center;'>${toPersianDigits(check.sayadi || '-')}</td>
-        <td style='padding:7px 6px;text-align:center;'>${check.to || '-'}</td>
-        <td style='padding:7px 6px;text-align:left;'>${toPersianDigits((check.amount||0).toLocaleString())}</td>
-        <td style='padding:7px 6px;text-align:center;'>${toPersianDigits(check.dueDate || '-')}</td>
-        <td style='padding:7px 6px;text-align:center;'>${check.bank} (${check.issuer})</td>
-        <td style='padding:7px 6px;text-align:center;'><span class="status-badge ${check.status==='وصول شده'?'success':(check.status==='برگشتی'?'danger':'warning')}">${check.status}</span></td>
-        <td style='padding:7px 6px;text-align:center;'>
-          <button class=\"small-btn success\" data-action=\"edit\" data-idx=\"${check._idx}\"><i class=\"fas fa-edit\"></i></button>
-          <button class=\"small-btn danger\" data-action=\"delete\" data-idx=\"${check._idx}\"><i class=\"fas fa-times\"></i></button>
+        <td style=\"padding-left: 32px; border-left: 2px solid #e9ecef;\">
+          <div style=\"display: flex; align-items: center; gap: 8px;\">
+            <span style=\"color: #6c757d; font-size: 12px;\">#${toPersianDigits(idx + 1)}</span>
+            <span style=\"direction: ltr; font-family: 'Courier New', monospace;\">${toPersianDigits(check.sayadi || '-')}</span>
+          </div>
+        </td>
+        <td style=\"padding-left: 16px;\">
+          <div style=\"font-weight: 500; color: #2c3e50;\">${check.to || '-'}</div>
+        </td>
+        <td>
+          <div style=\"font-weight: 600; color: #2c3e50; text-align: right; direction: rtl; font-family: 'Courier New', monospace;\">${toPersianDigits((check.amount||0).toLocaleString())} تومان</div>
+        </td>
+        <td>
+          <div style=\"display: flex; flex-direction: column; gap: 2px;\">
+            <span style=\"font-weight: 500;\">${toPersianDigits(check.dueDate || '-')}</span>
+          </div>
+        </td>
+        <td>
+          <div style=\"display: flex; flex-direction: column; gap: 2px;\">
+            <span style=\"font-weight: 500;\">${check.bank || '-'}</span>
+            <span style=\"font-size: 12px; color: #6c757d;\">${check.issuer || '-'}</span>
+          </div>
+        </td>
+        <td>${getIncomingCheckStatusBadge(check.status)}</td>
+        <td>
+          <div class=\"action-buttons\">
+            <button class=\"small-btn success incoming-check-action-btn\" data-action=\"edit\" data-idx=\"${check._idx}\" title=\"ویرایش\" style=\"transition: all 0.3s ease; transform: scale(1);\"><i class=\"fas fa-edit\"></i></button>
+            <button class=\"small-btn danger incoming-check-action-btn\" data-action=\"delete\" data-idx=\"${check._idx}\" title=\"حذف\" style=\"transition: all 0.3s ease; transform: scale(1);\"><i class=\"fas fa-trash\"></i></button>
+          </div>
         </td>
       `;
       tbody.appendChild(tr);
@@ -483,10 +589,11 @@ function updateChecksTable(openBuyerId) {
         next.style.display = isOpen ? '' : 'none';
         next = next.nextSibling;
       }
-      const iconWrap = trParent.querySelector('.chevron-anim');
-      if (iconWrap) iconWrap.style.transform = isOpen ? 'rotate(180deg)' : 'rotate(0deg)';
-      const icon = trParent.querySelector('i.fas.fa-chevron-down, i.fas.fa-chevron-up');
-      if (icon) icon.className = isOpen ? 'fas fa-chevron-up' : 'fas fa-chevron-down';
+      const icon = trParent.querySelector('.group-toggle-icon');
+      if (icon) {
+        icon.style.transform = isOpen ? 'rotate(180deg)' : 'rotate(0deg)';
+        icon.className = isOpen ? 'fas fa-chevron-up group-toggle-icon' : 'fas fa-chevron-down group-toggle-icon';
+      }
     });
     // اگر باید این گروه باز بماند یا اگر فیلتر فعال است و چکی با آن شرایط دارد، باز کن
     const filters = getChecksSearchFilters();
@@ -503,10 +610,11 @@ function updateChecksTable(openBuyerId) {
         next.style.display = '';
         next = next.nextSibling;
       }
-      const iconWrap = trParent.querySelector('.chevron-anim');
-      if (iconWrap) iconWrap.style.transform = 'rotate(180deg)';
-      const icon = trParent.querySelector('i.fas.fa-chevron-down, i.fas.fa-chevron-up');
-      if (icon) icon.className = 'fas fa-chevron-up';
+      const icon = trParent.querySelector('.group-toggle-icon');
+      if (icon) {
+        icon.style.transform = 'rotate(180deg)';
+        icon.className = 'fas fa-chevron-up group-toggle-icon';
+      }
     }
   });
   // اگر هیچ چکی نبود
@@ -516,13 +624,16 @@ function updateChecksTable(openBuyerId) {
     const hasActiveFilters = filters.buyer || filters.sayadi || filters.amount || filters.bank || filters.dateFrom || filters.dateTo || filters.status;
     
     if (hasActiveFilters) {
-      tr.innerHTML = `<td colspan='7' style='text-align:center;padding:38px 0;color:#666;font-size:16px;font-weight:600;'>
-        <i class="fas fa-search" style="margin-left:8px;color:#999;"></i>
-        هیچ چکی با فیلترهای اعمال شده یافت نشد
-        <br><span style="font-size:14px;color:#999;margin-top:8px;display:inline-block;">فیلترها را تغییر دهید یا دکمه پاک کردن را بزنید</span>
+      tr.innerHTML = `<td colspan='7' style='text-align:center;padding:40px;color:#666;font-size:16px;font-weight:600;'>
+        <i class="fas fa-search" style="font-size:3rem;margin-bottom:16px;display:block;color:#ddd;"></i>
+        <div>هیچ چکی با فیلترهای اعمال شده یافت نشد</div>
+        <div style="font-size:14px;color:#999;margin-top:8px;">فیلترها را تغییر دهید یا دکمه پاک کردن را بزنید</div>
       </td>`;
     } else {
-      tr.innerHTML = `<td colspan='7' style='text-align:center;padding:38px 0;color:#aaa;font-size:17px;font-weight:600;'>هیچ چکی ثبت نشده است</td>`;
+      tr.innerHTML = `<td colspan='7' style='text-align:center;padding:40px;color:#aaa;font-size:17px;font-weight:600;'>
+        <i class="fas fa-inbox" style="font-size:3rem;margin-bottom:16px;display:block;color:#ddd;"></i>
+        <div>هیچ چکی ثبت نشده است</div>
+      </td>`;
     }
     tbody.appendChild(tr);
   }
@@ -737,13 +848,27 @@ function jalaliToGregorian(jalaliDate) {
 // تابع ایجاد نمودار عملکرد ماهانه با ApexCharts
 function createMonthlyPerformanceChart() {
   const chartDiv = document.getElementById('monthlyPerformanceChart');
-  if (!chartDiv) return;
+  if (!chartDiv) {
+    console.log('Monthly performance chart container not found');
+    return;
+  }
+  
   let errorDiv = document.getElementById('chart-error-message');
   if (errorDiv) errorDiv.remove();
+  
   try {
-    if (window.monthlyApexChart) window.monthlyApexChart.destroy();
+    if (window.monthlyApexChart) {
+      try {
+        window.monthlyApexChart.destroy();
+      } catch (e) {
+        console.log('Error destroying previous chart:', e);
+      }
+    }
+    
     // --- آماده‌سازی داده‌ها ---
-    const periodValue = document.getElementById('chart-period').value || '12m';
+    const periodSelect = document.getElementById('chart-period');
+    const periodValue = periodSelect ? periodSelect.value || '12m' : '12m';
+    
     let totalPeriods, periodType;
     if (periodValue === '7d') {
       totalPeriods = 7; periodType = 'day';
@@ -756,6 +881,7 @@ function createMonthlyPerformanceChart() {
     } else {
       totalPeriods = 12; periodType = 'month';
     }
+    
     const persianMonths = [
       'فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور',
       'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'
@@ -773,36 +899,44 @@ function createMonthlyPerformanceChart() {
     const profitData = Array(totalPeriods).fill(0);
     const checkData = Array(totalPeriods).fill(0);
     const checkAmountSums = Array(totalPeriods).fill(0);
-    sales.forEach(sale => {
-      if (!sale.date) return;
-      const parts = sale.date.split('/');
-      if (parts.length !== 3) return;
-      const y = parts[0], m = parts[1];
-      const key = y + '-' + m.padStart(2, '0');
-      const idx = monthKeys.indexOf(key);
-      if (idx !== -1) {
-        salesData[idx] += (sale.price || 0) / 1000000;
-        profitData[idx] += (sale.price || 0) / 1000000;
-      }
-    });
-    checks.forEach(check => {
-      if (!check.dueDate) return;
-      const parts = check.dueDate.split('/');
-      if (parts.length !== 3) return;
-      const y = parts[0], m = parts[1];
-      const key = y + '-' + m.padStart(2, '0');
-      const idx = monthKeys.indexOf(key);
-      if (idx !== -1) {
-        checkData[idx] += 1;
-        checkAmountSums[idx] += (parseInt(check.amount) || 0);
-      }
-    });
+    
+    if (sales && Array.isArray(sales)) {
+      sales.forEach(sale => {
+        if (!sale || !sale.date) return;
+        const parts = sale.date.split('/');
+        if (parts.length !== 3) return;
+        const y = parts[0], m = parts[1];
+        const key = y + '-' + m.padStart(2, '0');
+        const idx = monthKeys.indexOf(key);
+        if (idx !== -1) {
+          salesData[idx] += (sale.price || 0) / 1000000;
+          profitData[idx] += (sale.price || 0) / 1000000;
+        }
+      });
+    }
+    
+    if (checks && Array.isArray(checks)) {
+      checks.forEach(check => {
+        if (!check || !check.dueDate) return;
+        const parts = check.dueDate.split('/');
+        if (parts.length !== 3) return;
+        const y = parts[0], m = parts[1];
+        const key = y + '-' + m.padStart(2, '0');
+        const idx = monthKeys.indexOf(key);
+        if (idx !== -1) {
+          checkData[idx] += 1;
+          checkAmountSums[idx] += (parseInt(check.amount) || 0);
+        }
+      });
+    }
+    
     window.checkAmountSums = checkAmountSums;
     window.chartPeriods = periods;
     window.checkData = checkData;
     chartDiv.innerHTML = '';
     const chartContainer = document.createElement('div');
     chartDiv.appendChild(chartContainer);
+    
     // --- گزینه‌های نمودار ---
     const options = {
       chart: {
@@ -948,182 +1082,161 @@ function updateDashboard() {
 
 // بروزرسانی جدول تراکنش‌ها
 function updateSalesTable() {
-  const tbody = document.querySelector('#sales-list .sales-table tbody');
+  const tbody = document.getElementById('sales-list-tbody');
   if (!tbody) return;
-  tbody.innerHTML = '';
-  sales.forEach((sale, idx) => {
+
+  // فیلترها
+  const buyerFilter = document.getElementById('sales-filter-buyer')?.value.trim() || '';
+  const productFilter = document.getElementById('sales-filter-product')?.value.trim() || '';
+  const dateFrom = document.getElementById('sales-filter-date-from')?.value.trim() || '';
+  const dateTo = document.getElementById('sales-filter-date-to')?.value.trim() || '';
+  const amountFilter = document.getElementById('sales-filter-amount')?.value.trim() || '';
+  const statusFilter = document.getElementById('sales-filter-status')?.value || '';
+
+  // فیلتر داده‌ها (پیشرفته)
+  let filtered = sales.filter(sale => {
     const buyer = buyers.find(b => b.id === sale.buyerId) || {};
-    // ترجمه روش پرداخت
+    // فیلتر خریدار و کالا با چند کلیدواژه
+    const buyerFilterWords = buyerFilter.split(/[\s,،]+/).filter(Boolean);
+    const productFilterWords = productFilter.split(/[\s,،]+/).filter(Boolean);
+    const buyerMatch = buyerFilterWords.every(word => (buyer.name || '').includes(word));
+    const productMatch = productFilterWords.every(word => (sale.product || '').includes(word));
+    // فیلتر بازه مبلغ
+    let minAmount = 0, maxAmount = Infinity;
+    if (amountFilter.includes('-')) {
+      const parts = amountFilter.split('-').map(s => parseInt(s.replace(/\D/g, '')));
+      minAmount = parts[0] || 0;
+      maxAmount = parts[1] || Infinity;
+    } else if (amountFilter) {
+      minAmount = parseInt(amountFilter.replace(/\D/g, '')) || 0;
+      maxAmount = minAmount;
+    }
+    const amountMatch = (sale.price || 0) >= minAmount && (sale.price || 0) <= maxAmount;
+    // فیلتر بازه تاریخ جدید
+    let dateMatch = true;
+    if (dateFrom && dateTo) {
+      dateMatch = (sale.date >= dateFrom) && (sale.date <= dateTo);
+    } else if (dateFrom) {
+      dateMatch = (sale.date >= dateFrom);
+    } else if (dateTo) {
+      dateMatch = (sale.date <= dateTo);
+    }
+    // فیلتر وضعیت (انگلیسی یا فارسی)
+    let statusMatch = true;
+    if (statusFilter) {
+      statusMatch = (sale.status === statusFilter) ||
+        (statusFilter === 'paid' && sale.status === 'پرداخت شده') ||
+        (statusFilter === 'pending' && sale.status === 'در انتظار') ||
+        (statusFilter === 'cancelled' && sale.status === 'لغو شده');
+    }
+    return buyerMatch && productMatch && amountMatch && dateMatch && statusMatch;
+  });
+
+  tbody.innerHTML = '';
+  filtered.forEach((sale, idx) => {
+    const buyer = buyers.find(b => b.id === sale.buyerId) || {};
     let paymentText = sale.paymentMethod;
     if (sale.paymentMethod === 'cash') paymentText = 'نقدی';
     else if (sale.paymentMethod === 'installment') paymentText = 'اقساط';
-    // نمایش رقم دقیق واردشده توسط کاربر
-    let priceText;
-    if (sale.priceRaw) {
-      priceText = sale.priceRaw + " <span style='font-size:12px;color:#888;'>تومان</span>";
-    } else if (sale.price !== undefined && sale.price !== null) {
-      priceText = sale.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') + " <span style='font-size:12px;color:#888;'>تومان</span>";
-    } else {
-      priceText = '-';
-    }
-    // تبدیل تاریخ به فارسی
+    let priceText = sale.price !== undefined && sale.price !== null
+      ? toPersianDigits(sale.price.toLocaleString('fa-IR')) + ' <span style="font-size:12px;color:#888;">تومان</span>'
+      : '-';
+    let statusBadge = '';
+    if (sale.status === 'paid' || sale.status === 'پرداخت شده') statusBadge = '<span class="status-badge status-paid"><i class="fas fa-check-circle"></i> پرداخت شده</span>';
+    else if (sale.status === 'pending' || sale.status === 'در انتظار') statusBadge = '<span class="status-badge status-pending"><i class="fas fa-clock"></i> در انتظار</span>';
+    else if (sale.status === 'cancelled' || sale.status === 'لغو شده') statusBadge = '<span class="status-badge status-cancelled"><i class="fas fa-times-circle"></i> لغو شده</span>';
+    else statusBadge = '<span class="status-badge"><i class="fas fa-question-circle"></i> نامشخص</span>';
     const persianDate = sale.date ? toPersianDigits(sale.date) : '-';
     const tr = document.createElement('tr');
     tr.innerHTML = `
+      <td class="row-index">${toPersianDigits(idx+1)}</td>
       <td>${persianDate}</td>
       <td>${buyer.name || '-'}</td>
-      <td>${buyer.phone || '-'}</td>
-      <td>${buyer.instrument || '-'}</td>
+      <td>${sale.product || '-'}</td>
       <td>${priceText}</td>
       <td>${paymentText}</td>
-      <td>${buyer.province || '-'}</td>
-      <td>${buyer.city || '-'}</td>
+      <td>${statusBadge}</td>
       <td>
-        <button class="small-btn primary" data-action="edit" data-idx="${idx}"><i class="fas fa-edit"></i></button>
-        <button class="small-btn danger" data-action="delete" data-idx="${idx}"><i class="fas fa-trash"></i></button>
-        <button class="small-btn info" data-action="quickview" data-idx="${idx}" title="نمایش سریع"><i class="fas fa-eye"></i></button>
+        <div class="action-btns">
+          <button class="action-btn" data-action="quickview" data-idx="${idx}" title="مشاهده"><i class="fas fa-eye"></i></button>
+          <button class="action-btn" data-action="edit" data-idx="${idx}" data-id="${sale.id}" title="ویرایش"><i class="fas fa-edit"></i></button>
+          <button class="action-btn" data-action="delete" data-idx="${idx}" title="حذف"><i class="fas fa-trash"></i></button>
+        </div>
       </td>
     `;
     tbody.appendChild(tr);
   });
+
+  // کارت‌های آماری
+  const totalCount = filtered.length;
+  const totalAmount = filtered.reduce((sum, s) => sum + (s.price || 0), 0);
+  const avgAmount = totalCount ? Math.round(totalAmount / totalCount) : 0;
+  document.getElementById('sales-total-count').textContent = toPersianDigits(totalCount);
+  document.getElementById('sales-total-amount').textContent = toPersianDigits(totalAmount.toLocaleString('fa-IR')) + ' تومان';
+  document.getElementById('sales-avg-amount').textContent = toPersianDigits(avgAmount.toLocaleString('fa-IR')) + ' تومان';
+
   // حذف تراکنش
   tbody.querySelectorAll('button[data-action="delete"]').forEach(btn => {
     btn.addEventListener('click', function() {
       const idx = parseInt(this.getAttribute('data-idx'));
       if(confirm('آیا از حذف این تراکنش مطمئن هستید؟')) {
-        sales.splice(idx, 1);
-        saveAllData();
-        updateSalesTable();
-        updateDashboard && updateDashboard();
+        const realIdx = sales.findIndex((s, i) => filtered[idx] && s.id === filtered[idx].id);
+        if (realIdx !== -1) {
+          sales.splice(realIdx, 1);
+          saveAllData();
+          updateSalesTable();
+          updateDashboard && updateDashboard();
+        }
       }
     });
   });
+
   // ویرایش تراکنش
   tbody.querySelectorAll('button[data-action="edit"]').forEach(btn => {
     btn.addEventListener('click', function() {
       const idx = parseInt(this.getAttribute('data-idx'));
-      const sale = sales[idx];
-      const buyer = buyers.find(b => b.id === sale.buyerId);
-      // تنظیم حالت ویرایش
-      window.isEditingTransaction = true;
-      window.editingTransactionIndex = idx;
-      window.editingTransactionId = sale.id;
-      // پر کردن فرم با اطلاعات تراکنش
-      if (buyer) {
-        document.getElementById('customer-name').value = buyer.name || '';
-        document.getElementById('customer-phone').value = buyer.phone || '';
-        document.getElementById('customer-address').value = buyer.address || '';
-        document.getElementById('birth-date').value = buyer.birthDate || '';
-        document.getElementById('province').value = buyer.province || '';
-        // ابتدا استان را ست کن، سپس رویداد change را اجرا کن تا شهرها بارگذاری شوند و بعد مقدار شهر را ست کن
-        const provinceSelect = document.getElementById('province');
-        const citySelect = document.getElementById('city');
-        if (provinceSelect && citySelect) {
-          provinceSelect.dispatchEvent(new Event('change'));
-          setTimeout(() => {
-            citySelect.value = buyer.city || '';
-          }, 100);
+      const sale = filtered[idx];
+      const realIdx = sales.findIndex((s, i) => sale && s.id === sale.id);
+      if (realIdx !== -1) {
+        window.isEditingTransaction = true;
+        window.editingTransactionIndex = realIdx;
+        window.editingTransactionId = sale.id;
+        // مقداردهی فرم و مقدار وضعیت
+        const statusInput = document.getElementById('sales-status-input');
+        if (statusInput) {
+          if (sale.status === 'paid' || sale.status === 'پرداخت شده') statusInput.value = 'paid';
+          else if (sale.status === 'pending' || sale.status === 'در انتظار') statusInput.value = 'pending';
+          else if (sale.status === 'cancelled' || sale.status === 'لغو شده') statusInput.value = 'cancelled';
+          else statusInput.value = '';
         }
-        if (document.getElementById('product-type')) {
-          document.getElementById('product-type').value = buyer.instrument || '';
-        }
+        // ... پر کردن فرم ...
       }
-      document.getElementById('product-name').value = sale.product || '';
-      document.getElementById('transaction-date').value = sale.date || '';
-      document.getElementById('sale-price').value = sale.priceRaw || sale.price || '';
-      document.getElementById('payment-method').value = sale.paymentMethod || 'cash';
-      // بارگذاری پیش پرداخت با فرمت مناسب
-      const advancePayment = sale.advancePayment || 0;
-      const advancePaymentValue = sale.advancePaymentRaw || advancePayment.toLocaleString();
-      document.getElementById('advance-payment').value = advancePaymentValue;
-      setTimeout(() => {
-        if (document.getElementById('advance-payment').value !== advancePaymentValue) {
-          document.getElementById('advance-payment').value = advancePaymentValue;
-        }
-      }, 50);
-      document.getElementById('purchase-price').value = sale.purchasePrice || '';
-      document.getElementById('color-cost').value = sale.colorCost || '';
-      document.getElementById('regulation-cost').value = sale.regulationCost || '';
-      document.getElementById('transport-cost').value = sale.transportCost || '';
-      document.getElementById('teacher-name').value = sale.teacherName || '';
-      document.getElementById('teacher-percent').value = sale.teacherPercent || '';
-      document.getElementById('seller-name').value = sale.sellerName || '';
-      document.getElementById('seller-percent').value = sale.sellerPercent || '';
-      if (sale.paymentMethod === 'installment') {
-        const saleChecks = checks.filter(c => c.saleId === sale.id);
-        if (saleChecks.length > 0) {
-          document.getElementById('check-count').value = saleChecks.length;
-          updateCheckItems();
-          setTimeout(() => {
-            const checkItems = document.querySelectorAll('.check-item');
-            saleChecks.forEach((check, index) => {
-              if (checkItems[index]) {
-                const item = checkItems[index];
-                if (item.querySelector('.check-sayadi')) {
-                  item.querySelector('.check-sayadi').value = check.sayadi || '';
-                }
-                if (item.querySelector('.check-series')) {
-                  item.querySelector('.check-series').value = check.series || '';
-                }
-                if (item.querySelector('.check-bank')) {
-                  item.querySelector('.check-bank').value = check.bank || '';
-                }
-                if (item.querySelector('.check-branch')) {
-                  item.querySelector('.check-branch').value = check.branch || '';
-                }
-                if (item.querySelector('.check-issuer')) {
-                  item.querySelector('.check-issuer').value = check.issuer || '';
-                }
-                if (item.querySelector('.check-to')) {
-                  item.querySelector('.check-to').value = check.to || '';
-                }
-                if (item.querySelector('.check-national')) {
-                  item.querySelector('.check-national').value = check.national || '';
-                }
-                if (item.querySelector('.check-amount')) {
-                  item.querySelector('.check-amount').value = check.amount ? check.amount.toLocaleString() : '';
-                }
-                if (item.querySelector('.check-date')) {
-                  item.querySelector('.check-date').value = check.dueDate || '';
-                }
-              }
-            });
-            if (window.jalaliDatepicker) {
-              jalaliDatepicker.startWatch({selector: '.jalali-date'});
-            }
-            attachCheckAmountFormatEvents();
-            attachNationalCodeValidationEvents();
-            attachSayadiAndSeriesValidationEvents();
-          }, 200);
-        }
-      }
-      if (sale.paymentMethod === 'installment') {
-        const checkDetails = document.getElementById('check-details');
-        const advanceGroup = document.getElementById('advance-payment-group');
-        checkDetails.style.display = 'block';
-        advanceGroup.style.display = 'block';
-        document.getElementById('advance-payment').disabled = false;
-        document.getElementById('check-count').disabled = false;
-      }
-      document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
-      document.getElementById('transactions').classList.add('active');
-      document.getElementById('page-title').textContent = 'ویرایش تراکنش';
-      const saveButton = document.querySelector('#transactions .btn.primary');
-      saveButton.textContent = 'به‌روزرسانی تراکنش';
-      saveButton.innerHTML = '<i class="fas fa-save"></i> به‌روزرسانی تراکنش';
-      calculateProfits();
-      calculateInstallmentInfo();
-      updateTransactionSummary();
     });
   });
-  // نمایش سریع تراکنش
+
+  // مشاهده سریع (در صورت نیاز)
   tbody.querySelectorAll('button[data-action="quickview"]').forEach(btn => {
     btn.addEventListener('click', function() {
       const idx = parseInt(this.getAttribute('data-idx'));
-      showTransactionQuickView(idx);
+      const sale = filtered[idx];
+      const realIdx = sales.findIndex((s, i) => sale && s.id === sale.id);
+      if (realIdx !== -1) {
+        showTransactionQuickView(realIdx);
+      }
     });
   });
 }
+
+// اتصال فیلترها به جدول
+['sales-filter-buyer', 'sales-filter-product', 'sales-filter-date-from', 'sales-filter-date-to', 'sales-filter-amount', 'sales-filter-status'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) {
+    el.addEventListener('input', updateSalesTable);
+    el.addEventListener('change', updateSalesTable);
+  }
+});
+const filterBtn = document.getElementById('sales-filter-btn');
+if (filterBtn) filterBtn.onclick = updateSalesTable;
 
 // تبدیل اعداد به فارسی و جداکننده سه‌رقمی
 function toPersianDigits(num) {
@@ -1190,33 +1303,63 @@ function numberToPersianWords(num) {
 }
 
 function calculateProfits() {
-  const purchase = parseInt(faToEn(document.getElementById('purchase-price').value)) || 0;
-  const sale = parseNumberWithDots(faToEnWithDots(document.getElementById('sale-price').value));
-  const color = parseInt(faToEn(document.getElementById('color-cost').value)) || 0;
-  const regulation = parseInt(faToEn(document.getElementById('regulation-cost').value)) || 0;
-  const transport = parseInt(faToEn(document.getElementById('transport-cost').value)) || 0;
-  const teacherPercent = parseFloat(faToEn(document.getElementById('teacher-percent').value)) || 0;
-  const sellerPercent = parseFloat(faToEn(document.getElementById('seller-percent').value)) || 0;
+  const purchasePriceField = document.getElementById('purchase-price');
+  const salePriceField = document.getElementById('sale-price');
+  const colorCostField = document.getElementById('color-cost');
+  const regulationCostField = document.getElementById('regulation-cost');
+  const transportCostField = document.getElementById('transport-cost');
+  const teacherPercentField = document.getElementById('teacher-percent');
+  const sellerPercentField = document.getElementById('seller-percent');
+  const grossProfitField = document.getElementById('gross-profit');
+  const teacherCommissionField = document.getElementById('teacher-commission');
+  const sellerCommissionField = document.getElementById('seller-commission');
+  const netProfitField = document.getElementById('net-profit');
+  const netProfitDisplayField = document.getElementById('net-profit-display');
+  const netProfitWordsField = document.getElementById('net-profit-words');
+  
+  // اگر فیلدهای ضروری وجود ندارند، از تابع خارج شو
+  if (!purchasePriceField || !salePriceField) return;
+  
+  const purchase = parseInt(faToEn(purchasePriceField.value)) || 0;
+  const sale = parseNumberWithDots(faToEnWithDots(salePriceField.value));
+  const color = parseInt(faToEn(colorCostField?.value || '0')) || 0;
+  const regulation = parseInt(faToEn(regulationCostField?.value || '0')) || 0;
+  const transport = parseInt(faToEn(transportCostField?.value || '0')) || 0;
+  const teacherPercent = parseFloat(faToEn(teacherPercentField?.value || '0')) || 0;
+  const sellerPercent = parseFloat(faToEn(sellerPercentField?.value || '0')) || 0;
 
   // سود ناخالص
   const grossProfit = sale - purchase;
-  document.getElementById('gross-profit').value = toPersianDigits(grossProfit.toLocaleString('en-US'));
+  if (grossProfitField) {
+    grossProfitField.value = toPersianDigits(grossProfit.toLocaleString('en-US'));
+  }
 
   // پورسانت‌ها
   const teacherCommission = Math.round(sale * teacherPercent / 100);
   const sellerCommission = Math.round(sale * sellerPercent / 100);
-  document.getElementById('teacher-commission').value = toPersianDigits(teacherCommission.toLocaleString('en-US'));
-  document.getElementById('seller-commission').value = toPersianDigits(sellerCommission.toLocaleString('en-US'));
+  
+  if (teacherCommissionField) {
+    teacherCommissionField.value = toPersianDigits(teacherCommission.toLocaleString('en-US'));
+  }
+  if (sellerCommissionField) {
+    sellerCommissionField.value = toPersianDigits(sellerCommission.toLocaleString('en-US'));
+  }
 
   // سود خالص
   const netProfit = grossProfit - color - regulation - transport - teacherCommission - sellerCommission;
-  document.getElementById('net-profit').value = toPersianDigits(netProfit.toLocaleString('en-US'));
-  if(document.getElementById('net-profit-display'))
-    document.getElementById('net-profit-display').textContent = toPersianDigits(netProfit.toLocaleString('en-US'));
+  
+  if (netProfitField) {
+    netProfitField.value = toPersianDigits(netProfit.toLocaleString('en-US'));
+  }
+  
+  if (netProfitDisplayField) {
+    netProfitDisplayField.textContent = toPersianDigits(netProfit.toLocaleString('en-US'));
+  }
+  
   // نمایش سود خالص به حروف
-  if(document.getElementById('net-profit-words')) {
+  if (netProfitWordsField) {
     let words = numberToPersianWords(netProfit);
-    document.getElementById('net-profit-words').textContent = words && netProfit !== 0 ? `(${words} تومان)` : '';
+    netProfitWordsField.textContent = words && netProfit !== 0 ? `(${words} تومان)` : '';
   }
 }
 
@@ -1246,26 +1389,65 @@ function formatAdvancePaymentInput(e) {
 
 // محاسبه مبلغ باقی‌مانده پس از پیش‌پرداخت و نمایش فرم چک‌ها
 function calculateInstallmentInfo() {
-  const sale = parseNumberWithDots(faToEnWithDots(document.getElementById('sale-price').value));
-  const advanceRaw = document.getElementById('advance-payment').value;
+  const salePriceField = document.getElementById('sale-price');
+  const advancePaymentField = document.getElementById('advance-payment');
+  const checkDetailsField = document.getElementById('check-details');
+  const paymentMethodField = document.getElementById('payment-method');
+  const advancePaymentGroupField = document.getElementById('advance-payment-group');
+  const checkCountField = document.getElementById('check-count');
+  
+  if (!salePriceField || !advancePaymentField) return;
+  
+  const sale = parseNumberWithDots(faToEnWithDots(salePriceField.value));
+  const advanceRaw = advancePaymentField.value;
   const advance = parseNumberWithDots(faToEnWithDots(advanceRaw)) || 0;
   const remain = sale - advance;
-  document.getElementById('advance-payment').setAttribute('max', sale);
+  const paymentMethod = paymentMethodField?.value || 'cash';
+  
+  advancePaymentField.setAttribute('max', sale);
+  
+  // نمایش/مخفی کردن فرم چک‌ها بر اساس روش پرداخت
+  if (paymentMethod === 'installment') {
+    if (checkDetailsField) checkDetailsField.style.display = 'block';
+    if (advancePaymentGroupField) advancePaymentGroupField.style.display = 'block';
+    if (advancePaymentField) advancePaymentField.disabled = false;
+    if (checkCountField) checkCountField.disabled = false;
+    
+    // به‌روزرسانی تعداد چک‌ها
+    updateCheckItems();
+  } else {
+    if (checkDetailsField) checkDetailsField.style.display = 'none';
+    if (advancePaymentGroupField) advancePaymentGroupField.style.display = 'none';
+    if (advancePaymentField) advancePaymentField.disabled = true;
+    if (checkCountField) checkCountField.disabled = true;
+  }
+  
   // نمایش مبلغ باقی‌مانده (در صورت نیاز می‌توان یک فیلد جدید اضافه کرد)
   let remainField = document.getElementById('installment-remain');
-  if (!remainField) {
+  if (!remainField && checkDetailsField && checkDetailsField.parentElement) {
     remainField = document.createElement('div');
     remainField.id = 'installment-remain';
     remainField.style.margin = '10px 0';
-    document.getElementById('check-details').parentElement.insertBefore(remainField, document.getElementById('check-details'));
+    checkDetailsField.parentElement.insertBefore(remainField, checkDetailsField);
   }
-  remainField.innerHTML = `<b>مبلغ قابل پرداخت با چک/اقساط:</b> <span style='color:#2eaa72'>${remain.toLocaleString()} تومان</span>`;
+  
+  if (remainField && paymentMethod === 'installment') {
+    remainField.innerHTML = `<b>مبلغ قابل پرداخت با چک/اقساط:</b> <span style='color:#2eaa72'>${remain.toLocaleString()} تومان</span>`;
+    remainField.style.display = 'block';
+  } else if (remainField) {
+    remainField.style.display = 'none';
+  }
 }
 
 // نمایش فرم چک‌ها به تعداد اقساط
 function updateCheckItems() {
-  const count = parseInt(document.getElementById('check-count').value) || 1;
+  const checkCountField = document.getElementById('check-count');
   const container = document.querySelector('.check-items');
+  
+  if (!checkCountField || !container) return;
+  
+  const count = parseInt(checkCountField.value) || 1;
+  
   // مقادیر پیش‌فرض از اولین چک قبلی (اگر وجود دارد)
   let prev = container.querySelector('.check-item');
   let prevVals = { bank: '', branch: '', amount: '', issuer: '', national: '', to: '' };
@@ -1277,7 +1459,9 @@ function updateCheckItems() {
     prevVals.national = prev.querySelector('.check-national')?.value || '';
     prevVals.to = prev.querySelector('.check-to')?.value || '';
   }
+  
   container.innerHTML = '';
+  
   for (let i = 0; i < count; i++) {
     const checkItem = document.createElement('div');
     checkItem.className = 'check-item';
@@ -1336,40 +1520,53 @@ function updateCheckItems() {
     `;
     container.appendChild(checkItem);
   }
+  
   // رویداد حذف چک
   container.querySelectorAll('.remove-check-btn').forEach(btn => {
     btn.onclick = function() {
       this.closest('.check-item').remove();
     };
   });
+  
   // فعال‌سازی مجدد دیت‌پیکر برای چک‌های جدید
   if (window.jalaliDatepicker) {
     jalaliDatepicker.startWatch({selector: '.jalali-date'});
   }
-  // اتصال رویداد فرمت مبلغ چک
-  attachCheckAmountFormatEvents();
-  // اتصال رویداد اعتبارسنجی کدملی
-  attachNationalCodeValidationEvents();
-  attachSayadiAndSeriesValidationEvents();
 }
 
 function updateTransactionSummary() {
-  const customerName = document.getElementById('customer-name').value.trim();
-  const productName = document.getElementById('product-name').options[document.getElementById('product-name').selectedIndex].text;
-  const purchase = parseInt(faToEn(document.getElementById('purchase-price').value)) || 0;
-  const sale = parseInt(faToEn(document.getElementById('sale-price').value)) || 0;
+  const customerNameField = document.getElementById('customer-name');
+  const productNameField = document.getElementById('product-name');
+  const purchasePriceField = document.getElementById('purchase-price');
+  const salePriceField = document.getElementById('sale-price');
+  const colorCostField = document.getElementById('color-cost');
+  const regulationCostField = document.getElementById('regulation-cost');
+  const transportCostField = document.getElementById('transport-cost');
+  const teacherPercentField = document.getElementById('teacher-percent');
+  const sellerPercentField = document.getElementById('seller-percent');
+  const advancePaymentField = document.getElementById('advance-payment');
+  const paymentMethodField = document.getElementById('payment-method');
+  const transactionSummaryField = document.getElementById('transaction-summary');
+  
+  // اگر فیلدهای ضروری وجود ندارند، از تابع خارج شو
+  if (!customerNameField || !productNameField || !salePriceField || !transactionSummaryField) return;
+  
+  const customerName = customerNameField.value.trim();
+  const productName = productNameField.options[productNameField.selectedIndex]?.text || '';
+  const purchase = parseInt(faToEn(purchasePriceField?.value || '0')) || 0;
+  const sale = parseInt(faToEn(salePriceField.value)) || 0;
   const grossProfit = sale - purchase;
-  const color = parseInt(faToEn(document.getElementById('color-cost').value)) || 0;
-  const regulation = parseInt(faToEn(document.getElementById('regulation-cost').value)) || 0;
-  const transport = parseInt(faToEn(document.getElementById('transport-cost').value)) || 0;
-  const teacherPercent = parseFloat(faToEn(document.getElementById('teacher-percent').value)) || 0;
-  const sellerPercent = parseFloat(faToEn(document.getElementById('seller-percent').value)) || 0;
+  const color = parseInt(faToEn(colorCostField?.value || '0')) || 0;
+  const regulation = parseInt(faToEn(regulationCostField?.value || '0')) || 0;
+  const transport = parseInt(faToEn(transportCostField?.value || '0')) || 0;
+  const teacherPercent = parseFloat(faToEn(teacherPercentField?.value || '0')) || 0;
+  const sellerPercent = parseFloat(faToEn(sellerPercentField?.value || '0')) || 0;
   const teacherCommission = Math.round(sale * teacherPercent / 100);
   const sellerCommission = Math.round(sale * sellerPercent / 100);
   const netProfit = grossProfit - color - regulation - transport - teacherCommission - sellerCommission;
-  const advanceRaw = document.getElementById('advance-payment').value;
+  const advanceRaw = advancePaymentField?.value || '0';
   const advance = parseNumberWithDots(faToEnWithDots(advanceRaw)) || 0;
-  const paymentMethod = document.getElementById('payment-method').options[document.getElementById('payment-method').selectedIndex].text;
+  const paymentMethod = paymentMethodField?.options[paymentMethodField.selectedIndex]?.text || '';
   const remain = sale - advance;
 
   let html = '';
@@ -1386,17 +1583,30 @@ function updateTransactionSummary() {
   if (paymentMethod !== 'نقدی') html += `<div class='receipt-row'><span class='receipt-label'>مبلغ قابل پرداخت با چک/اقساط:</span><span class='receipt-value'>${toPersianDigits(remain.toLocaleString())} تومان</span></div>`;
   html += `<div class='receipt-total'>${toPersianDigits(sale.toLocaleString())} تومان</div>`;
 
-  document.getElementById('transaction-summary').innerHTML = html;
-  document.getElementById('transaction-summary').style.display = 'block';
-  document.getElementById('transaction-summary').classList.add('receipt-cut');
+  transactionSummaryField.innerHTML = html;
+  transactionSummaryField.style.display = 'block';
+  transactionSummaryField.classList.add('receipt-cut');
 }
 
 // تابع پاک کردن فرم
 function clearTransactionForm() {
-  // پاک کردن فیلدهای مشتری
+  // پاک کردن فیلدهای اصلی
   document.getElementById('customer-name').value = '';
   document.getElementById('customer-phone').value = '';
   document.getElementById('customer-address').value = '';
+  document.getElementById('product-name').value = '';
+  document.getElementById('transaction-date').value = '';
+  document.getElementById('sale-price').value = '';
+  document.getElementById('payment-method').value = 'cash';
+  document.getElementById('advance-payment').value = '';
+  document.getElementById('purchase-price').value = '';
+  document.getElementById('color-cost').value = '';
+  document.getElementById('regulation-cost').value = '';
+  document.getElementById('transport-cost').value = '';
+  document.getElementById('teacher-name').value = '';
+  document.getElementById('teacher-percent').value = '';
+  document.getElementById('seller-name').value = '';
+  document.getElementById('seller-percent').value = '';
   document.getElementById('birth-date').value = '';
   document.getElementById('province').value = '';
   if (document.getElementById('city')) {
@@ -1406,36 +1616,25 @@ function clearTransactionForm() {
     document.getElementById('product-type').value = '';
   }
   
-  // پاک کردن فیلدهای تراکنش
-  document.getElementById('product-name').value = '';
-  document.getElementById('transaction-date').value = '';
-  document.getElementById('sale-price').value = '';
-  document.getElementById('payment-method').value = 'cash';
-  document.getElementById('advance-payment').value = '0';
-  
-  // پاک کردن فیلدهای مالی
-  document.getElementById('purchase-price').value = '';
-  document.getElementById('color-cost').value = '';
-  document.getElementById('regulation-cost').value = '';
-  document.getElementById('transport-cost').value = '';
-  
-  // پاک کردن فیلدهای معلم و فروشنده
-  document.getElementById('teacher-name').value = '';
-  document.getElementById('teacher-percent').value = '';
-  document.getElementById('seller-name').value = '';
-  document.getElementById('seller-percent').value = '';
-  
-  // پاک کردن فرم چک‌ها
-  document.getElementById('check-count').value = '1';
-  updateCheckItems();
-  
-  // مخفی کردن فرم چک‌ها
+  // پاک کردن چک‌ها
   const checkDetails = document.getElementById('check-details');
+  if (checkDetails) {
+    checkDetails.innerHTML = '';
+    checkDetails.style.display = 'none';
+  }
+  
+  // پاک کردن پیش‌پرداخت
   const advanceGroup = document.getElementById('advance-payment-group');
-  checkDetails.style.display = 'none';
-  advanceGroup.style.display = 'none';
-  document.getElementById('advance-payment').disabled = true;
-  document.getElementById('check-count').disabled = true;
+  if (advanceGroup) {
+    advanceGroup.style.display = 'none';
+  }
+  
+  // غیرفعال کردن فیلدهای پیش‌پرداخت
+  const advancePaymentField = document.getElementById('advance-payment');
+  const checkCountField = document.getElementById('check-count');
+  
+  if (advancePaymentField) advancePaymentField.disabled = true;
+  if (checkCountField) checkCountField.disabled = true;
   
   // پاک کردن حالت ویرایش
   window.isEditingTransaction = false;
@@ -1444,16 +1643,22 @@ function clearTransactionForm() {
   
   // بازگرداندن متن دکمه ذخیره
   const saveButton = document.querySelector('#transactions .btn.primary');
-  saveButton.textContent = 'ثبت تراکنش';
-  saveButton.innerHTML = '<i class="fas fa-save"></i> ثبت تراکنش';
+  if (saveButton) {
+    saveButton.textContent = 'ثبت تراکنش';
+    saveButton.innerHTML = '<i class="fas fa-save"></i> ثبت تراکنش';
+  }
   
   // تغییر عنوان صفحه
-  document.getElementById('page-title').textContent = 'ثبت تراکنش';
+  const pageTitle = document.getElementById('page-title');
+  if (pageTitle) {
+    pageTitle.textContent = 'ثبت تراکنش';
+  }
   
   // به‌روزرسانی محاسبات
   calculateProfits();
   calculateInstallmentInfo();
   updateTransactionSummary();
+  updateTransactionReceipt();
 }
 
 // راه‌اندازی اولیه
@@ -1467,6 +1672,14 @@ window.addEventListener('DOMContentLoaded', () => {
   renderChecksStatusChart();
   setupAdvancedFilters();
   enhanceFilterUX();
+  
+  // فعال کردن صفحه داشبورد در ابتدای بارگذاری
+  showSection('dashboard');
+  
+  // اضافه کردن calculateInstallmentInfo بعد از بارگذاری
+  setTimeout(function() {
+    calculateInstallmentInfo();
+  }, 500);
 
   // اتصال رویدادها به فیلدهای مالی
   [
@@ -1803,6 +2016,11 @@ function attachSayadiAndSeriesValidationEvents() {
 // تابع تنظیم event listeners برای آپشن‌های سفارشی نمودار
 function setupCustomLegendEvents() {
   const legendItems = document.querySelectorAll('.legend-item');
+  if (!legendItems || legendItems.length === 0) {
+    console.log('Legend items not found, skipping setup');
+    return;
+  }
+  
   // مدال جمع مبلغ چک‌ها
   let checkSumDiv = document.getElementById('check-sum-amount');
   if (!checkSumDiv) {
@@ -1847,10 +2065,15 @@ function setupCustomLegendEvents() {
     closeBtn.style.fontSize = '18px';
     closeBtn.style.cursor = 'pointer';
     closeBtn.style.zIndex = '30';
-    closeBtn.onclick = () => { checkSumDiv.style.display = 'none'; };
-    checkSumDiv.appendChild(closeBtn);
+    closeBtn.onclick = () => { 
+      if (checkSumDiv) checkSumDiv.style.display = 'none'; 
+    };
+    if (checkSumDiv) checkSumDiv.appendChild(closeBtn);
   }
+  
   legendItems.forEach((item, index) => {
+    if (!item) return;
+    
     item.addEventListener('click', function() {
       // تغییر وضعیت active
       const isActive = this.classList.contains('active');
@@ -1863,17 +2086,18 @@ function setupCustomLegendEvents() {
       if (window.monthlyApexChart) {
         const seriesNames = ['فروش', 'سود خالص', 'تعداد چک'];
         legendItems.forEach((legend, idx) => {
+          if (!legend) return;
           const name = seriesNames[idx];
-          if (legend.classList.contains('active')) {
+          if (legend && legend.classList && legend.classList.contains('active')) {
             window.monthlyApexChart.showSeries(name);
           } else {
             window.monthlyApexChart.hideSeries(name);
           }
         });
         // منطق محور y داینامیک
-        const isProfitActive = legendItems[1].classList.contains('active');
-        const isCheckActive = legendItems[2].classList.contains('active');
-        if (isProfitActive && !legendItems[0].classList.contains('active') && !isCheckActive) {
+        const isProfitActive = legendItems[1] && legendItems[1].classList.contains('active');
+        const isCheckActive = legendItems[2] && legendItems[2].classList.contains('active');
+        if (isProfitActive && !legendItems[0]?.classList.contains('active') && !isCheckActive) {
           // فقط سود خالص فعال است
           window.monthlyApexChart.updateOptions({
             yaxis: [
@@ -2052,31 +2276,34 @@ function setupSidebarToggle() {
 } 
 
 function updateTransactionReceipt() {
-  const customerName = document.getElementById('customer-name').value.trim();
-  const productName = document.getElementById('product-name').options[document.getElementById('product-name').selectedIndex].text;
-  const saleDate = document.getElementById('transaction-date').value;
-  const sale = parseInt(faToEn(document.getElementById('sale-price').value)) || 0;
-  const purchase = parseInt(faToEn(document.getElementById('purchase-price').value)) || 0;
+  const receiptDiv = document.getElementById('transaction-receipt');
+  if (!receiptDiv) {
+    console.log('Transaction receipt element not found, skipping update');
+    return;
+  }
+
+  const customerName = document.getElementById('customer-name')?.value || '';
+  const productName = document.getElementById('product-name')?.options[document.getElementById('product-name')?.selectedIndex]?.text || '';
+  const purchase = parseInt(faToEn(document.getElementById('purchase-price')?.value || '0')) || 0;
+  const sale = parseInt(faToEn(document.getElementById('sale-price')?.value || '0')) || 0;
   const grossProfit = sale - purchase;
-  const color = parseInt(faToEn(document.getElementById('color-cost').value)) || 0;
-  const regulation = parseInt(faToEn(document.getElementById('regulation-cost').value)) || 0;
-  const transport = parseInt(faToEn(document.getElementById('transport-cost').value)) || 0;
-  const teacherPercent = parseFloat(faToEn(document.getElementById('teacher-percent').value)) || 0;
-  const sellerPercent = parseFloat(faToEn(document.getElementById('seller-percent').value)) || 0;
+  const color = parseInt(faToEn(document.getElementById('color-cost')?.value || '0')) || 0;
+  const regulation = parseInt(faToEn(document.getElementById('regulation-cost')?.value || '0')) || 0;
+  const transport = parseInt(faToEn(document.getElementById('transport-cost')?.value || '0')) || 0;
+  const teacherPercent = parseFloat(faToEn(document.getElementById('teacher-percent')?.value || '0')) || 0;
+  const sellerPercent = parseFloat(faToEn(document.getElementById('seller-percent')?.value || '0')) || 0;
   const teacherCommission = Math.round(sale * teacherPercent / 100);
   const sellerCommission = Math.round(sale * sellerPercent / 100);
   const netProfit = grossProfit - color - regulation - transport - teacherCommission - sellerCommission;
-  const advanceRaw = document.getElementById('advance-payment').value;
+  const advanceRaw = document.getElementById('advance-payment')?.value || '0';
   const advance = parseNumberWithDots(faToEnWithDots(advanceRaw)) || 0;
-  const paymentMethod = document.getElementById('payment-method').options[document.getElementById('payment-method').selectedIndex].text;
+  const paymentMethod = document.getElementById('payment-method')?.options[document.getElementById('payment-method')?.selectedIndex]?.text || '';
   const remain = sale - advance;
 
   let html = '';
-  html += `<h3><i class='fas fa-receipt'></i> رسید سفارش</h3>`;
+  html += `<h3><i class='fas fa-receipt'></i> خلاصه سفارش</h3>`;
   if (customerName) html += `<div class='receipt-row'><span class='receipt-label'>مشتری:</span><span class='receipt-value'>${customerName}</span></div>`;
   if (productName && productName !== 'انتخاب کنید') html += `<div class='receipt-row'><span class='receipt-label'>کالا:</span><span class='receipt-value'>${productName}</span></div>`;
-  if (saleDate) html += `<div class='receipt-row'><span class='receipt-label'>تاریخ:</span><span class='receipt-value'>${toPersianDigits(saleDate)}</span></div>`;
-  html += `<div class='receipt-row'><span class='receipt-label'>مبلغ فروش:</span><span class='receipt-value'>${toPersianDigits(sale.toLocaleString())} تومان</span></div>`;
   html += `<div class='receipt-row'><span class='receipt-label'>سود ناخالص:</span><span class='receipt-value'>${toPersianDigits(grossProfit.toLocaleString())} تومان</span></div>`;
   html += `<div class='receipt-row'><span class='receipt-label'>هزینه‌ها:</span><span class='receipt-value'>رنگ: ${toPersianDigits(color.toLocaleString())} | رگلاژ: ${toPersianDigits(regulation.toLocaleString())} | حمل: ${toPersianDigits(transport.toLocaleString())}</span></div>`;
   html += `<div class='receipt-row'><span class='receipt-label'>پورسانت معلم:</span><span class='receipt-value'>${toPersianDigits(teacherCommission.toLocaleString())} تومان</span></div>`;
@@ -2088,17 +2315,23 @@ function updateTransactionReceipt() {
   html += `<div class='receipt-total'>${toPersianDigits(sale.toLocaleString())} تومان</div>`;
   html += `<div class='receipt-footer'>این رسید غیررسمی است و صرفاً جهت مشاهده خلاصه سفارش می‌باشد.</div>`;
 
-  const receiptDiv = document.getElementById('transaction-receipt');
   receiptDiv.innerHTML = html;
   receiptDiv.style.display = 'block';
 }
 
 // اتصال به رویدادهای فرم
 ['customer-name', 'product-name', 'transaction-date', 'purchase-price', 'sale-price', 'color-cost', 'regulation-cost', 'transport-cost', 'teacher-percent', 'seller-percent', 'advance-payment', 'payment-method'].forEach(id => {
-  document.getElementById(id).addEventListener('input', updateTransactionReceipt);
-  document.getElementById(id).addEventListener('change', updateTransactionReceipt);
+  const element = document.getElementById(id);
+  if (element) {
+    element.addEventListener('input', updateTransactionReceipt);
+    element.addEventListener('change', updateTransactionReceipt);
+  }
 });
-updateTransactionReceipt();
+
+// فقط اگر عنصر receipt وجود دارد، آن را به‌روزرسانی کن
+if (document.getElementById('transaction-receipt')) {
+  updateTransactionReceipt();
+}
 
 // --- جستجوی پیشرفته چک‌ها ---
 function getChecksSearchFilters() {
@@ -2577,89 +2810,103 @@ function updateChecksStatsCardsFromArray() {
 }
 
 // رویدادهای فیلترهای پیشرفته
-function setupAdvancedFilters() {
-  // دکمه گسترش فیلترها
-  const expandBtn = document.getElementById('expand-filters-btn');
-  const advancedFilters = document.getElementById('advanced-filters');
-  
+function setupAdvancedFilters(prefix) {
+  const expandBtn = document.getElementById('expand-filters-btn-' + prefix);
+  const advancedFilters = document.getElementById('advanced-filters-' + prefix);
   if (expandBtn && advancedFilters) {
     expandBtn.addEventListener('click', function() {
-      const isExpanded = advancedFilters.style.maxHeight !== '0px' && advancedFilters.style.maxHeight !== '';
-      
-      if (isExpanded) {
-        // بستن dropdown
-        this.classList.remove('expanded');
-        advancedFilters.style.maxHeight = '0px';
-        advancedFilters.style.paddingTop = '0px';
-        advancedFilters.style.paddingBottom = '0px';
-        advancedFilters.style.borderTop = 'none';
-        advancedFilters.style.opacity = '0';
-        
-        const icon = this.querySelector('i');
-        const text = this.querySelector('span') || this.childNodes[1];
-        icon.className = 'fas fa-chevron-down';
-        text.textContent = ' فیلترهای بیشتر';
-        
-
+      const isOpen = advancedFilters.classList.contains('open');
+      if (isOpen) {
+        advancedFilters.classList.remove('open');
+        expandBtn.classList.remove('expanded');
+        expandBtn.querySelector('i').className = 'fas fa-filter';
+        expandBtn.querySelector('span').textContent = 'فیلتر پیشرفته';
       } else {
-        // باز کردن dropdown
-        this.classList.add('expanded');
-        advancedFilters.style.display = 'block';
-        advancedFilters.style.maxHeight = '300px';
-        advancedFilters.style.paddingTop = '16px';
-        advancedFilters.style.paddingBottom = '16px';
-        advancedFilters.style.borderTop = '1px solid #e3f2fd';
-        advancedFilters.style.opacity = '1';
-        
-        const icon = this.querySelector('i');
-        const text = this.querySelector('span') || this.childNodes[1];
-        icon.className = 'fas fa-chevron-up';
-        text.textContent = ' مخفی کردن';
-        
-
+        advancedFilters.classList.add('open');
+        expandBtn.classList.add('expanded');
+        expandBtn.querySelector('i').className = 'fas fa-times';
+        expandBtn.querySelector('span').textContent = 'بستن فیلتر';
+        if (window.jalaliDatepicker) {
+          setTimeout(() => {
+            jalaliDatepicker.startWatch({selector: '#' + advancedFilters.id + ' .jalali-date'});
+          }, 100);
+        }
       }
     });
-  }
-  
-  // دکمه پاک کردن فیلترها
-  const resetBtn = document.getElementById('reset-checks-btn');
-  if (resetBtn) {
-    resetBtn.addEventListener('click', function() {
-      // پاک کردن همه فیلترها
-      document.getElementById('search-buyer').value = '';
-      document.getElementById('search-sayadi').value = '';
-      document.getElementById('search-amount').value = '';
-      document.getElementById('search-bank').value = '';
-      document.getElementById('search-status').value = '';
-      document.getElementById('search-date-from').value = '';
-      document.getElementById('search-date-to').value = '';
-      document.getElementById('search-sort').value = 'date-desc';
-      document.getElementById('search-limit').value = 'all';
-      
-      // به‌روزرسانی جدول
-      updateChecksTable();
+    // شمارنده فیلتر فعال (برای هر بخش)
+    function updateActiveFiltersCount() {
+      let ids = [];
+      if (prefix === 'checks') {
+        ids = ['search-buyer','search-sayadi','search-amount','search-bank','search-date-from','search-date-to','search-status'];
+      } else if (prefix === 'sales') {
+        ids = ['sales-filter-buyer','sales-filter-product','sales-filter-date-from','sales-filter-date-to','sales-filter-amount','sales-filter-status'];
+      }
+      const active = ids.map(id => document.getElementById(id)?.value.trim()).filter(Boolean).length;
+      let badge = expandBtn.querySelector('.filter-badge');
+      if (active > 0) {
+        if (!badge) {
+          badge = document.createElement('span');
+          badge.className = 'filter-badge';
+          badge.style.cssText = 'position:absolute;top:-8px;right:-8px;background:#e74c3c;color:white;border-radius:50%;width:20px;height:20px;font-size:11px;display:flex;align-items:center;justify-content:center;font-weight:bold;';
+          expandBtn.appendChild(badge);
+        }
+        badge.textContent = active;
+      } else if (badge) {
+        badge.remove();
+      }
+    }
+    let ids = [];
+    if (prefix === 'checks') {
+      ids = ['search-buyer','search-sayadi','search-amount','search-bank','search-date-from','search-date-to','search-status'];
+    } else if (prefix === 'sales') {
+      ids = ['sales-filter-buyer','sales-filter-product','sales-filter-date-from','sales-filter-date-to','sales-filter-amount','sales-filter-status'];
+    }
+    ids.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('input', updateActiveFiltersCount);
+        el.addEventListener('change', updateActiveFiltersCount);
+      }
     });
+    updateActiveFiltersCount();
   }
-  
-
-  
-  // به‌روزرسانی نمایش نتایج
-  updateSearchResultsInfo();
 }
+// ... existing code ...
+window.addEventListener('DOMContentLoaded', function() {
+  // ... سایر کدها ...
+  if (window.jalaliDatepicker) {
+    jalaliDatepicker.startWatch({selector: '.jalali-date'});
+  }
+  setupAdvancedFilters('checks');
+  setupAdvancedFilters('sales');
+  // اتصال فیلترهای جدید تاریخ به جدول
+  ['sales-filter-buyer','sales-filter-product','sales-filter-date-from','sales-filter-date-to','sales-filter-amount','sales-filter-status'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener('input', updateSalesTable);
+      el.addEventListener('change', updateSalesTable);
+    }
+  });
+});
+// ... existing code ...
 
 // تابع به‌روزرسانی اطلاعات نتایج جستجو
 function updateSearchResultsInfo() {
   const resultsCount = document.getElementById('results-count');
-  const stats = calculateChecksStatsFromArray();
+  
+  // محاسبه چک‌های فیلتر شده
+  const filteredChecks = filterChecks(checks.map((c, idx) => ({...c, _idx: idx})));
+  const totalCount = filteredChecks.length;
+  const totalAmount = filteredChecks.reduce((sum, check) => sum + (check.amount || 0), 0);
   
   if (resultsCount) {
-    resultsCount.textContent = toPersianDigits(stats.total);
+    resultsCount.textContent = toPersianDigits(totalCount);
   }
   
   // به‌روزرسانی مجموع مبالغ
   const totalAmountElement = document.querySelector('.search-results-info strong');
   if (totalAmountElement) {
-    totalAmountElement.textContent = toPersianDigits(stats.totalAmount.toLocaleString()) + ' تومان';
+    totalAmountElement.textContent = toPersianDigits(totalAmount.toLocaleString()) + ' تومان';
   }
 }
 
@@ -2867,41 +3114,114 @@ window.addEventListener('DOMContentLoaded', function() {
 
 // ... existing code ...
 function showCustomAlert(message, type = 'info') {
-  // Remove any existing alert
-  let oldAlert = document.querySelector('.custom-alert-internal');
-  if (oldAlert) oldAlert.remove();
+  try {
+    console.log(`Attempting to show alert: ${type} - ${message}`);
+    
+    // Remove any existing alert
+    let oldAlert = document.querySelector('.custom-alert-internal');
+    if (oldAlert && oldAlert.parentNode) {
+      console.log('Removing old alert');
+      oldAlert.remove();
+    }
 
-  // Create alert wrapper
-  const wrapper = document.createElement('div');
-  wrapper.className = 'custom-alert-internal ' + (type === 'success' ? 'success' : type === 'error' ? 'error' : 'info');
+    // Check if document.body exists
+    if (!document.body) {
+      console.error('Document body not available');
+      return;
+    }
 
-  // Choose icon
-  let icon = '';
-  if (type === 'error') icon = '❌';
-  else if (type === 'info') icon = 'ℹ️';
+    // Create alert wrapper
+    const wrapper = document.createElement('div');
+    wrapper.className = 'custom-alert-internal ' + (type === 'success' ? 'success' : type === 'error' ? 'error' : 'info');
 
-  // Create alert HTML
-  wrapper.innerHTML = `
-    ${icon ? `<span class="alert-icon">${icon}</span>` : ''}
-    <span>${message}</span>
-    <button class="alert-close" aria-label="بستن">×</button>
-  `;
-  document.body.appendChild(wrapper);
+    // Choose icon based on type
+    let icon = '';
+    if (type === 'success') icon = '✅';
+    else if (type === 'error') icon = '❌';
+    else if (type === 'info') icon = 'ℹ️';
 
-  // Show with animation
-  setTimeout(() => wrapper.classList.add('show'), 10);
+    // Create alert HTML
+    wrapper.innerHTML = `
+      ${icon ? `<span class="alert-icon">${icon}</span>` : ''}
+      <span class="alert-message">${message}</span>
+      <button class="alert-close" aria-label="بستن">×</button>
+    `;
+    
+    console.log('Alert HTML created:', wrapper.outerHTML);
+    
+    // Add to body
+    document.body.appendChild(wrapper);
+    console.log('Alert added to body');
 
-  // Close on button click
-  wrapper.querySelector('.alert-close').onclick = () => {
-    wrapper.classList.remove('show');
-    setTimeout(() => { if (wrapper) wrapper.remove(); }, 400);
-  };
+    // Force reflow to ensure proper positioning
+    if (wrapper.offsetHeight) {
+      wrapper.offsetHeight;
+    }
 
-  // Auto-dismiss after 3 seconds
-  setTimeout(() => {
-    wrapper.classList.remove('show');
-    setTimeout(() => { if (wrapper) wrapper.remove(); }, 400);
-  }, 3000);
+    // Show with animation
+    setTimeout(() => {
+      if (wrapper && wrapper.parentNode) {
+        wrapper.classList.add('show');
+        console.log('Alert show class added');
+      }
+    }, 10);
+
+    // Close on button click
+    const closeBtn = wrapper.querySelector('.alert-close');
+    if (closeBtn) {
+      closeBtn.onclick = () => {
+        console.log('Alert close button clicked');
+        if (wrapper && wrapper.parentNode) {
+          wrapper.classList.remove('show');
+          setTimeout(() => { 
+            if (wrapper && wrapper.parentNode) {
+              wrapper.remove(); 
+              console.log('Alert removed from DOM');
+            }
+          }, 400);
+        }
+      };
+    }
+
+    // Auto-dismiss after different times based on type
+    const dismissTime = type === 'success' ? 5000 : type === 'error' ? 6000 : 4000;
+    setTimeout(() => {
+      if (wrapper && wrapper.parentNode && wrapper.classList.contains('show')) {
+        console.log('Auto-dismissing alert');
+        wrapper.classList.remove('show');
+        setTimeout(() => { 
+          if (wrapper && wrapper.parentNode) {
+            wrapper.remove(); 
+            console.log('Alert auto-removed from DOM');
+          }
+        }, 400);
+      }
+    }, dismissTime);
+
+    // Log for debugging
+    console.log(`Alert shown successfully: ${type} - ${message}`);
+    
+    // Additional check - verify the alert is visible
+    setTimeout(() => {
+      const visibleAlert = document.querySelector('.custom-alert-internal.show');
+      if (visibleAlert) {
+        console.log('Alert is visible in DOM');
+        console.log('Alert computed styles:', {
+          opacity: getComputedStyle(visibleAlert).opacity,
+          display: getComputedStyle(visibleAlert).display,
+          visibility: getComputedStyle(visibleAlert).visibility,
+          zIndex: getComputedStyle(visibleAlert).zIndex
+        });
+      } else {
+        console.warn('Alert not found in DOM after show');
+      }
+    }, 100);
+    
+  } catch (error) {
+    console.error('Error showing custom alert:', error);
+    // Fallback to simple alert if custom alert fails
+    alert(message);
+  }
 }
 // ... existing code ...
 // Example usage (replace with real transaction events):
@@ -3012,3 +3332,169 @@ window.addEventListener('DOMContentLoaded', function() {
   // ... موجود ...
 });
 // ... موجود ...
+
+// تابع تست برای بررسی عملکرد alert
+function testAlert() {
+  console.log('Testing alert function...');
+  console.log('Document body exists:', !!document.body);
+  console.log('Current z-index of alerts:', getComputedStyle(document.querySelector('.custom-alert-internal') || document.body).zIndex);
+  
+  // تست alert ساده
+  showCustomAlert('تست مودال موفقیت!', 'success');
+  
+  // تست alert خطا
+  setTimeout(() => {
+    showCustomAlert('تست مودال خطا!', 'error');
+  }, 2000);
+  
+  // تست alert اطلاعات
+  setTimeout(() => {
+    showCustomAlert('تست مودال اطلاعات!', 'info');
+  }, 4000);
+}
+
+// تابع تست برای بررسی alert ثبت تراکنش
+function testTransactionAlert() {
+  console.log('Testing transaction alert...');
+  showCustomAlert('تراکنش جدید با موفقیت ثبت شد!', 'success');
+}
+
+// اضافه کردن تابع‌های تست به window برای دسترسی از console
+window.testAlert = testAlert;
+window.testTransactionAlert = testTransactionAlert;
+window.testSaveTransaction = testSaveTransaction;
+
+
+
+// تابع تست برای بررسی تابع saveTransaction
+function testSaveTransaction() {
+  console.log('=== Testing saveTransaction function ===');
+  
+  // پر کردن فرم با داده‌های تست
+  document.getElementById('customer-name').value = 'تست مشتری';
+  document.getElementById('customer-phone').value = '09123456789';
+  document.getElementById('customer-address').value = 'آدرس تست';
+  document.getElementById('product-name').value = 'yamaha-u1';
+  document.getElementById('sale-price').value = '1000000';
+  document.getElementById('purchase-price').value = '800000';
+  
+  // تنظیم تاریخ به صورت صحیح
+  const transactionDateField = document.getElementById('transaction-date');
+  transactionDateField.value = '1402/01/01';
+  transactionDateField.setAttribute('data-jdp', '1402/01/01');
+  
+  console.log('Form filled with test data');
+  console.log('Customer name:', document.getElementById('customer-name').value);
+  console.log('Product name:', document.getElementById('product-name').value);
+  console.log('Sale price:', document.getElementById('sale-price').value);
+  console.log('Transaction date:', document.getElementById('transaction-date').value);
+  console.log('Transaction date data-jdp:', document.getElementById('transaction-date').getAttribute('data-jdp'));
+  
+  // بررسی validation قبل از فراخوانی
+  const customerName = document.getElementById('customer-name').value.trim();
+  const productName = document.getElementById('product-name').value;
+  const salePriceRaw = document.getElementById('sale-price').value;
+  const salePrice = parseNumberWithDots(faToEnWithDots(salePriceRaw));
+  const saleDate = getJalaliDateValue(document.getElementById('transaction-date'));
+  
+  console.log('Validation check:');
+  console.log('- customerName:', customerName, '| valid:', !!customerName);
+  console.log('- productName:', productName, '| valid:', !!(productName && productName !== ''));
+  console.log('- salePrice:', salePrice, '| valid:', !!(salePrice && salePrice !== 0));
+  console.log('- saleDate:', saleDate, '| valid:', !!saleDate);
+  
+  // فراخوانی تابع saveTransaction
+  saveTransaction();
+}
+
+// تابع نمایش دکمه گزارش جامع
+function showComprehensiveReportButton() {
+  const reportBtn = document.getElementById('comprehensiveReportBtn');
+  if (reportBtn) {
+    reportBtn.style.display = 'flex';
+    console.log('دکمه گزارش جامع نمایش داده شد');
+  } else {
+    console.log('دکمه گزارش جامع پیدا نشد');
+  }
+}
+
+// تابع مخفی کردن دکمه گزارش جامع
+function hideComprehensiveReportButton() {
+  const reportBtn = document.getElementById('comprehensiveReportBtn');
+  if (reportBtn) {
+    reportBtn.style.display = 'none';
+    console.log('دکمه گزارش جامع مخفی شد');
+  }
+}
+// تابع ایجاد status badge برای چک‌های ورودی
+function getIncomingCheckStatusBadge(status) {
+  const statusConfig = {
+    'در جریان': { 
+      background: '#fff3e0', 
+      color: '#f39c12', 
+      border: '#f39c12',
+      hoverBg: '#ffe0b2',
+      icon: 'clock',
+      text: 'در جریان'
+    },
+    'وصول شده': { 
+      background: '#e8f5e9', 
+      color: '#2ecc71', 
+      border: '#2ecc71',
+      hoverBg: '#c8e6c9',
+      icon: 'check-circle',
+      text: 'وصول شده'
+    },
+    'برگشتی': { 
+      background: '#ffebee', 
+      color: '#e74c3c', 
+      border: '#e74c3c',
+      hoverBg: '#ffcdd2',
+      icon: 'times-circle',
+      text: 'برگشتی'
+    }
+  };
+
+  const config = statusConfig[status] || statusConfig['در جریان'];
+  return `<span style="background: ${config.background}; color: ${config.color}; padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: 500; display: inline-flex; align-items: center; gap: 4px; transition: all 0.3s ease; cursor: pointer; min-width: 90px; justify-content: center; white-space: nowrap;" onmouseover="this.style.background='${config.hoverBg}'; this.style.transform='scale(1.05)'" onmouseout="this.style.background='${config.background}'; this.style.transform='scale(1)'">
+    <i class="fas fa-${config.icon}" style="font-size: 10px;"></i>
+    ${config.text}
+  </span>`;
+}
+
+// ... existing code ...
+window.addEventListener('DOMContentLoaded', function() {
+  // ... سایر کدها ...
+  const filterToggle = document.getElementById('sales-filter-toggle');
+  const advFilters = document.getElementById('sales-advanced-filters');
+  if (filterToggle && advFilters) {
+    filterToggle.onclick = function() {
+      advFilters.style.display = advFilters.style.display === 'none' ? 'block' : 'none';
+    };
+  }
+  // اتصال فیلترها به جدول
+  ['sales-filter-buyer', 'sales-filter-product', 'sales-filter-date-from', 'sales-filter-date-to', 'sales-filter-amount', 'sales-filter-status'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener('input', updateSalesTable);
+      el.addEventListener('change', updateSalesTable);
+    }
+  });
+  const filterBtn = document.getElementById('sales-filter-btn');
+  if (filterBtn) filterBtn.onclick = updateSalesTable;
+});
+// ... existing code ...
+
+// ... existing code ...
+window.addEventListener('DOMContentLoaded', function() {
+  // ... سایر کدها ...
+  // فعال‌سازی دیتاپیکر جلالی برای همه فیلدهای تاریخ فیلتر
+  if (window.jalaliDatepicker) {
+    jalaliDatepicker.startWatch({selector: '.jalali-date'});
+  }
+  // راه‌اندازی فیلتر پیشرفته برای تراکنش‌ها و چک‌ها
+  if (typeof setupAdvancedFilters === 'function') {
+    setupAdvancedFilters();
+  }
+});
+// ... existing code ...

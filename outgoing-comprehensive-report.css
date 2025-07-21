@@ -1,0 +1,605 @@
+/* --- استایل‌های گزارش جامع چک‌های خروجی --- */
+
+/* دکمه گزارش جامع - استایل مدرن و جذاب */
+#outgoing-comprehensive-report-btn.comprehensive-report-btn {
+    background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+    border: none;
+    transition: all 0.3s ease;
+}
+
+#outgoing-comprehensive-report-btn.comprehensive-report-btn:hover {
+    background: linear-gradient(135deg, #45a049 0%, #3d8b40 100%);
+    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+    transform: translateY(-2px);
+}
+
+#outgoing-comprehensive-report-btn.comprehensive-report-btn:active {
+    box-shadow: 0 2px 10px rgba(76, 175, 80, 0.3);
+    transform: translateY(0);
+}
+
+/* آیکون دکمه - رنگ سفید و گرد */
+#outgoing-comprehensive-report-btn .report-btn-icon {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+#outgoing-comprehensive-report-btn:hover .report-btn-icon {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+}
+
+#outgoing-comprehensive-report-btn .report-btn-icon i {
+    color: white;
+    font-size: 16px;
+}
+
+/* مودال جدید با ID outgoingComprehensiveReportModal */
+#outgoingComprehensiveReportModal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+}
+
+#outgoingComprehensiveReportModal .modal-content {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    max-width: 90%;
+    max-height: 90%;
+    width: 1200px;
+    overflow: hidden;
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50px) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+#outgoingComprehensiveReportModal .modal-header {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+    color: #fff;
+    padding: 20px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+#outgoingComprehensiveReportModal .modal-title {
+    font-size: 18px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#outgoingComprehensiveReportModal .modal-close {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    transition: background-color 0.3s;
+}
+
+#outgoingComprehensiveReportModal .modal-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+#outgoingComprehensiveReportModal .modal-body {
+    padding: 30px;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+/* تب‌های گزارش */
+#outgoingComprehensiveReportModal .report-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 30px;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 10px;
+}
+
+#outgoingComprehensiveReportModal .tab-btn {
+    background: #f8f9fa;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px 8px 0 0;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    color: #666;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#outgoingComprehensiveReportModal .tab-btn:hover {
+    background: #e9ecef;
+    color: #ff6b6b;
+}
+
+#outgoingComprehensiveReportModal .tab-btn.active {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+}
+
+/* محتوای تب‌ها */
+#outgoingComprehensiveReportModal .tab-content {
+    display: none;
+}
+
+#outgoingComprehensiveReportModal .tab-content.active {
+    display: block;
+}
+
+#outgoingComprehensiveReportModal .tab-header {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+#outgoingComprehensiveReportModal .tab-header h3 {
+    color: #333;
+    font-size: 16px;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* جدول گزارش */
+#outgoingComprehensiveReportModal .report-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+#outgoingComprehensiveReportModal .report-table th {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+    color: #fff;
+    padding: 15px 12px;
+    text-align: right;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+#outgoingComprehensiveReportModal .report-table td {
+    padding: 12px;
+    border-bottom: 1px solid #f0f0f0;
+    text-align: right;
+    font-size: 14px;
+}
+
+#outgoingComprehensiveReportModal .report-table tr:hover {
+    background: #f8f9fa;
+}
+
+/* دکمه‌های مرتب‌سازی */
+#outgoingComprehensiveReportModal .sort-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+#outgoingComprehensiveReportModal .sort-label {
+    font-size: 14px;
+    color: #666;
+    white-space: nowrap;
+}
+
+#outgoingComprehensiveReportModal .sort-toggle {
+    display: flex;
+    gap: 8px;
+}
+
+#outgoingComprehensiveReportModal .sort-btn {
+    padding: 8px 16px;
+    border: 1px solid #e0e0e0;
+    background: #fff;
+    color: #666;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+#outgoingComprehensiveReportModal .sort-btn:hover {
+    background: #f8f9fa;
+    border-color: #ff6b6b;
+    color: #ff6b6b;
+}
+
+#outgoingComprehensiveReportModal .sort-btn.active {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+    color: #fff;
+    border-color: #ff6b6b;
+}
+
+/* آیکون‌های مدال */
+#outgoingComprehensiveReportModal .medal-icon {
+    font-size: 16px;
+    margin-left: 5px;
+}
+
+#outgoingComprehensiveReportModal .gold-row {
+    background: linear-gradient(90deg, #fff9e6, #fff5cc) !important;
+}
+
+#outgoingComprehensiveReportModal .gold-row:hover {
+    background: linear-gradient(90deg, #fff2cc, #ffe6b3) !important;
+}
+
+/* درصد */
+#outgoingComprehensiveReportModal .percent-sign {
+    color: #ff6b6b;
+    font-weight: bold;
+}
+
+/* ریسپانسیو */
+@media (max-width: 768px) {
+    #outgoingComprehensiveReportModal .modal-content {
+        width: 95%;
+        margin: 20px;
+    }
+    
+    #outgoingComprehensiveReportModal .modal-body {
+        padding: 20px;
+    }
+    
+    #outgoingComprehensiveReportModal .report-tabs {
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    #outgoingComprehensiveReportModal .tab-btn {
+        border-radius: 8px;
+        text-align: center;
+        justify-content: center;
+    }
+    
+    #outgoingComprehensiveReportModal .sort-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    #outgoingComprehensiveReportModal .sort-toggle {
+        justify-content: center;
+    }
+    
+    #outgoingComprehensiveReportModal .report-table {
+        font-size: 12px;
+    }
+    
+    #outgoingComprehensiveReportModal .report-table th,
+    #outgoingComprehensiveReportModal .report-table td {
+        padding: 8px 6px;
+    }
+}
+
+/* مودال قدیمی - استایل دقیقاً شبیه چک‌های ورودی */
+#outgoingComprehensiveReportModal.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(44, 62, 80, 0.25);
+    z-index: 2000;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    overflow-y: auto;
+    padding: 32px 0 32px 0;
+}
+
+#outgoingComprehensiveReportModal .modal-content {
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 8px 32px rgba(255, 107, 107, 0.18), 0 2px 8px rgba(0,0,0,0.08) !important;
+    padding: 0;
+    min-width: 340px;
+    max-width: 1200px;
+    width: 98vw;
+    animation: modalIn 0.35s cubic-bezier(.68,-0.55,.27,1.55);
+    overflow-x: auto;
+}
+
+@keyframes modalIn {
+    0% { transform: scale(0.85) translateY(60px); opacity: 0; }
+    100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+#outgoingComprehensiveReportModal .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 24px 12px 18px;
+    border-bottom: 1.5px solid #ffe8e8;
+    background: linear-gradient(135deg, #ffe8e8 0%, #fff 100%) !important;
+}
+
+#outgoingComprehensiveReportModal .modal-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #ff6b6b !important;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#outgoingComprehensiveReportModal .modal-close {
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 20px;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+#outgoingComprehensiveReportModal .modal-close:hover {
+    color: #e74c3c;
+}
+
+#outgoingComprehensiveReportModal .modal-body {
+    padding: 32px 32px 32px 32px;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+/* تب‌ها - دقیقاً شبیه چک‌های ورودی */
+#outgoingComprehensiveReportModal .report-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+}
+
+#outgoingComprehensiveReportModal .tab-header {
+    margin-top: 0;
+    margin-bottom: 18px;
+}
+
+/* دکمه‌های تب مدرن */
+#outgoingComprehensiveReportModal .tab-btn {
+    background: #fff5f5 !important;
+    color: #ff6b6b !important;
+    border: 1.5px solid #ffe8e8 !important;
+    border-radius: 12px 12px 0 0;
+    padding: 10px 28px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 2px 8px #ffe8e833 !important;
+    transition: background 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+    position: relative;
+    z-index: 1;
+}
+
+#outgoingComprehensiveReportModal .tab-btn.active {
+    background: #ff6b6b !important;
+    color: #fff !important;
+    border-color: #ff6b6b #ff6b6b #fff #ff6b6b !important;
+    box-shadow: 0 4px 16px #ff6b6b33 !important;
+}
+
+#outgoingComprehensiveReportModal .tab-btn:not(.active):hover {
+    background: #ffe8e8 !important;
+    color: #ff6b6b !important;
+    border-color: #ff6b6b !important;
+}
+
+/* جدول گزارش - دقیقاً شبیه چک‌های ورودی */
+#outgoingComprehensiveReportModal .report-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+    font-size: 15px;
+    min-width: 700px;
+}
+
+#outgoingComprehensiveReportModal .report-table th,
+#outgoingComprehensiveReportModal .report-table td {
+    padding: 10px 8px;
+    text-align: center;
+}
+
+#outgoingComprehensiveReportModal .report-table th {
+    background: #ffe8e8 !important;
+    color: #ff6b6b !important;
+    font-weight: 700;
+    border-bottom: 2px solid #ffc8c8 !important;
+}
+
+#outgoingComprehensiveReportModal .report-table tr:nth-child(even) {
+    background: #f8fafb;
+}
+
+#outgoingComprehensiveReportModal .report-table tr:nth-child(odd) {
+    background: #fff;
+}
+
+#outgoingComprehensiveReportModal .report-table td {
+    color: #333;
+    font-weight: 500;
+}
+
+/* کنترل‌های مرتب‌سازی */
+#outgoingComprehensiveReportModal .sort-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#outgoingComprehensiveReportModal .sort-label {
+    font-size: 15px;
+    color: #555;
+    margin-left: 8px;
+}
+
+#outgoingComprehensiveReportModal .sort-toggle {
+    display: flex;
+    gap: 4px;
+}
+
+#outgoingComprehensiveReportModal .sort-btn {
+    padding: 6px 14px;
+    border-radius: 8px;
+    border: 1.5px solid #ffe8e8 !important;
+    background: #fff;
+    color: #ff6b6b !important;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+    outline: none;
+}
+
+#outgoingComprehensiveReportModal .sort-btn.active {
+    background: #fff5f5 !important;
+    color: #ff6b6b !important;
+    border-color: #ff6b6b !important;
+}
+
+#outgoingComprehensiveReportModal .sort-btn:hover:not(.active) {
+    background: #ffe8e8 !important;
+    color: #ff6b6b !important;
+}
+
+/* فیلترها */
+#outgoingComprehensiveReportModal .report-filters {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+#outgoingComprehensiveReportModal .filter-btn {
+    padding: 8px 16px;
+    border: 2px solid #e9ecef;
+    background: white;
+    border-radius: 20px;
+    color: #6c757d;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+#outgoingComprehensiveReportModal .filter-btn.active {
+    border-color: #4CAF50;
+    background: #4CAF50;
+    color: white;
+}
+
+#outgoingComprehensiveReportModal .filter-btn:hover {
+    border-color: #4CAF50;
+    color: #4CAF50;
+}
+
+#outgoingComprehensiveReportModal .filter-btn.active:hover {
+    background: #45a049;
+    color: white;
+}
+
+/* بج جایزه */
+#outgoingComprehensiveReportModal .medal-icon {
+    display: inline-block;
+    vertical-align: middle;
+    font-size: 1.25em;
+    margin-left: 6px;
+    line-height: 1;
+}
+
+#outgoingComprehensiveReportModal .percent-sign {
+    margin-left: 2px;
+    font-weight: bold;
+}
+
+#outgoingComprehensiveReportModal .gold-row {
+    background: linear-gradient(90deg, #fffbe6 0%, #fff3b0 100%);
+    color: #bfa100 !important;
+    font-weight: bold;
+}
+
+#outgoingComprehensiveReportModal .gold-row td {
+    border-color: #ffe066 !important;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    #outgoingComprehensiveReportModal .modal-content {
+        width: 100vw;
+        min-width: unset;
+        max-width: 100vw;
+        border-radius: 0;
+        padding: 0;
+    }
+    #outgoingComprehensiveReportModal .modal-header,
+    #outgoingComprehensiveReportModal .modal-body {
+        padding: 12px 8px;
+    }
+    #outgoingComprehensiveReportModal .report-table th,
+    #outgoingComprehensiveReportModal .report-table td {
+        padding: 7px 3px;
+        font-size: 13px;
+    }
+    #outgoingComprehensiveReportModal .modal-body {
+        padding: 12px 4px;
+        max-height: 90vh;
+    }
+    #outgoingComprehensiveReportModal .report-table {
+        min-width: 500px;
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 600px) {
+    #outgoingComprehensiveReportModal .tab-btn {
+        padding: 8px 10px;
+        font-size: 14px;
+    }
+    #outgoingComprehensiveReportModal .report-tabs {
+        gap: 4px;
+        margin-bottom: 14px;
+    }
+    #outgoingComprehensiveReportModal .report-filters {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    #outgoingComprehensiveReportModal .filter-btn {
+        text-align: center;
+    }
+} 

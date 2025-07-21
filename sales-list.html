@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لیست تراکنش‌ها - دیزاین مدرن</title>
+    <link rel="stylesheet" href="sales-list.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Yekan+Bakh:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="sales-list-container">
+        <header class="sales-list-header">
+            <h1><i class="fas fa-list"></i> لیست تراکنش‌ها</h1>
+            <div class="sales-list-actions">
+                <button class="btn primary"><i class="fas fa-plus-circle"></i> تراکنش جدید</button>
+                <button class="btn excel"><i class="fas fa-file-excel"></i> خروجی Excel</button>
+            </div>
+        </header>
+        <section class="sales-list-stats">
+            <div class="stat-card blue">
+                <div class="stat-title">تعداد تراکنش</div>
+                <div class="stat-value" id="stat-count">0</div>
+            </div>
+            <div class="stat-card green">
+                <div class="stat-title">مجموع فروش</div>
+                <div class="stat-value" id="stat-total">0 تومان</div>
+            </div>
+            <div class="stat-card orange">
+                <div class="stat-title">میانگین مبلغ</div>
+                <div class="stat-value" id="stat-avg">0 تومان</div>
+            </div>
+        </section>
+        <section class="sales-list-filters">
+            <input type="text" id="filter-buyer" placeholder="جستجو خریدار...">
+            <input type="text" id="filter-date" placeholder="تاریخ...">
+            <input type="text" id="filter-amount" placeholder="مبلغ...">
+            <select id="filter-status">
+                <option value="">همه وضعیت‌ها</option>
+                <option value="paid">پرداخت شده</option>
+                <option value="pending">در انتظار</option>
+                <option value="cancelled">لغو شده</option>
+            </select>
+            <button class="btn filter"><i class="fas fa-search"></i> جستجو</button>
+        </section>
+        <section class="sales-list-table-wrapper">
+            <table class="sales-list-table">
+                <thead>
+                    <tr>
+                        <th>تاریخ</th>
+                        <th>نام خریدار</th>
+                        <th>کالا</th>
+                        <th>مبلغ</th>
+                        <th>روش پرداخت</th>
+                        <th>وضعیت</th>
+                        <th>عملیات</th>
+                    </tr>
+                </thead>
+                <tbody id="sales-list-tbody">
+                    <!-- ردیف‌های داینامیک با جاوااسکریپت -->
+                </tbody>
+            </table>
+        </section>
+        <footer class="sales-list-footer">
+            <span id="sales-list-count">۰ تراکنش</span>
+            <span id="sales-list-total">مجموع: ۰ تومان</span>
+        </footer>
+    </div>
+    <script src="sales-list.js"></script>
+</body>
+</html> 

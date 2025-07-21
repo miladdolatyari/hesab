@@ -26,7 +26,8 @@ class DatabaseManager {
     // Check if we're online
     checkConnection() {
         if (!this.isOnline) {
-            throw new Error('No internet connection');
+            console.warn('⚠️ No internet connection - using local storage');
+            return false;
         }
         return true;
     }
@@ -39,7 +40,11 @@ class DatabaseManager {
         }
 
         // Check connection
-        this.checkConnection();
+        const isOnline = this.checkConnection();
+        if (!isOnline) {
+            console.log('🔄 Using local storage due to offline status');
+            return [];
+        }
 
         // Create new request
         const promise = requestFn();
@@ -650,6 +655,16 @@ class DatabaseManager {
             console.error('Error deleting outgoing check:', error);
             this.showNotification('خطا در حذف چک خروجی', 'error');
             throw error;
+        }
+    }
+
+    async getAllOutgoingChecks() {
+        try {
+            const outgoingChecks = JSON.parse(localStorage.getItem('outgoing_checks') || '[]');
+            return outgoingChecks;
+        } catch (error) {
+            console.error('Error getting all outgoing checks:', error);
+            return [];
         }
     }
 

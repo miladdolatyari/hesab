@@ -27,6 +27,8 @@
     <!-- Custom Styles -->
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="comprehensive-report.css">
+    <link rel="stylesheet" href="outgoing-comprehensive-report.css">
+    <link rel="stylesheet" href="outgoing-comprehensive-report.css">
     <link rel="stylesheet" href="mobile.css" media="only screen and (max-width:600px)">
     
     <!-- ApexCharts -->
@@ -36,7 +38,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <!-- Database Management -->
-    <script src="database.js"></script>
+    <!-- <script src="database.js"></script> -->
 </head>
 <body>
     <div class="app-container">
@@ -257,7 +259,8 @@
                         <button class="btn secondary" onclick="clearTransactionForm()">
                             <i class="fas fa-plus-circle"></i> تراکنش جدید
                         </button>
-                    <button class="btn primary" type="button">
+
+                    <button class="btn primary" type="button" onclick="saveTransaction()">
                         <i class="fas fa-save"></i> ذخیره تراکنش
                     </button>
                     </div>
@@ -522,6 +525,12 @@
                             <button type="button" class="btn secondary" id="add-check-btn">
                                 <i class="fas fa-plus-circle"></i> افزودن چک
                             </button>
+                        <button type="button" class="btn secondary" onclick="testTransactionAlert()" style="background: #27ae60; margin-right: 10px;">
+                            <i class="fas fa-check"></i> تست Alert
+                        </button>
+                        <button type="button" class="btn secondary" onclick="testSaveTransaction()" style="background: #e74c3c; margin-right: 10px;">
+                            <i class="fas fa-play"></i> تست ذخیره
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -530,24 +539,98 @@
             <!-- لیست تراکنش‌ها -->
             <section id="sales-list" class="content-section">
                 <div class="section-header">
-                    <h2>لیست تراکنش‌ها</h2>
+                    <h2><i class="fas fa-list"></i> لیست تراکنش‌ها</h2>
+                    <button id="expand-filters-btn-sales" class="btn secondary" style="padding: 8px 16px; font-size: 15px; border-radius: 10px; position: relative; box-shadow: 0 2px 8px #1976d233; background: #fff; color: #1976d2; border: 1.5px solid #1976d2;">
+                      <i class="fas fa-filter" style="font-size: 20px; color: #1976d2; filter: drop-shadow(0 2px 8px #1976d233);"></i> <span>فیلتر پیشرفته</span>
+                    </button>
                 </div>
+                <div class="advanced-filters-container" style="background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); border-radius: 16px; padding: 20px; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border: 1px solid #e3f2fd; display: none;" id="advanced-filters-sales">
+                  <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid #e3f2fd;">
+                    <i class="fas fa-filter" style="color: #1976d2; font-size: 20px;"></i>
+                    <h3 style="margin: 0; color: #2c3e50; font-size: 16px; font-weight: 600;">فیلترهای پیشرفته</h3>
+                    <div style="margin-right: auto; display: flex; gap: 8px;"></div>
+                  </div>
+                  <div class="main-filters" style="display: flex; gap: 12px; align-items: flex-end; margin-bottom: 0; flex-wrap: wrap; width: 100%;">
+                    <div class="filter-group" style="flex: 1; min-width: 180px;">
+                      <label style="display: block; margin-bottom: 6px; font-size: 13px; color: #666; font-weight: 500;"><i class="fas fa-user" style="margin-left: 6px; color: #1976d2;"></i>نام خریدار</label>
+                      <input type="text" id="sales-filter-buyer" class="form-control search-input" placeholder="جستجو در نام خریدار..." style="width: 100%; border-radius: 10px; border: 1.5px solid #e3f2fd; padding: 12px 16px; font-size: 14px; transition: all 0.3s ease;">
+                    </div>
+                    <div class="filter-group" style="flex: 1; min-width: 160px;">
+                      <label style="display: block; margin-bottom: 6px; font-size: 13px; color: #666; font-weight: 500;"><i class="fas fa-box" style="margin-left: 6px; color: #1976d2;"></i>کالا</label>
+                      <input type="text" id="sales-filter-product" class="form-control search-input" placeholder="نام کالا..." style="width: 100%; border-radius: 10px; border: 1.5px solid #e3f2fd; padding: 12px 16px; font-size: 14px; transition: all 0.3s ease;">
+                    </div>
+                    <div class="filter-group" style="flex: 1; min-width: 160px;">
+                      <label style="display: block; margin-bottom: 6px; font-size: 13px; color: #666; font-weight: 500;"><i class="fas fa-money-bill-wave" style="margin-left: 6px; color: #1976d2;"></i>مبلغ (یا بازه)</label>
+                      <input type="text" id="sales-filter-amount" class="form-control search-input" placeholder="مثلاً ۱۰۰۰۰۰۰-۵۰۰۰۰۰۰" style="width: 100%; border-radius: 10px; border: 1.5px solid #e3f2fd; padding: 12px 16px; font-size: 14px; transition: all 0.3s ease;">
+                    </div>
+                    <div class="filter-group" style="flex: 1; min-width: 160px;">
+                      <label style="display: block; margin-bottom: 6px; font-size: 13px; color: #666; font-weight: 500;"><i class="fas fa-calendar-alt" style="margin-left: 6px; color: #1976d2;"></i>از تاریخ</label>
+                      <input type="text" id="sales-filter-date-from" class="form-control search-input jalali-date" placeholder="از تاریخ..." style="width: 100%; border-radius: 10px; border: 1.5px solid #e3f2fd; padding: 12px 16px; font-size: 14px; transition: all 0.3s ease;">
+                    </div>
+                    <div class="filter-group" style="flex: 1; min-width: 160px;">
+                      <label style="display: block; margin-bottom: 6px; font-size: 13px; color: #666; font-weight: 500;"><i class="fas fa-calendar-check" style="margin-left: 6px; color: #1976d2;"></i>تا تاریخ</label>
+                      <input type="text" id="sales-filter-date-to" class="form-control search-input jalali-date" placeholder="تا تاریخ..." style="width: 100%; border-radius: 10px; border: 1.5px solid #e3f2fd; padding: 12px 16px; font-size: 14px; transition: all 0.3s ease;">
+                    </div>
+                    <div class="filter-group" style="flex: 1; min-width: 140px;">
+                      <label style="display: block; margin-bottom: 6px; font-size: 13px; color: #666; font-weight: 500;"><i class="fas fa-info-circle" style="margin-left: 6px; color: #1976d2;"></i>وضعیت</label>
+                      <select id="sales-filter-status" class="form-control search-status-big" style="width: 100%; border-radius: 10px; border: 1.5px solid #e3f2fd; padding: 12px 16px; font-size: 14px; background: #fff; transition: all 0.3s ease;">
+                        <option value="">همه وضعیت‌ها</option>
+                        <option value="paid">پرداخت شده</option>
+                        <option value="pending">در انتظار</option>
+                        <option value="cancelled">لغو شده</option>
+                      </select>
+                    </div>
+                    <div style="display: flex; align-items: flex-end;">
+                      <button class="btn primary" id="sales-filter-btn" style="padding: 12px 16px; font-size: 14px; border-radius: 10px; min-width: 120px; min-height: 48px; height: 48px; display: flex; align-items: center;"><i class="fas fa-search" style="margin-left: 8px;"></i>جستجو</button>
+                    </div>
+                  </div>
+                </div>
+                <!-- کارت‌های آماری -->
+                <div class="stats-cards" style="margin-bottom: 24px;">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);">
+                            <i class="fas fa-wallet"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="sales-total-count">۰</div>
+                            <div class="stat-label">تعداد تراکنش</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);">
+                            <i class="fas fa-money-bill-wave"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="sales-total-amount">۰ تومان</div>
+                            <div class="stat-label">مجموع فروش</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);">
+                            <i class="fas fa-coins"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="sales-avg-amount">۰ تومان</div>
+                            <div class="stat-label">میانگین مبلغ</div>
+                        </div>
+                    </div>
+                </div>
+                <!-- جدول تراکنش‌ها -->
                 <div class="table-responsive">
-                    <table class="sales-table">
+                    <table class="report-table" id="sales-list-table">
                         <thead>
                             <tr>
+                                <th>ردیف</th>
                                 <th>تاریخ</th>
                                 <th>نام خریدار</th>
-                                <th>شماره تماس</th>
-                                <th>نام کالا</th>
-                                <th>مبلغ فروش</th>
+                                <th>کالا</th>
+                                <th>مبلغ</th>
                                 <th>روش پرداخت</th>
-                                <th>استان</th>
-                                <th>شهر</th>
+                                <th>وضعیت</th>
                                 <th>عملیات</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="sales-list-tbody">
                             <!-- سطرهای تراکنش‌ها به صورت داینامیک اضافه می‌شود -->
                         </tbody>
                     </table>
@@ -630,7 +713,7 @@
                       <i class="fas fa-filter" style="color: #3498db; font-size: 18px;"></i>
                       <h3 style="margin: 0; color: #2c3e50; font-size: 16px; font-weight: 600;">فیلترهای پیشرفته</h3>
                       <div style="margin-right: auto; display: flex; gap: 8px;">
-                        <button id="expand-filters-btn" class="btn secondary" style="padding: 8px 16px; font-size: 13px; border-radius: 8px; position: relative;">
+                        <button id="expand-filters-btn-checks" class="btn secondary" style="padding: 8px 16px; font-size: 13px; border-radius: 8px; position: relative;">
                           <i class="fas fa-chevron-down"></i> فیلترهای بیشتر
                         </button>
                         <button id="reset-checks-btn" class="btn secondary" style="padding: 8px 16px; font-size: 13px; border-radius: 8px; background: #fff; color: #e74c3c; border: 1px solid #e74c3c;">
@@ -722,7 +805,7 @@
                 </div>
 
                     <!-- فیلترهای پیشرفته (Dropdown) -->
-                    <div id="advanced-filters" style="display: none; border-top: 1px solid #e3f2fd; padding-top: 16px; max-height: 0; overflow: hidden; transition: max-height 0.3s ease;">
+                    <div id="advanced-filters-checks" style="display: none; border-top: 1px solid #e3f2fd; padding-top: 16px; max-height: 0; overflow: hidden; transition: max-height 0.3s ease;">
                       <div style="display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; width: 100%;">
                         <div class="filter-group" style="flex: 1; min-width: 180px;">
                           <label style="display: block; margin-bottom: 6px; font-size: 13px; color: #666; font-weight: 500;">
@@ -834,6 +917,17 @@
                         </tbody>
                     </table>
                 </div>
+                
+                <!-- دکمه گزارش جامع چک‌ها -->
+                <div class="comprehensive-report-btn" id="comprehensiveReportBtn" title="گزارش جامع چک‌ها" style="display: none;">
+                  <div class="report-btn-icon">
+                    <i class="fas fa-chart-line"></i>
+                  </div>
+                  <div class="report-btn-text">
+                    <span>گزارش جامع</span>
+                    <small>آمار و رتبه‌بندی</small>
+                  </div>
+                </div>
             </section>
             <!-- بخش مدیریت چک‌های خروجی -->
             <section id="outgoing-checks" class="content-section">
@@ -909,6 +1003,17 @@
                         </defs>
                     </svg>
                     <div id="outgoingChecksStatusChart" style="width:100%;max-width:100%;min-width:0;padding:0 0 0 0;"></div>
+                </div>
+                
+                <!-- دکمه گزارش جامع چک‌های خروجی -->
+                <div class="comprehensive-report-btn" id="outgoing-comprehensive-report-btn" title="گزارش جامع چک‌های خروجی" style="display: none;">
+                  <div class="report-btn-icon">
+                    <i class="fas fa-chart-line"></i>
+                  </div>
+                  <div class="report-btn-text">
+                    <span>گزارش جامع</span>
+                    <small>آمار و رتبه‌بندی</small>
+                  </div>
                 </div>
 
                 <!-- فرم ثبت چک خروجی (Dropdown) -->
@@ -1438,17 +1543,6 @@
                     </div>
                 </div>
             </section>
-
-            <!-- دکمه گزارش جامع چک‌ها -->
-            <div class="comprehensive-report-btn" id="comprehensiveReportBtn" title="گزارش جامع چک‌ها">
-              <div class="report-btn-icon">
-                <i class="fas fa-chart-line"></i>
-              </div>
-              <div class="report-btn-text">
-                <span>گزارش جامع</span>
-                <small>آمار و رتبه‌بندی</small>
-              </div>
-            </div>
         </main>
     </div>
 
@@ -1527,6 +1621,107 @@
       </div>
     </div>
 
+    <!-- مودال گزارش جامع چک‌های خروجی -->
+    <div class="modal-overlay" id="outgoingComprehensiveReportModal" style="display:none;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <span class="modal-title"><i class="fas fa-chart-line"></i> گزارش جامع چک‌های خروجی</span>
+          <button class="modal-close" id="closeOutgoingComprehensiveReportModal"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+          <!-- تب‌های گزارش -->
+          <div class="report-tabs">
+            <button class="tab-btn active" data-tab="outgoing-monthly-stats">
+              <i class="fas fa-calendar-alt"></i>
+              آمار ماهانه
+            </button>
+            <button class="tab-btn" data-tab="outgoing-payee-ranking">
+              <i class="fas fa-users"></i>
+              رتبه‌بندی گیرندگان
+            </button>
+            <button class="tab-btn" data-tab="outgoing-status-ranking">
+              <i class="fas fa-info-circle"></i>
+              رتبه‌بندی وضعیت
+            </button>
+          </div>
+          <!-- محتوای تب آمار ماهانه -->
+          <div class="tab-content active" id="outgoing-monthly-stats">
+            <div class="tab-header" style="display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+              <h3 style="margin: 0; display: flex; align-items: center;"><i class="fas fa-calendar-alt" style="margin-left: 8px;"></i> آمار ماهانه چک‌های خروجی (فروردین تا اسفند)</h3>
+              <div class="sort-controls" style="display: flex; align-items: center; gap: 8px;">
+                <label class="sort-label" style="font-size: 15px; color: #555; margin-left: 8px;">مرتب‌سازی بر اساس تعداد چک:</label>
+                <div class="sort-toggle" style="display: flex; align-items: center; gap: 8px;">
+                  <button class="sort-btn active" id="outgoingSortDescBtn" data-sort="desc" title="بیشترین تعداد" type="button" style="padding: 6px 14px; border-radius: 8px; border: 1px solid #ffe8e8; background: #fff5f5; color: #ff6b6b; font-weight: bold; cursor: pointer;">
+                    <i class="fas fa-sort-amount-up"></i> بیشترین
+                  </button>
+                  <button class="sort-btn" id="outgoingSortAscBtn" data-sort="asc" title="کمترین تعداد" type="button" style="padding: 6px 14px; border-radius: 8px; border: 1px solid #ffe8e8; background: #fff; color: #ff6b6b; font-weight: bold; cursor: pointer;">
+                    <i class="fas fa-sort-amount-down"></i> کمترین
+                  </button>
+                  <button class="sort-btn" id="outgoingSortNoneBtn" data-sort="none" title="بدون فیلتر" type="button" style="padding: 6px 14px; border-radius: 8px; border: 1px solid #ffe8e8; background: #fff; color: #ff6b6b; font-weight: bold; cursor: pointer;">
+                    <i class="fas fa-calendar"></i> بدون فیلتر
+                  </button>
+                </div>
+              </div>
+            </div>
+            <table class="report-table">
+              <thead>
+                <tr>
+                  <th>ماه</th>
+                  <th>تعداد چک</th>
+                  <th>مبلغ هر چک</th>
+                  <th>جمع مبالغ (تومان)</th>
+                  <th>درصد از کل</th>
+                </tr>
+              </thead>
+              <tbody id="outgoingMonthlyStatsTableBody">
+                <!-- داده‌ها با جاوااسکریپت پر می‌شود -->
+              </tbody>
+            </table>
+          </div>
+          <!-- محتوای تب رتبه‌بندی گیرندگان -->
+          <div class="tab-content" id="outgoing-payee-ranking" style="display:none;">
+            <div class="tab-header">
+              <h3><i class="fas fa-users"></i> رتبه‌بندی گیرندگان چک</h3>
+            </div>
+            <table class="report-table">
+              <thead>
+                <tr>
+                  <th>گیرنده</th>
+                  <th>تعداد چک</th>
+                  <th>مبلغ هر چک</th>
+                  <th>جمع مبالغ (تومان)</th>
+                  <th>درصد از کل</th>
+                </tr>
+              </thead>
+              <tbody id="outgoingPayeeStatsTableBody">
+                <!-- داده‌ها با جاوااسکریپت پر می‌شود -->
+              </tbody>
+            </table>
+          </div>
+          <!-- محتوای تب رتبه‌بندی وضعیت -->
+          <div class="tab-content" id="outgoing-status-ranking" style="display:none;">
+            <div class="tab-header">
+              <h3><i class="fas fa-info-circle"></i> رتبه‌بندی وضعیت چک‌ها</h3>
+            </div>
+            <table class="report-table">
+              <thead>
+                <tr>
+                  <th>وضعیت</th>
+                  <th>تعداد چک</th>
+                  <th>مبلغ هر چک</th>
+                  <th>جمع مبالغ (تومان)</th>
+                  <th>درصد از کل</th>
+                </tr>
+              </thead>
+              <tbody id="outgoingStatusStatsTableBody">
+                <!-- داده‌ها با جاوااسکریپت پر می‌شود -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div id="transaction-quickview-modal" style="display:none;">
       <div class="quickview-content">
         <button class="quickview-close">×</button>
@@ -1534,11 +1729,13 @@
       </div>
     </div>
 
+    <script src="database.js"></script>
     <script src="script.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@majidh1/jalalidatepicker/dist/jalalidatepicker.min.js"></script>
     <script src="comprehensive-report.js"></script>
-    <script src="main.js"></script>
-    <script src="database.js"></script>
+    <script src="outgoing-comprehensive-report.js"></script>
+    <script src="outgoing-comprehensive-report.js"></script>
+    <!-- <script src="main.js"></script> -->
     <script src="outgoing-checks.js"></script>
     <style>
 .search-input {

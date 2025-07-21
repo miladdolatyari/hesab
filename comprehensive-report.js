@@ -1,4 +1,5 @@
 // --- گزارش جامع چک‌ها ---
+
 function fillMonthlyStats(sortOrder = 'desc') {
   const persianMonths = ['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
   let checksArr = [];
@@ -105,7 +106,10 @@ function switchTab(tabId) {
 // رویداد دکمه‌ها و تب‌ها
 window.addEventListener('DOMContentLoaded', function() {
   const btn = document.getElementById('comprehensiveReportBtn');
-  if (btn) btn.onclick = showComprehensiveReportModal;
+  if (btn) {
+    btn.onclick = showComprehensiveReportModal;
+    console.log('Event listener برای دکمه گزارش جامع اضافه شد');
+  }
   const closeBtn = document.getElementById('closeComprehensiveReportModal');
   if (closeBtn) closeBtn.onclick = hideComprehensiveReportModal;
   // بستن با کلیک روی پس‌زمینه مودال

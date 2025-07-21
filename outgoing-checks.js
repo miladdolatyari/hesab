@@ -2,7 +2,26 @@
 class OutgoingChecksManager {
     constructor() {
         this.currentCheckId = null;
-        this.init();
+        // منتظر ماندن تا database manager آماده شود
+        this.waitForDatabaseManager().then(() => {
+            this.init();
+        });
+    }
+
+    async waitForDatabaseManager() {
+        let attempts = 0;
+        const maxAttempts = 20;
+        
+        while (!window.dbManager && attempts < maxAttempts) {
+            await new Promise(resolve => setTimeout(resolve, 250));
+            attempts++;
+        }
+        
+        if (!window.dbManager) {
+            console.error('Database manager not available after multiple attempts');
+        } else {
+            console.log('Database manager is ready');
+        }
     }
 
     init() {
@@ -10,6 +29,36 @@ class OutgoingChecksManager {
         this.loadStats();
         this.setupEventListeners();
         this.initChart();
+        if (!document.getElementById('next-check-modal')) {
+            const modal = document.createElement('div');
+            modal.id = 'next-check-modal';
+            modal.className = 'custom-modal-overlay';
+            modal.innerHTML = `
+                <div class="custom-modal-content">
+                    <button class="modal-close-btn" title="بستن">&times;</button>
+                    <div class="custom-modal-body">
+                        <p>آیا می‌خواهید چک دیگری برای همین شخص ثبت کنید؟</p>
+                        <div class="modal-buttons">
+                            <button id="next-check-yes" class="btn primary">بله</button>
+                            <button id="next-check-no" class="btn secondary">خیر</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            document.getElementById('next-check-yes').onclick = () => {
+                this.hideNextCheckModal();
+                this.clearOutgoingCheckFormForNext();
+            };
+            document.getElementById('next-check-no').onclick = () => {
+                this.hideNextCheckModal();
+                this.clearOutgoingCheckForm();
+            };
+            document.querySelector('#next-check-modal .modal-close-btn').onclick = () => {
+                this.hideNextCheckModal();
+                this.clearOutgoingCheckForm();
+            };
+        }
     }
 
     setupEventListeners() {
@@ -270,13 +319,11 @@ class OutgoingChecksManager {
                     <td>
                         <div style="display: flex; flex-direction: column; gap: 2px;">
                             <span style="font-weight: 500;">${check.reason || '-'}</span>
-                            <span style="font-size: 12px; color: #6c757d;">${check.description || '-'}</span>
+                            <span style="font-size: 12px; color: #6c757d;" class="description-cell">${check.description || '-'}</span>
                         </div>
                     </td>
                     <td>${this.getStatusBadge(check.status)}</td>
-                    <td>
-                        ${this.getActionButtons(check)}
-                    </td>
+                    <td><div class="action-buttons">${this.getActionButtons(check)}</div></td>
                 `;
                 tbody.appendChild(row);
             });
@@ -344,15 +391,36 @@ class OutgoingChecksManager {
 
     getStatusBadge(status) {
         const statusConfig = {
-            'در جریان': { class: 'warning', icon: 'clock' },
-            'پرداخت شده': { class: 'success', icon: 'check-circle' },
-            'باطل شده': { class: 'danger', icon: 'times-circle' }
+            'در جریان': { 
+                background: '#fff3e0', 
+                color: '#f39c12', 
+                border: '#f39c12',
+                hoverBg: '#ffe0b2',
+                icon: 'clock',
+                text: 'در جریان'
+            },
+            'پرداخت شده': { 
+                background: '#e8f5e9', 
+                color: '#2ecc71', 
+                border: '#2ecc71',
+                hoverBg: '#c8e6c9',
+                icon: 'check-circle',
+                text: 'پرداخت شده'
+            },
+            'باطل شده': { 
+                background: '#ffebee', 
+                color: '#e74c3c', 
+                border: '#e74c3c',
+                hoverBg: '#ffcdd2',
+                icon: 'times-circle',
+                text: 'باطل شده'
+            }
         };
 
         const config = statusConfig[status] || statusConfig['در جریان'];
-        return `<span class="status-badge ${config.class}">
-            <i class="fas fa-${config.icon}"></i>
-            ${status}
+        return `<span style="background: ${config.background}; color: ${config.color}; padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: 500; display: inline-flex; align-items: center; gap: 4px; transition: all 0.3s ease; cursor: pointer; min-width: 90px; justify-content: center; white-space: nowrap;" onmouseover="this.style.background='${config.hoverBg}'; this.style.transform='scale(1.05)'" onmouseout="this.style.background='${config.background}'; this.style.transform='scale(1)'">
+            <i class="fas fa-${config.icon}" style="font-size: 10px;"></i>
+            ${config.text}
         </span>`;
     }
 
@@ -364,12 +432,14 @@ class OutgoingChecksManager {
             buttons += `
                 <button class="small-btn success outgoing-check-action-btn" 
                         data-action="mark-paid" data-id="${check.id}" 
-                        title="علامت‌گذاری به عنوان پرداخت شده">
+                        title="علامت‌گذاری به عنوان پرداخت شده"
+                        style="transition: all 0.3s ease; transform: scale(1);">
                     <i class="fas fa-check"></i>
                 </button>
                 <button class="small-btn danger outgoing-check-action-btn" 
                         data-action="mark-cancelled" data-id="${check.id}" 
-                        title="علامت‌گذاری به عنوان باطل شده">
+                        title="علامت‌گذاری به عنوان باطل شده"
+                        style="transition: all 0.3s ease; transform: scale(1);">
                     <i class="fas fa-times"></i>
                 </button>
             `;
@@ -377,12 +447,14 @@ class OutgoingChecksManager {
             buttons += `
                 <button class="small-btn warning outgoing-check-action-btn" 
                         data-action="mark-pending" data-id="${check.id}" 
-                        title="بازگشت به وضعیت در جریان">
+                        title="بازگشت به وضعیت در جریان"
+                        style="transition: all 0.3s ease; transform: scale(1);">
                     <i class="fas fa-undo"></i>
                 </button>
                 <button class="small-btn danger outgoing-check-action-btn" 
                         data-action="mark-cancelled" data-id="${check.id}" 
-                        title="علامت‌گذاری به عنوان باطل شده">
+                        title="علامت‌گذاری به عنوان باطل شده"
+                        style="transition: all 0.3s ease; transform: scale(1);">
                     <i class="fas fa-times"></i>
                 </button>
             `;
@@ -390,12 +462,14 @@ class OutgoingChecksManager {
             buttons += `
                 <button class="small-btn success outgoing-check-action-btn" 
                         data-action="mark-paid" data-id="${check.id}" 
-                        title="علامت‌گذاری به عنوان پرداخت شده">
+                        title="علامت‌گذاری به عنوان پرداخت شده"
+                        style="transition: all 0.3s ease; transform: scale(1);">
                     <i class="fas fa-check"></i>
                 </button>
                 <button class="small-btn warning outgoing-check-action-btn" 
                         data-action="mark-pending" data-id="${check.id}" 
-                        title="بازگشت به وضعیت در جریان">
+                        title="بازگشت به وضعیت در جریان"
+                        style="transition: all 0.3s ease; transform: scale(1);">
                     <i class="fas fa-undo"></i>
                 </button>
             `;
@@ -404,12 +478,14 @@ class OutgoingChecksManager {
         buttons += `
             <button class="small-btn info outgoing-check-action-btn" 
                     data-action="edit" data-id="${check.id}" 
-                    title="ویرایش">
+                    title="ویرایش"
+                    style="transition: all 0.3s ease; transform: scale(1);">
                 <i class="fas fa-edit"></i>
             </button>
             <button class="small-btn danger outgoing-check-action-btn" 
                     data-action="delete" data-id="${check.id}" 
-                    title="حذف">
+                    title="حذف"
+                    style="transition: all 0.3s ease; transform: scale(1);">
                 <i class="fas fa-trash"></i>
             </button>
         `;
@@ -419,51 +495,34 @@ class OutgoingChecksManager {
 
     async saveOutgoingCheck() {
         const formData = this.getFormData();
-        
         if (!this.validateForm(formData)) {
             return;
         }
-
         try {
             if (this.currentCheckId) {
-                console.log('Updating check with ID:', this.currentCheckId);
-                console.log('Form data:', formData);
-                // Update existing check
                 await window.dbManager.updateOutgoingCheck(this.currentCheckId, formData);
                 window.dbManager.showNotification('چک خروجی با موفقیت بروزرسانی شد', 'success');
+                this.clearOutgoingCheckForm();
+                this.refreshUI();
             } else {
-                console.log('Adding new check');
-                console.log('Form data:', formData);
-                // Add new check
                 await window.dbManager.addOutgoingCheck(formData);
                 window.dbManager.showNotification('چک خروجی با موفقیت ثبت شد', 'success');
-            }
-
-            // فوراً UI را بروزرسانی کن
-            this.refreshUI();
-            
-            // نمایش دکمه چک بعدی برای چک‌های جدید
-            if (!this.currentCheckId) {
-                const nextCheckBtn = document.getElementById('next-check-btn');
-                if (nextCheckBtn) {
-                    nextCheckBtn.style.display = 'inline-block';
-                }
-                
-                // پرسیدن از کاربر برای ثبت چک بعدی
-                const shouldAddNext = confirm('آیا می‌خواهید چک دیگری برای همین شخص ثبت کنید؟\n\nاگر بله را انتخاب کنید، اطلاعات تکراری (بانک، شعبه، در وجه، کد ملی، دلیل) حفظ می‌شود و فقط فیلدهای متغیر پاک می‌شود.');
-                
-                if (shouldAddNext) {
-                    this.clearOutgoingCheckFormForNext();
-                } else {
-                    this.clearOutgoingCheckForm();
-                }
-            } else {
-                this.clearOutgoingCheckForm();
+                this.refreshUI();
+                this.showNextCheckModal();
             }
         } catch (error) {
             console.error('خطا در ذخیره چک:', error);
             window.dbManager.showNotification('خطا در ذخیره چک', 'error');
         }
+    }
+
+    showNextCheckModal() {
+        const modal = document.getElementById('next-check-modal');
+        if (modal) modal.style.display = 'flex';
+    }
+    hideNextCheckModal() {
+        const modal = document.getElementById('next-check-modal');
+        if (modal) modal.style.display = 'none';
     }
 
     getFormData() {
@@ -936,6 +995,11 @@ class OutgoingChecksManager {
 
     async initChart() {
         try {
+            if (!window.dbManager) {
+                console.error('Database manager not available for chart initialization');
+                return;
+            }
+            
             const stats = await window.dbManager.getOutgoingCheckStats();
             this.renderChart(stats);
         } catch (error) {
@@ -1097,11 +1161,11 @@ class OutgoingChecksManager {
     }
 
     formatCurrency(amount) {
-        if (!amount || isNaN(amount)) return '۰ ریال';
+        if (!amount || isNaN(amount)) return '۰ تومان';
         
         const num = parseFloat(amount);
         const persianNum = this.convertToPersianNumbers(num.toLocaleString('en-US'));
-        return `${persianNum} ریال`;
+        return `${persianNum} تومان`;
     }
 
     formatDate(date) {
