@@ -544,6 +544,37 @@
                       <i class="fas fa-filter" style="font-size: 20px; color: #1976d2; filter: drop-shadow(0 2px 8px #1976d233);"></i> <span>فیلتر پیشرفته</span>
                     </button>
                 </div>
+                <!-- کارت‌های آماری -->
+                <div class="stats-cards" style="margin-bottom: 24px;">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);">
+                            <i class="fas fa-wallet"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="sales-total-count">۰</div>
+                            <div class="stat-label">تعداد تراکنش</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);">
+                            <i class="fas fa-money-bill-wave"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="sales-total-amount">۰ تومان</div>
+                            <div class="stat-label">مجموع فروش</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);">
+                            <i class="fas fa-coins"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="sales-avg-amount">۰ تومان</div>
+                            <div class="stat-label">میانگین مبلغ</div>
+                        </div>
+                    </div>
+                </div>
+                <!-- فیلتر پیشرفته (زیر کارت‌های آماری) -->
                 <div class="advanced-filters-container" style="background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); border-radius: 16px; padding: 20px; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border: 1px solid #e3f2fd; display: none;" id="advanced-filters-sales">
                   <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid #e3f2fd;">
                     <i class="fas fa-filter" style="color: #1976d2; font-size: 20px;"></i>
@@ -580,40 +611,7 @@
                         <option value="cancelled">لغو شده</option>
                       </select>
                     </div>
-                    <div style="display: flex; align-items: flex-end;">
-                      <button class="btn primary" id="sales-filter-btn" style="padding: 12px 16px; font-size: 14px; border-radius: 10px; min-width: 120px; min-height: 48px; height: 48px; display: flex; align-items: center;"><i class="fas fa-search" style="margin-left: 8px;"></i>جستجو</button>
-                    </div>
                   </div>
-                </div>
-                <!-- کارت‌های آماری -->
-                <div class="stats-cards" style="margin-bottom: 24px;">
-                    <div class="stat-card">
-                        <div class="stat-icon" style="background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);">
-                            <i class="fas fa-wallet"></i>
-                        </div>
-                        <div class="stat-info">
-                            <div class="stat-value" id="sales-total-count">۰</div>
-                            <div class="stat-label">تعداد تراکنش</div>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon" style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);">
-                            <i class="fas fa-money-bill-wave"></i>
-                        </div>
-                        <div class="stat-info">
-                            <div class="stat-value" id="sales-total-amount">۰ تومان</div>
-                            <div class="stat-label">مجموع فروش</div>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon" style="background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);">
-                            <i class="fas fa-coins"></i>
-                        </div>
-                        <div class="stat-info">
-                            <div class="stat-value" id="sales-avg-amount">۰ تومان</div>
-                            <div class="stat-label">میانگین مبلغ</div>
-                        </div>
-                    </div>
                 </div>
                 <!-- جدول تراکنش‌ها -->
                 <div class="table-responsive">
@@ -1273,16 +1271,88 @@
             <!-- بخش مشتریان -->
             <section id="customers" class="content-section">
                 <div class="section-header">
-                    <h2>مدیریت مشتریان</h2>
-                    <button class="btn primary">
-                        <i class="fas fa-plus-circle"></i> مشتری جدید
+                    <h2><i class="fas fa-users"></i> لیست مشتریان</h2>
+                    <button id="expand-filters-btn-customers" class="btn secondary" style="padding: 8px 16px; font-size: 15px; border-radius: 10px; position: relative; box-shadow: 0 2px 8px #1976d233; background: #fff; color: #1976d2; border: 1.5px solid #1976d2;">
+                      <i class="fas fa-filter" style="font-size: 20px; color: #1976d2; filter: drop-shadow(0 2px 8px #1976d233);"></i> <span>فیلتر پیشرفته</span>
                     </button>
                 </div>
-
-                <div class="customers-table">
-                    <table>
+                <!-- کارت‌های آماری -->
+                <div class="stats-cards" style="margin-bottom: 24px;">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #1976d2 0%, #64b5f6 100%);">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="stat-customer-count">۰</div>
+                            <div class="stat-label">تعداد مشتریان</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #43a047 0%, #b2ff59 100%);">
+                            <i class="fas fa-money-bill-wave"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="stat-total-purchases">۰ تومان</div>
+                            <div class="stat-label">مجموع خریدها</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #ff9800 0%, #ffb74d 100%);">
+                            <i class="fas fa-coins"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="stat-avg-purchase">۰ تومان</div>
+                            <div class="stat-label">میانگین خرید</div>
+                        </div>
+                    </div>
+                </div>
+                <!-- فیلتر ساده -->
+                <div class="sales-list-filters">
+                    <input type="text" id="filter-customer-name" placeholder="جستجو نام مشتری...">
+                    <input type="text" id="filter-customer-phone" placeholder="شماره تماس...">
+                    <input type="text" id="filter-customer-email" placeholder="ایمیل...">
+                    <button class="btn filter" id="customer-filter-btn"><i class="fas fa-search"></i> جستجو</button>
+                </div>
+                <!-- فیلتر پیشرفته (Dropdown) -->
+                <div class="advanced-filters-container" id="advanced-filters-customers" style="background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); border-radius: 16px; padding: 20px; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border: 1px solid #e3f2fd; display: none; max-height: 0; opacity: 0; overflow: hidden; transition: max-height 0.45s cubic-bezier(.4,1.2,.4,1), opacity 0.35s, padding 0.35s;">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid #e3f2fd;">
+                        <i class="fas fa-filter" style="color: #1976d2; font-size: 20px;"></i>
+                        <h3 style="margin: 0; color: #2c3e50; font-size: 16px; font-weight: 600;">فیلترهای پیشرفته</h3>
+                        <div style="margin-right: auto; display: flex; gap: 8px;"></div>
+                    </div>
+                    <div class="main-filters" style="display: flex; gap: 12px; align-items: flex-end; margin-bottom: 0; flex-wrap: wrap; width: 100%;">
+                        <div class="filter-group" style="flex: 1; min-width: 140px;">
+                            <label style="display: block; margin-bottom: 6px; font-size: 13px; color: #666; font-weight: 500;"><i class="fas fa-map-marker-alt" style="margin-left: 6px; color: #1976d2;"></i>استان</label>
+                            <input type="text" id="filter-customer-province" class="form-control search-input" placeholder="استان..." style="width: 100%; border-radius: 10px; border: 1.5px solid #e3f2fd; padding: 12px 16px; font-size: 14px; transition: all 0.3s ease;">
+                        </div>
+                        <div class="filter-group" style="flex: 1; min-width: 140px;">
+                            <label style="display: block; margin-bottom: 6px; font-size: 13px; color: #666; font-weight: 500;"><i class="fas fa-city" style="margin-left: 6px; color: #1976d2;"></i>شهر</label>
+                            <input type="text" id="filter-customer-city" class="form-control search-input" placeholder="شهر..." style="width: 100%; border-radius: 10px; border: 1.5px solid #e3f2fd; padding: 12px 16px; font-size: 14px; transition: all 0.3s ease;">
+                        </div>
+                        <div class="filter-group" style="flex: 1; min-width: 140px;">
+                            <label style="display: block; margin-bottom: 6px; font-size: 13px; color: #666; font-weight: 500;"><i class="fas fa-music" style="margin-left: 6px; color: #1976d2;"></i>نوع ساز</label>
+                            <input type="text" id="filter-customer-instrument" class="form-control search-input" placeholder="نوع ساز..." style="width: 100%; border-radius: 10px; border: 1.5px solid #e3f2fd; padding: 12px 16px; font-size: 14px; transition: all 0.3s ease;">
+                        </div>
+                        <div class="filter-group" style="flex: 1; min-width: 140px;">
+                            <label style="display: block; margin-bottom: 6px; font-size: 13px; color: #666; font-weight: 500;"><i class="fas fa-sort-numeric-up" style="margin-left: 6px; color: #1976d2;"></i>تعداد خرید (مثلاً 1-5)</label>
+                            <input type="text" id="filter-customer-purchases" class="form-control search-input" placeholder="تعداد خرید..." style="width: 100%; border-radius: 10px; border: 1.5px solid #e3f2fd; padding: 12px 16px; font-size: 14px; transition: all 0.3s ease;">
+                        </div>
+                        <div class="filter-group" style="flex: 1; min-width: 140px;">
+                            <label style="display: block; margin-bottom: 6px; font-size: 13px; color: #666; font-weight: 500;"><i class="fas fa-calendar-alt" style="margin-left: 6px; color: #1976d2;"></i>تاریخ آخرین خرید از</label>
+                            <input type="text" id="filter-customer-lastbuy-from" class="form-control search-input jalali-date" placeholder="از تاریخ..." style="width: 100%; border-radius: 10px; border: 1.5px solid #e3f2fd; padding: 12px 16px; font-size: 14px; transition: all 0.3s ease;">
+                        </div>
+                        <div class="filter-group" style="flex: 1; min-width: 140px;">
+                            <label style="display: block; margin-bottom: 6px; font-size: 13px; color: #666; font-weight: 500;"><i class="fas fa-calendar-check" style="margin-left: 6px; color: #1976d2;"></i>تاریخ آخرین خرید تا</label>
+                            <input type="text" id="filter-customer-lastbuy-to" class="form-control search-input jalali-date" placeholder="تا تاریخ..." style="width: 100%; border-radius: 10px; border: 1.5px solid #e3f2fd; padding: 12px 16px; font-size: 14px; transition: all 0.3s ease;">
+                        </div>
+                    </div>
+                </div>
+                <!-- جدول مشتریان -->
+                <div class="table-responsive">
+                    <table class="report-table" id="customers-list-table">
                         <thead>
                             <tr>
+                                <th>ردیف</th>
                                 <th>نام</th>
                                 <th>تلفن</th>
                                 <th>تاریخ تولد</th>
@@ -1295,40 +1365,15 @@
                                 <th>عملیات</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr>
-                                <td>رضا محمدی</td>
-                                <td>۰۹۱۲۱۲۳۴۵۶۷</td>
-                                <td>۱۳۷۵/۰۲/۱۵</td>
-                                <td>تهران</td>
-                                <td>تهران</td>
-                                <td>پیانو</td>
-                                <td>۲</td>
-                                <td>۳۲۰,۰۰۰,۰۰۰</td>
-                                <td>۱۴۰۲/۰۴/۲۰</td>
-                                <td>
-                                    <button class="small-btn primary"><i class="fas fa-edit"></i></button>
-                                    <button class="small-btn danger"><i class="fas fa-trash"></i></button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>فاطمه احمدی</td>
-                                <td>۰۹۳۵۵۶۷۸۹۱۲</td>
-                                <td>۱۳۶۸/۰۹/۰۵</td>
-                                <td>اصفهان</td>
-                                <td>اصفهان</td>
-                                <td>گیتار</td>
-                                <td>۱</td>
-                                <td>۱۸۰,۰۰۰,۰۰۰</td>
-                                <td>۱۴۰۲/۰۵/۰۵</td>
-                                <td>
-                                    <button class="small-btn primary"><i class="fas fa-edit"></i></button>
-                                    <button class="small-btn danger"><i class="fas fa-trash"></i></button>
-                                </td>
-                            </tr>
+                        <tbody id="customers-list-tbody">
+                            <!-- ردیف‌های داینامیک با جاوااسکریپت -->
                         </tbody>
                     </table>
                 </div>
+                <footer class="sales-list-footer">
+                    <span id="customers-list-count">۰ مشتری</span>
+                    <span id="customers-list-total">مجموع خریدها: ۰ تومان</span>
+                </footer>
             </section>
 
             <!-- بخش گزارشات -->
