@@ -1272,9 +1272,6 @@
             <section id="customers" class="content-section">
                 <div class="section-header">
                     <h2><i class="fas fa-users"></i> لیست مشتریان</h2>
-                    <button id="expand-filters-btn-customers" class="btn secondary" style="padding: 8px 16px; font-size: 15px; border-radius: 10px; position: relative; box-shadow: 0 2px 8px #1976d233; background: #fff; color: #1976d2; border: 1.5px solid #1976d2;">
-                      <i class="fas fa-filter" style="font-size: 20px; color: #1976d2; filter: drop-shadow(0 2px 8px #1976d233);"></i> <span>فیلتر پیشرفته</span>
-                    </button>
                 </div>
                 <!-- کارت‌های آماری -->
                 <div class="stats-cards" style="margin-bottom: 24px;">
@@ -1305,47 +1302,59 @@
                             <div class="stat-label">میانگین خرید</div>
                         </div>
                     </div>
-                </div>
-                <!-- فیلتر ساده -->
-                <div class="sales-list-filters">
-                    <input type="text" id="filter-customer-name" placeholder="جستجو نام مشتری...">
-                    <input type="text" id="filter-customer-phone" placeholder="شماره تماس...">
-                    <input type="text" id="filter-customer-email" placeholder="ایمیل...">
-                    <button class="btn filter" id="customer-filter-btn"><i class="fas fa-search"></i> جستجو</button>
-                </div>
-                <!-- فیلتر پیشرفته (Dropdown) -->
-                <div class="advanced-filters-container" id="advanced-filters-customers" style="background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); border-radius: 16px; padding: 20px; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border: 1px solid #e3f2fd; display: none; max-height: 0; opacity: 0; overflow: hidden; transition: max-height 0.45s cubic-bezier(.4,1.2,.4,1), opacity 0.35s, padding 0.35s;">
-                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid #e3f2fd;">
-                        <i class="fas fa-filter" style="color: #1976d2; font-size: 20px;"></i>
-                        <h3 style="margin: 0; color: #2c3e50; font-size: 16px; font-weight: 600;">فیلترهای پیشرفته</h3>
-                        <div style="margin-right: auto; display: flex; gap: 8px;"></div>
-                    </div>
-                    <div class="main-filters" style="display: flex; gap: 12px; align-items: flex-end; margin-bottom: 0; flex-wrap: wrap; width: 100%;">
-                        <div class="filter-group" style="flex: 1; min-width: 140px;">
-                            <label style="display: block; margin-bottom: 6px; font-size: 13px; color: #666; font-weight: 500;"><i class="fas fa-map-marker-alt" style="margin-left: 6px; color: #1976d2;"></i>استان</label>
-                            <input type="text" id="filter-customer-province" class="form-control search-input" placeholder="استان..." style="width: 100%; border-radius: 10px; border: 1.5px solid #e3f2fd; padding: 12px 16px; font-size: 14px; transition: all 0.3s ease;">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #8e24aa 0%, #ce93d8 100%);">
+                            <i class="fas fa-city"></i>
                         </div>
-                        <div class="filter-group" style="flex: 1; min-width: 140px;">
-                            <label style="display: block; margin-bottom: 6px; font-size: 13px; color: #666; font-weight: 500;"><i class="fas fa-city" style="margin-left: 6px; color: #1976d2;"></i>شهر</label>
-                            <input type="text" id="filter-customer-city" class="form-control search-input" placeholder="شهر..." style="width: 100%; border-radius: 10px; border: 1.5px solid #e3f2fd; padding: 12px 16px; font-size: 14px; transition: all 0.3s ease;">
-                        </div>
-                        <div class="filter-group" style="flex: 1; min-width: 140px;">
-                            <label style="display: block; margin-bottom: 6px; font-size: 13px; color: #666; font-weight: 500;"><i class="fas fa-music" style="margin-left: 6px; color: #1976d2;"></i>نوع ساز</label>
-                            <input type="text" id="filter-customer-instrument" class="form-control search-input" placeholder="نوع ساز..." style="width: 100%; border-radius: 10px; border: 1.5px solid #e3f2fd; padding: 12px 16px; font-size: 14px; transition: all 0.3s ease;">
-                        </div>
-                        <div class="filter-group" style="flex: 1; min-width: 140px;">
-                            <label style="display: block; margin-bottom: 6px; font-size: 13px; color: #666; font-weight: 500;"><i class="fas fa-sort-numeric-up" style="margin-left: 6px; color: #1976d2;"></i>تعداد خرید (مثلاً 1-5)</label>
-                            <input type="text" id="filter-customer-purchases" class="form-control search-input" placeholder="تعداد خرید..." style="width: 100%; border-radius: 10px; border: 1.5px solid #e3f2fd; padding: 12px 16px; font-size: 14px; transition: all 0.3s ease;">
-                        </div>
-                        <div class="filter-group" style="flex: 1; min-width: 140px;">
-                            <label style="display: block; margin-bottom: 6px; font-size: 13px; color: #666; font-weight: 500;"><i class="fas fa-calendar-alt" style="margin-left: 6px; color: #1976d2;"></i>تاریخ آخرین خرید از</label>
-                            <input type="text" id="filter-customer-lastbuy-from" class="form-control search-input jalali-date" placeholder="از تاریخ..." style="width: 100%; border-radius: 10px; border: 1.5px solid #e3f2fd; padding: 12px 16px; font-size: 14px; transition: all 0.3s ease;">
-                        </div>
-                        <div class="filter-group" style="flex: 1; min-width: 140px;">
-                            <label style="display: block; margin-bottom: 6px; font-size: 13px; color: #666; font-weight: 500;"><i class="fas fa-calendar-check" style="margin-left: 6px; color: #1976d2;"></i>تاریخ آخرین خرید تا</label>
-                            <input type="text" id="filter-customer-lastbuy-to" class="form-control search-input jalali-date" placeholder="تا تاریخ..." style="width: 100%; border-radius: 10px; border: 1.5px solid #e3f2fd; padding: 12px 16px; font-size: 14px; transition: all 0.3s ease;">
+                        <div class="stat-info">
+                            <div class="stat-value" id="stat-top-city">-</div>
+                            <div class="stat-label">پرفروش‌ترین شهر</div>
                         </div>
                     </div>
+                </div>
+                <!-- فیلتر مشتریان با دیزاین sales-list -->
+                <div class="advanced-filters-container" id="customers-filters" style="background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); border-radius: 16px; padding: 20px; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border: 1px solid #e3f2fd; display: block;">
+                  <div class="main-filters" style="display: flex; gap: 12px; align-items: flex-end; margin-bottom: 0; flex-wrap: wrap; width: 100%;">
+                    <div class="filter-group" style="flex: 1; min-width: 140px;">
+                      <label style="display: block; margin-bottom: 6px; font-size: 13px; color: #666; font-weight: 500;"><i class="fas fa-user" style="margin-left: 6px; color: #1976d2;"></i>نام مشتری</label>
+                      <input type="text" id="filter-customer-name" class="form-control search-input" placeholder="جستجو در نام مشتری..." style="width: 100%; border-radius: 10px; border: 1.5px solid #e3f2fd; padding: 12px 16px; font-size: 14px; transition: all 0.3s ease;">
+                    </div>
+                    <div class="filter-group" style="flex: 1; min-width: 140px;">
+                      <label style="display: block; margin-bottom: 6px; font-size: 13px; color: #666; font-weight: 500;"><i class="fas fa-phone" style="margin-left: 6px; color: #1976d2;"></i>شماره تماس</label>
+                      <input type="text" id="filter-customer-phone" class="form-control search-input" placeholder="شماره تماس..." style="width: 100%; border-radius: 10px; border: 1.5px solid #e3f2fd; padding: 12px 16px; font-size: 14px; transition: all 0.3s ease;">
+                    </div>
+                    <div class="filter-group" style="flex: 1; min-width: 140px;">
+                      <label style="display: block; margin-bottom: 6px; font-size: 13px; color: #666; font-weight: 500;"><i class="fas fa-envelope" style="margin-left: 6px; color: #1976d2;"></i>ایمیل</label>
+                      <input type="text" id="filter-customer-email" class="form-control search-input" placeholder="ایمیل..." style="width: 100%; border-radius: 10px; border: 1.5px solid #e3f2fd; padding: 12px 16px; font-size: 14px; transition: all 0.3s ease;">
+                    </div>
+                    <div class="filter-group" style="flex: 1; min-width: 140px;">
+                      <label style="display: block; margin-bottom: 6px; font-size: 13px; color: #666; font-weight: 500;"><i class="fas fa-map-marker-alt" style="margin-left: 6px; color: #1976d2;"></i>استان</label>
+                      <input type="text" id="filter-customer-province" class="form-control search-input" placeholder="استان..." style="width: 100%; border-radius: 10px; border: 1.5px solid #e3f2fd; padding: 12px 16px; font-size: 14px; transition: all 0.3s ease;">
+                    </div>
+                    <div class="filter-group" style="flex: 1; min-width: 140px;">
+                      <label style="display: block; margin-bottom: 6px; font-size: 13px; color: #666; font-weight: 500;"><i class="fas fa-city" style="margin-left: 6px; color: #1976d2;"></i>شهر</label>
+                      <input type="text" id="filter-customer-city" class="form-control search-input" placeholder="شهر..." style="width: 100%; border-radius: 10px; border: 1.5px solid #e3f2fd; padding: 12px 16px; font-size: 14px; transition: all 0.3s ease;">
+                    </div>
+                    <div class="filter-group" style="flex: 1; min-width: 140px;">
+                      <label style="display: block; margin-bottom: 6px; font-size: 13px; color: #666; font-weight: 500;"><i class="fas fa-music" style="margin-left: 6px; color: #1976d2;"></i>نوع ساز</label>
+                      <input type="text" id="filter-customer-instrument" class="form-control search-input" placeholder="نوع ساز..." style="width: 100%; border-radius: 10px; border: 1.5px solid #e3f2fd; padding: 12px 16px; font-size: 14px; transition: all 0.3s ease;">
+                    </div>
+                    <div class="filter-group" style="flex: 1; min-width: 140px;">
+                      <label style="display: block; margin-bottom: 6px; font-size: 13px; color: #666; font-weight: 500;"><i class="fas fa-sort-numeric-up" style="margin-left: 6px; color: #1976d2;"></i>تعداد خرید (مثلاً 1-5)</label>
+                      <input type="text" id="filter-customer-purchases" class="form-control search-input" placeholder="تعداد خرید..." style="width: 100%; border-radius: 10px; border: 1.5px solid #e3f2fd; padding: 12px 16px; font-size: 14px; transition: all 0.3s ease;">
+                    </div>
+                    <div class="filter-group" style="flex: 1; min-width: 140px;">
+                      <label style="display: block; margin-bottom: 6px; font-size: 13px; color: #666; font-weight: 500;"><i class="fas fa-calendar-alt" style="margin-left: 6px; color: #1976d2;"></i>تاریخ آخرین خرید از</label>
+                      <input type="text" id="filter-customer-lastbuy-from" class="form-control search-input jalali-date" placeholder="از تاریخ..." style="width: 100%; border-radius: 10px; border: 1.5px solid #e3f2fd; padding: 12px 16px; font-size: 14px; transition: all 0.3s ease;">
+                    </div>
+                    <div class="filter-group" style="flex: 1; min-width: 140px;">
+                      <label style="display: block; margin-bottom: 6px; font-size: 13px; color: #666; font-weight: 500;"><i class="fas fa-calendar-check" style="margin-left: 6px; color: #1976d2;"></i>تاریخ آخرین خرید تا</label>
+                      <input type="text" id="filter-customer-lastbuy-to" class="form-control search-input jalali-date" placeholder="تا تاریخ..." style="width: 100%; border-radius: 10px; border: 1.5px solid #e3f2fd; padding: 12px 16px; font-size: 14px; transition: all 0.3s ease;">
+                    </div>
+                    <div class="filter-group" style="flex: 0 0 120px; min-width: 120px;">
+                      <button class="btn filter" id="customer-filter-btn" style="width: 100%;"><i class="fas fa-search"></i> جستجو</button>
+                    </div>
+                  </div>
                 </div>
                 <!-- جدول مشتریان -->
                 <div class="table-responsive">
