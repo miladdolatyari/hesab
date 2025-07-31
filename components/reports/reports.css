@@ -1,0 +1,19 @@
+/* reports.css */
+#reports-list .report-table {
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(25, 118, 210, 0.08), 0 1.5px 8px 0 rgba(46, 204, 113, 0.08);
+  background: #fff;
+  margin-top: 0;
+  animation: fadeInTable 0.7s cubic-bezier(.4,2,.6,1) both;
+}
+#reports-list .report-table th, #reports-list .report-table td {
+  font-size: 15px;
+  border-bottom: 1.5px solid #e3f2fd;
+  position: relative;
+}
+#reports-list .report-table td.row-index {
+  color: #90caf9;
+  font-weight: bold;
+  font-size: 1.1em;
+} 

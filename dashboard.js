@@ -1,0 +1,3 @@
+// dashboard.js
+// کدهای مربوط به داشبورد و آمار کلی
+// ... کدهای updateDashboard، createMonthlyPerformanceChart و ... را اینجا منتقل کن ... 

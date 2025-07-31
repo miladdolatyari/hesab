@@ -2,6 +2,7 @@
 let buyers = [];
 let sales = [];
 let checks = [];
+let products = [];
 let employees = [];
 
 // ابزار کمکی برای تولید شناسه یکتا
@@ -82,6 +83,7 @@ function saveAllData() {
   localStorage.setItem('buyers', JSON.stringify(buyers));
   localStorage.setItem('sales', JSON.stringify(sales));
   localStorage.setItem('checks', JSON.stringify(checks));
+  localStorage.setItem('products', JSON.stringify(products));
 }
 
 // مهاجرت داده‌های قدیمی - اضافه کردن priceRaw به تراکنش‌های موجود
@@ -100,13 +102,59 @@ function migrateOldSalesData() {
 
 // بارگذاری داده‌ها از localStorage
 function loadAllData() {
-  buyers = JSON.parse(localStorage.getItem('buyers') || '[]');
-  sales = JSON.parse(localStorage.getItem('sales') || '[]');
-  checks = JSON.parse(localStorage.getItem('checks') || '[]');
+  console.log('=== Loading data from localStorage ===');
+  
+  // بارگذاری از localStorage
+  const buyersData = localStorage.getItem('buyers');
+  const salesData = localStorage.getItem('sales');
+  const checksData = localStorage.getItem('checks');
+  const productsData = localStorage.getItem('products');
+  
+  console.log('localStorage data:', {
+    buyers: buyersData ? JSON.parse(buyersData).length : 0,
+    sales: salesData ? JSON.parse(salesData).length : 0,
+    checks: checksData ? JSON.parse(checksData).length : 0,
+    products: productsData ? JSON.parse(productsData).length : 0
+  });
+  
+  buyers = JSON.parse(buyersData || '[]');
+  sales = JSON.parse(salesData || '[]');
+  checks = JSON.parse(checksData || '[]');
+  products = JSON.parse(productsData || '[]');
+  
+  console.log('Initial data loaded:', {
+    buyers: buyers.length,
+    sales: sales.length,
+    checks: checks.length,
+    products: products.length
+  });
+  
   // مهاجرت داده‌های قدیمی
   migrateOldSalesData();
-  // اضافه کردن داده‌های نمونه چک‌ها در صورت خالی بودن
-  initializeSampleChecksData();
+  
+  // اضافه کردن داده‌های نمونه در صورت خالی بودن
+  if (buyers.length === 0) {
+    initializeSampleBuyersData();
+  }
+  if (sales.length === 0) {
+    initializeSampleSalesData();
+  }
+  if (checks.length === 0) {
+    initializeSampleChecksData();
+  }
+  if (products.length === 0) {
+    initializeSampleProductsData();
+  }
+  
+  // رفع ارتباط ناقص بین مشتری و تراکنش
+  fixBuyersAndSalesRelations();
+  
+  console.log('Final data loaded:', {
+    buyers: buyers.length,
+    sales: sales.length,
+    checks: checks.length,
+    products: products.length
+  });
 }
 
 // ثبت تراکنش جدید
@@ -266,6 +314,8 @@ function saveTransaction() {
         existingSale.sellerName = sellerName;
         existingSale.sellerPercent = sellerPercent;
         existingSale.sellerCommission = sellerCommission;
+        existingSale.serialNumber = document.getElementById('serial-number') ? document.getElementById('serial-number').value : '';
+        existingSale.city = city;
         
         // به‌روزرسانی آمار خریدار جدید
         buyer.purchases++;
@@ -371,7 +421,9 @@ function saveTransaction() {
           teacherCommission,
           sellerName,
           sellerPercent,
-          sellerCommission
+          sellerCommission,
+          serialNumber: document.getElementById('serial-number') ? document.getElementById('serial-number').value : '',
+          city,
         };
         sales.push(sale);
 
@@ -435,10 +487,15 @@ function saveTransaction() {
     console.error('خطای کلی در saveTransaction:', error);
     showCustomAlert(`خطای غیرمنتظره: ${error.message}`, 'error');
   }
+  // انتهای تابع، بعد از ثبت یا ویرایش تراکنش
+  saveAllData();
 }
-
 // به‌روزرسانی جدول مشتریان با دیزاین جدید و فیلترها و کارت‌های آماری
 function updateBuyersTable() {
+  console.log('=== updateBuyersTable called ===');
+  console.log('Total buyers:', buyers.length);
+  console.log('Sample buyers:', buyers.slice(0, 2));
+  
   // فیلترها (یکپارچه)
   const nameFilter = document.getElementById('filter-customer-name')?.value?.trim() || '';
   const phoneFilter = document.getElementById('filter-customer-phone')?.value?.trim() || '';
@@ -485,6 +542,7 @@ function updateBuyersTable() {
   const citySales = {};
   filteredBuyers.forEach((buyer, idx) => {
     const buyerSales = sales.filter(s => s.buyerId === buyer.id);
+    const purchasesCount = buyerSales.length;
     const totalAmount = buyerSales.reduce((sum, s) => sum + (s.price || 0), 0);
     totalPurchases += totalAmount;
     // جمع فروش هر شهر
@@ -505,10 +563,10 @@ function updateBuyersTable() {
       buyer.province || '',
       buyer.city || '',
       buyer.instrument || '',
-      buyer.purchases ? toPersianDigits(buyer.purchases) : '',
+      purchasesCount ? toPersianDigits(purchasesCount) : '۰',
       toPersianDigits(totalAmount.toLocaleString()) + " <span style='font-size:12px;color:#888;'>تومان</span>",
       lastBuyOrDue ? toPersianDigits(lastBuyOrDue) : '',
-      `<div class="action-btns"><button class="action-btn" data-action="edit" data-idx="${idx}" title="ویرایش"><i class="fas fa-edit"></i></button><button class="action-btn" data-action="delete" data-idx="${idx}" title="حذف"><i class="fas fa-trash"></i></button></div>`
+      `<div class="action-btns"><button class="action-btn" data-action="orders" data-idx="${idx}" title="سوابق خرید"><i class="fas fa-history"></i></button><button class="action-btn" data-action="delete" data-idx="${idx}" title="حذف"><i class="fas fa-trash"></i></button></div>`
     ];
     const tr = document.createElement('tr');
     tr.innerHTML = cells.map((cell, i) => `<td${i === 0 ? " class='row-index'" : ''}>${cell}</td>`).join('');
@@ -554,17 +612,12 @@ function updateBuyersTable() {
       }
     });
   });
-  // ویرایش مشتری
-  tbody.querySelectorAll('button[data-action="edit"]').forEach(btn => {
+  // مشاهده خلاصه سفارش
+  tbody.querySelectorAll('button[data-action="orders"]').forEach(btn => {
     btn.addEventListener('click', function() {
       const idx = parseInt(this.getAttribute('data-idx'));
       const buyer = filteredBuyers[idx];
-      document.getElementById('customer-name').value = buyer.name;
-      document.getElementById('customer-phone').value = buyer.phone || '';
-      document.getElementById('customer-address').value = buyer.address || '';
-      document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
-      document.getElementById('transactions').classList.add('active');
-      document.getElementById('page-title').textContent = 'ثبت تراکنش';
+      showCustomerOrdersModal(buyer);
     });
   });
 }
@@ -575,8 +628,17 @@ function updateChecksTable(openBuyerId) {
   tbody.innerHTML = '';
   // گروه‌بندی چک‌ها بر اساس خریدار
   const filteredChecks = filterChecks(checks.map((c, idx) => ({...c, _idx: idx})));
+  
+  // اعمال فیلتر limit
+  const searchFilters = getChecksSearchFilters();
+  let limitedChecks = filteredChecks;
+  if (searchFilters.limit && searchFilters.limit !== 'all') {
+    const limit = parseInt(searchFilters.limit);
+    limitedChecks = filteredChecks.slice(0, limit);
+  }
+  
   const checksByBuyer = {};
-  filteredChecks.forEach((check) => {
+  limitedChecks.forEach((check) => {
     if (!checksByBuyer[check.buyerId]) checksByBuyer[check.buyerId] = [];
     checksByBuyer[check.buyerId].push(check);
   });
@@ -596,7 +658,7 @@ function updateChecksTable(openBuyerId) {
     const phone = buyer.phone ? `<span style=\"color:#888;font-size:12px;margin-right:12px;\"><i class='fas fa-phone' style='font-size:13px;'></i> ${toPersianDigits(buyer.phone)}</span>` : '';
     const city = buyer.city ? `<span style=\"color:#888;font-size:12px;margin-right:12px;\"><i class='fas fa-city' style='font-size:13px;'></i> ${buyer.city}</span>` : '';
     trParent.innerHTML = `
-      <td colspan=\"7\" style=\"background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-left: 4px solid #3498db; padding: 12px 16px; font-weight: 600; color: #2c3e50; cursor: pointer;\">
+      <td colspan=\"8\" style=\"background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-left: 4px solid #3498db; padding: 12px 16px; font-weight: 600; color: #2c3e50; cursor: pointer;\">
         <div style=\"display: flex; align-items: center; justify-content: space-between;\">
           <div style=\"display: flex; align-items: center; gap: 12px;\">
             <i class=\"fas fa-chevron-down group-toggle-icon\" style=\"color: #3498db; font-size: 14px; transition: transform 0.3s ease;\"></i>
@@ -639,10 +701,10 @@ function updateChecksTable(openBuyerId) {
           </div>
         </td>
         <td>
-          <div style=\"display: flex; flex-direction: column; gap: 2px;\">
-            <span style=\"font-weight: 500;\">${check.bank || '-'}</span>
-            <span style=\"font-size: 12px; color: #6c757d;\">${check.issuer || '-'}</span>
-          </div>
+          <div style=\"font-weight: 500;\">${check.bank || '-'}</div>
+        </td>
+        <td>
+          <div style=\"font-weight: 500;\">${check.issuer || '-'}</div>
         </td>
         <td>${getIncomingCheckStatusBadge(check.status)}</td>
         <td>
@@ -697,13 +759,13 @@ function updateChecksTable(openBuyerId) {
     const hasActiveFilters = filters.buyer || filters.sayadi || filters.amount || filters.bank || filters.dateFrom || filters.dateTo || filters.status;
     
     if (hasActiveFilters) {
-      tr.innerHTML = `<td colspan='7' style='text-align:center;padding:40px;color:#666;font-size:16px;font-weight:600;'>
+      tr.innerHTML = `<td colspan='8' style='text-align:center;padding:40px;color:#666;font-size:16px;font-weight:600;'>
         <i class="fas fa-search" style="font-size:3rem;margin-bottom:16px;display:block;color:#ddd;"></i>
         <div>هیچ چکی با فیلترهای اعمال شده یافت نشد</div>
         <div style="font-size:14px;color:#999;margin-top:8px;">فیلترها را تغییر دهید یا دکمه پاک کردن را بزنید</div>
       </td>`;
     } else {
-      tr.innerHTML = `<td colspan='7' style='text-align:center;padding:40px;color:#aaa;font-size:17px;font-weight:600;'>
+      tr.innerHTML = `<td colspan='8' style='text-align:center;padding:40px;color:#aaa;font-size:17px;font-weight:600;'>
         <i class="fas fa-inbox" style="font-size:3rem;margin-bottom:16px;display:block;color:#ddd;"></i>
         <div>هیچ چکی ثبت نشده است</div>
       </td>`;
@@ -735,7 +797,7 @@ function updateChecksTable(openBuyerId) {
       const editTr = document.createElement('tr');
       editTr.className = 'check-edit-row';
       editTr.innerHTML = `
-        <td colspan='7' style='background:#f8fafb;padding:18px 12px;'>
+        <td colspan='8' style='background:#f8fafb;padding:18px 12px;'>
           <div style='display:flex;flex-wrap:wrap;gap:14px;align-items:center;'>
             <input type='text' class='form-control' id='edit-sayadi' value='${toPersianDigits(check.sayadi||'')}' placeholder='شماره صیادی' style='width:140px;'>
             <input type='text' class='form-control' id='edit-to' value='${check.to||''}' placeholder='در وجه' style='width:120px;'>
@@ -917,7 +979,6 @@ function jalaliToGregorian(jalaliDate) {
   console.log(`تبدیل تاریخ: ${jalaliDate} (ماه ${month}) -> ${result.toLocaleDateString()} (ماه میلادی ${result.getMonth() + 1})`);
   return result;
 }
-
 // تابع ایجاد نمودار عملکرد ماهانه با ApexCharts
 function createMonthlyPerformanceChart() {
   const chartDiv = document.getElementById('monthlyPerformanceChart');
@@ -1205,6 +1266,14 @@ function updateSalesTable() {
     return buyerMatch && productMatch && amountMatch && dateMatch && statusMatch;
   });
 
+  // مرتب‌سازی بر اساس تاریخ (آخرین تراکنش اول)
+  filtered.sort((a, b) => {
+    // تبدیل تاریخ‌های شمسی به میلادی برای مقایسه
+    const dateA = a.date ? jalaliToGregorian(a.date) : new Date(0);
+    const dateB = b.date ? jalaliToGregorian(b.date) : new Date(0);
+    return dateB - dateA; // نزولی (جدیدترین اول)
+  });
+
   tbody.innerHTML = '';
   filtered.forEach((sale, idx) => {
     const buyer = buyers.find(b => b.id === sale.buyerId) || {};
@@ -1264,7 +1333,7 @@ function updateSalesTable() {
     });
   });
 
-  // ویرایش تراکنش
+  // ویرایش تراکنش (در جدول تراکنش‌ها)
   tbody.querySelectorAll('button[data-action="edit"]').forEach(btn => {
     btn.addEventListener('click', function() {
       const idx = parseInt(this.getAttribute('data-idx'));
@@ -1274,15 +1343,37 @@ function updateSalesTable() {
         window.isEditingTransaction = true;
         window.editingTransactionIndex = realIdx;
         window.editingTransactionId = sale.id;
-        // مقداردهی فرم و مقدار وضعیت
-        const statusInput = document.getElementById('sales-status-input');
-        if (statusInput) {
-          if (sale.status === 'paid' || sale.status === 'پرداخت شده') statusInput.value = 'paid';
-          else if (sale.status === 'pending' || sale.status === 'در انتظار') statusInput.value = 'pending';
-          else if (sale.status === 'cancelled' || sale.status === 'لغو شده') statusInput.value = 'cancelled';
-          else statusInput.value = '';
-        }
-        // ... پر کردن فرم ...
+        // مقداردهی فرم تراکنش با اطلاعات کامل
+        document.getElementById('customer-name').value = buyers.find(b=>b.id===sale.buyerId)?.name || '';
+        document.getElementById('customer-phone').value = buyers.find(b=>b.id===sale.buyerId)?.phone || '';
+        document.getElementById('customer-address').value = buyers.find(b=>b.id===sale.buyerId)?.address || '';
+        document.getElementById('birth-date').value = buyers.find(b=>b.id===sale.buyerId)?.birthDate || '';
+        document.getElementById('province').value = buyers.find(b=>b.id===sale.buyerId)?.province || '';
+        if(document.getElementById('city')) document.getElementById('city').value = buyers.find(b=>b.id===sale.buyerId)?.city || '';
+        if(document.getElementById('product-type')) document.getElementById('product-type').value = buyers.find(b=>b.id===sale.buyerId)?.instrument || '';
+        if(document.getElementById('serial-number')) document.getElementById('serial-number').value = sale.serialNumber || '';
+        if(document.getElementById('product-name')) document.getElementById('product-name').value = sale.product || '';
+        if(document.getElementById('transaction-date')) document.getElementById('transaction-date').value = sale.date || '';
+        document.getElementById('sale-price').value = sale.price || '';
+        document.getElementById('purchase-price').value = sale.purchasePrice || '';
+        document.getElementById('color-cost').value = sale.colorCost || '';
+        document.getElementById('regulation-cost').value = sale.regulationCost || '';
+        document.getElementById('transport-cost').value = sale.transportCost || '';
+        document.getElementById('teacher-name').value = sale.teacherName || '';
+        document.getElementById('teacher-percent').value = sale.teacherPercent || '';
+        document.getElementById('teacher-commission').value = sale.teacherCommission || '';
+        document.getElementById('seller-name').value = sale.sellerName || '';
+        document.getElementById('seller-percent').value = sale.sellerPercent || '';
+        document.getElementById('seller-commission').value = sale.sellerCommission || '';
+        document.getElementById('payment-method').value = sale.paymentMethod || 'cash';
+        document.getElementById('advance-payment').value = sale.advancePayment || '';
+        // محاسبه مجدد سود و پورسانت و به‌روزرسانی خلاصه
+        calculateProfits();
+        updateTransactionSummary();
+        updateTransactionReceipt();
+        document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
+        document.getElementById('transactions').classList.add('active');
+        document.getElementById('page-title').textContent = 'ثبت تراکنش';
       }
     });
   });
@@ -1374,7 +1465,6 @@ function numberToPersianWords(num) {
   }
   return out.join(' و ');
 }
-
 function calculateProfits() {
   const purchasePriceField = document.getElementById('purchase-price');
   const salePriceField = document.getElementById('sale-price');
@@ -1620,10 +1710,10 @@ function updateTransactionSummary() {
   const advancePaymentField = document.getElementById('advance-payment');
   const paymentMethodField = document.getElementById('payment-method');
   const transactionSummaryField = document.getElementById('transaction-summary');
-  
+  const teacherNameField = document.getElementById('teacher-name');
+  const sellerNameField = document.getElementById('seller-name');
   // اگر فیلدهای ضروری وجود ندارند، از تابع خارج شو
   if (!customerNameField || !productNameField || !salePriceField || !transactionSummaryField) return;
-  
   const customerName = customerNameField.value.trim();
   const productName = productNameField.options[productNameField.selectedIndex]?.text || '';
   const purchase = parseInt(faToEn(purchasePriceField?.value || '0')) || 0;
@@ -1641,24 +1731,21 @@ function updateTransactionSummary() {
   const advance = parseNumberWithDots(faToEnWithDots(advanceRaw)) || 0;
   const paymentMethod = paymentMethodField?.options[paymentMethodField.selectedIndex]?.text || '';
   const remain = sale - advance;
-
+  const teacherName = teacherNameField ? teacherNameField.options ? teacherNameField.options[teacherNameField.selectedIndex]?.text : teacherNameField.value : '';
+  const sellerName = sellerNameField ? sellerNameField.options ? sellerNameField.options[sellerNameField.selectedIndex]?.text : sellerNameField.value : '';
   let html = '';
   html += `<h3><i class='fas fa-receipt'></i> خلاصه سفارش</h3>`;
-  if (customerName) html += `<div class='receipt-row'><span class='receipt-label'>مشتری:</span><span class='receipt-value'>${customerName}</span></div>`;
-  if (productName && productName !== 'انتخاب کنید') html += `<div class='receipt-row'><span class='receipt-label'>کالا:</span><span class='receipt-value'>${productName}</span></div>`;
-  html += `<div class='receipt-row'><span class='receipt-label'>سود ناخالص:</span><span class='receipt-value'>${toPersianDigits(grossProfit.toLocaleString())} تومان</span></div>`;
-  html += `<div class='receipt-row'><span class='receipt-label'>هزینه‌ها:</span><span class='receipt-value'>رنگ: ${toPersianDigits(color.toLocaleString())} | رگلاژ: ${toPersianDigits(regulation.toLocaleString())} | حمل: ${toPersianDigits(transport.toLocaleString())}</span></div>`;
-  html += `<div class='receipt-row'><span class='receipt-label'>پورسانت معلم:</span><span class='receipt-value'>${toPersianDigits(teacherCommission.toLocaleString())} تومان</span></div>`;
-  html += `<div class='receipt-row'><span class='receipt-label'>پورسانت فروشنده:</span><span class='receipt-value'>${toPersianDigits(sellerCommission.toLocaleString())} تومان</span></div>`;
-  html += `<div class='receipt-row'><span class='receipt-label'>سود خالص:</span><span class='receipt-value'>${toPersianDigits(netProfit.toLocaleString())} تومان</span></div>`;
-  html += `<div class='receipt-row'><span class='receipt-label'>روش پرداخت:</span><span class='receipt-value'>${paymentMethod}</span></div>`;
-  html += `<div class='receipt-row'><span class='receipt-label'>پیش‌پرداخت:</span><span class='receipt-value'>${toPersianDigits(advance.toLocaleString())} تومان</span></div>`;
-  if (paymentMethod !== 'نقدی') html += `<div class='receipt-row'><span class='receipt-label'>مبلغ قابل پرداخت با چک/اقساط:</span><span class='receipt-value'>${toPersianDigits(remain.toLocaleString())} تومان</span></div>`;
-  html += `<div class='receipt-total'>${toPersianDigits(sale.toLocaleString())} تومان</div>`;
-
+  if (customerName) html += `<div class='receipt-row'><span class='receipt-label'>مشتری:</span><span class='receipt-value' style='font-weight:600;'>${customerName}</span></div>`;
+  if (productName && productName !== 'انتخاب کنید') html += `<div class='receipt-row'><span class='receipt-label'>کالا:</span><span class='receipt-value' style='font-weight:600;'>${productName}</span></div>`;
+  html += `<div class='receipt-row'><span class='receipt-label'>سود ناخالص:</span><span class='receipt-value' style='font-weight:600;'>${toPersianDigits(grossProfit.toLocaleString())} تومان</span></div>`;
+  html += `<div class='receipt-row'><span class='receipt-label'>هزینه‌ها:</span><span class='receipt-value' style='font-weight:600;'>رنگ: ${toPersianDigits(color.toLocaleString())} | رگلاژ: ${toPersianDigits(regulation.toLocaleString())} | حمل: ${toPersianDigits(transport.toLocaleString())}</span></div>`;
+  html += `<div class='receipt-row'><span class='receipt-label'>پورسانت معلم:</span><span class='receipt-value' style='font-weight:600;'>${toPersianDigits(teacherCommission.toLocaleString())} تومان${teacherName ? ` (${teacherName})` : ''}</span></div>`;
+  html += `<div class='receipt-row'><span class='receipt-label'>پورسانت فروشنده:</span><span class='receipt-value' style='font-weight:600;'>${toPersianDigits(sellerCommission.toLocaleString())} تومان${sellerName ? ` (${sellerName})` : ''}</span></div>`;
+  html += `<div class='receipt-row'><span class='receipt-label'>سود خالص:</span><span class='receipt-value' style='font-weight:600;'>${toPersianDigits(netProfit.toLocaleString())} تومان</span></div>`;
+  html += `<div class='receipt-row'><span class='receipt-label'>روش پرداخت:</span><span class='receipt-value' style='font-weight:600;'>${paymentMethod}</span></div>`;
+  html += `<div class='receipt-row'><span class='receipt-label'>پیش‌پرداخت:</span><span class='receipt-value' style='font-weight:600;'>${toPersianDigits(advance.toLocaleString())} تومان</span></div>`;
+  if (paymentMethod !== 'نقدی') html += `<div class='receipt-row'><span class='receipt-label'>مبلغ قابل پرداخت با چک/اقساط:</span><span class='receipt-value' style='font-weight:600;'>${toPersianDigits(remain.toLocaleString())} تومان</span></div>`;
   transactionSummaryField.innerHTML = html;
-  transactionSummaryField.style.display = 'block';
-  transactionSummaryField.classList.add('receipt-cut');
 }
 
 // تابع پاک کردن فرم
@@ -1733,10 +1820,10 @@ function clearTransactionForm() {
   updateTransactionSummary();
   updateTransactionReceipt();
 }
-
 // راه‌اندازی اولیه
 window.addEventListener('DOMContentLoaded', () => {
   loadAllData();
+  fixBuyersAndSalesRelations();
   setupSectionNavigation();
   document.querySelector('#transactions .btn.primary').addEventListener('click', saveTransaction);
   updateBuyersTable();
@@ -2085,7 +2172,6 @@ function attachSayadiAndSeriesValidationEvents() {
     input.addEventListener('blur', validateCheckSeriesInput);
   });
 } 
-
 // تابع تنظیم event listeners برای آپشن‌های سفارشی نمودار
 function setupCustomLegendEvents() {
   const legendItems = document.querySelectorAll('.legend-item');
@@ -2408,15 +2494,19 @@ if (document.getElementById('transaction-receipt')) {
 
 // --- جستجوی پیشرفته چک‌ها ---
 function getChecksSearchFilters() {
-  return {
-    buyer: (document.getElementById('search-buyer')?.value || '').trim(),
-    sayadi: (document.getElementById('search-sayadi')?.value || '').trim(),
-    amount: (document.getElementById('search-amount')?.value || '').trim(),
-    bank: (document.getElementById('search-bank')?.value || '').trim(),
-    dateFrom: (document.getElementById('search-date-from')?.value || '').trim(),
-    dateTo: (document.getElementById('search-date-to')?.value || '').trim(),
-    status: (document.getElementById('search-status')?.value || '').trim(),
+  const filters = {
+    buyer: (document.getElementById('checks-filter-buyer')?.value || '').trim(),
+    sayadi: (document.getElementById('checks-filter-sayadi')?.value || '').trim(),
+    amount: (document.getElementById('checks-filter-amount')?.value || '').trim(),
+    bank: (document.getElementById('checks-filter-bank')?.value || '').trim(),
+    dateFrom: (document.getElementById('checks-filter-date-from')?.value || '').trim(),
+    dateTo: (document.getElementById('checks-filter-date-to')?.value || '').trim(),
+    status: (document.getElementById('checks-filter-status')?.value || '').trim(),
+    limit: (document.getElementById('checks-filter-limit')?.value || 'all').trim(),
   };
+  
+  console.log('Current filters:', filters);
+  return filters;
 }
 function filterChecks(checks) {
   const filters = getChecksSearchFilters();
@@ -2444,8 +2534,16 @@ function filterChecks(checks) {
       }
     }
     // تاریخ سررسید (از/تا)
-    if (filters.dateFrom && check.dueDate < filters.dateFrom) return false;
-    if (filters.dateTo && check.dueDate > filters.dateTo) return false;
+    if (filters.dateFrom && check.dueDate) {
+      const checkDate = check.dueDate.replace(/\//g, '');
+      const fromDate = filters.dateFrom.replace(/\//g, '');
+      if (checkDate < fromDate) return false;
+    }
+    if (filters.dateTo && check.dueDate) {
+      const checkDate = check.dueDate.replace(/\//g, '');
+      const toDate = filters.dateTo.replace(/\//g, '');
+      if (checkDate > toDate) return false;
+    }
     // وضعیت
     if (filters.status && check.status !== filters.status) return false;
     return true;
@@ -2472,6 +2570,7 @@ window.addEventListener('DOMContentLoaded', () => {
       document.getElementById('search-date-from').value = '';
       document.getElementById('search-date-to').value = '';
       document.getElementById('search-status').value = '';
+      document.getElementById('search-limit').value = 'all';
       updateChecksTable();
     };
   }
@@ -2832,6 +2931,210 @@ function initializeSampleChecksData() {
   }
 }
 
+// تابع اضافه کردن داده‌های نمونه مشتریان
+function initializeSampleBuyersData() {
+  console.log('Checking buyers data...', buyers.length);
+  
+  if (buyers.length === 0) {
+    console.log('Adding sample buyers data...');
+    
+    const sampleBuyers = [
+      {
+        id: 1,
+        name: 'احمد محمدی',
+        phone: '09123456789',
+        address: 'تهران، خیابان ولیعصر',
+        birthDate: '1365/03/15',
+        province: 'تهران',
+        city: 'تهران',
+        instrument: 'پیانو',
+        purchases: 2,
+        total: 125000000,
+        lastBuy: '1402/05/15'
+      },
+      {
+        id: 2,
+        name: 'فاطمه احمدی',
+        phone: '09987654321',
+        address: 'اصفهان، خیابان چهارباغ',
+        birthDate: '1370/07/22',
+        province: 'اصفهان',
+        city: 'اصفهان',
+        instrument: 'ویولن',
+        purchases: 1,
+        total: 75000000,
+        lastBuy: '1402/04/10'
+      },
+      {
+        id: 3,
+        name: 'علی رضایی',
+        phone: '09351234567',
+        address: 'شیراز، خیابان زند',
+        birthDate: '1368/11/08',
+        province: 'فارس',
+        city: 'شیراز',
+        instrument: 'گیتار',
+        purchases: 3,
+        total: 180000000,
+        lastBuy: '1402/06/01'
+      }
+    ];
+    
+    buyers.push(...sampleBuyers);
+    saveAllData();
+    console.log('Sample buyers data added:', buyers);
+  } else {
+    console.log('Buyers data already exists:', buyers.length, 'buyers');
+  }
+}
+
+// تابع اضافه کردن داده‌های نمونه تراکنش‌ها
+function initializeSampleSalesData() {
+  if (sales.length === 0) {
+    console.log('Adding sample sales data...');
+    
+    const sampleSales = [
+      {
+        id: 1,
+        buyerId: 1,
+        customerName: 'احمد محمدی',
+        product: 'پیانو یاماها',
+        price: 125000000,
+        date: '1402/05/15',
+        paymentMethod: 'installment',
+        advancePayment: 25000000,
+        purchasePrice: 100000000,
+        colorCost: 5000000,
+        regulationCost: 3000000,
+        transportCost: 2000000,
+        teacherName: 'استاد رضایی',
+        teacherPercent: 10,
+        teacherCommission: 12500000,
+        sellerName: 'فروشنده اصلی',
+        sellerPercent: 5,
+        sellerCommission: 6250000
+      },
+      {
+        id: 2,
+        buyerId: 2,
+        customerName: 'فاطمه احمدی',
+        product: 'ویولن استرادیواری',
+        price: 75000000,
+        date: '1402/04/10',
+        paymentMethod: 'cash',
+        advancePayment: 75000000,
+        purchasePrice: 60000000,
+        colorCost: 2000000,
+        regulationCost: 1500000,
+        transportCost: 1000000,
+        teacherName: 'استاد احمدی',
+        teacherPercent: 8,
+        teacherCommission: 6000000,
+        sellerName: 'فروشنده فرعی',
+        sellerPercent: 3,
+        sellerCommission: 2250000
+      },
+      {
+        id: 3,
+        buyerId: 3,
+        customerName: 'علی رضایی',
+        product: 'گیتار کلاسیک',
+        price: 60000000,
+        date: '1402/06/01',
+        paymentMethod: 'installment',
+        advancePayment: 20000000,
+        purchasePrice: 45000000,
+        colorCost: 3000000,
+        regulationCost: 2000000,
+        transportCost: 1500000,
+        teacherName: 'استاد محمدی',
+        teacherPercent: 12,
+        teacherCommission: 7200000,
+        sellerName: 'فروشنده اصلی',
+        sellerPercent: 4,
+        sellerCommission: 2400000
+      }
+    ];
+    
+    sales.push(...sampleSales);
+    saveAllData();
+    console.log('Sample sales data added:', sales);
+  }
+}
+// تابع اضافه کردن داده‌های نمونه محصولات
+function initializeSampleProductsData() {
+  if (products.length === 0) {
+    console.log('Adding sample products data...');
+    
+    const sampleProducts = [
+      {
+        id: 1,
+        name: 'پیانو یاماها C3X',
+        category: 'پیانو',
+        brand: 'یاماها',
+        price: 125000000,
+        purchasePrice: 100000000,
+        status: 'فعال',
+        description: 'پیانو گرند یاماها مدل C3X با کیفیت عالی',
+        stock: 2,
+        createdAt: '1402/01/01'
+      },
+      {
+        id: 2,
+        name: 'ویولن استرادیواری 4/4',
+        category: 'ویولن',
+        brand: 'استرادیواری',
+        price: 75000000,
+        purchasePrice: 60000000,
+        status: 'فعال',
+        description: 'ویولن حرفه‌ای استرادیواری سایز 4/4',
+        stock: 5,
+        createdAt: '1402/02/15'
+      },
+      {
+        id: 3,
+        name: 'گیتار کلاسیک یاماها C40',
+        category: 'گیتار',
+        brand: 'یاماها',
+        price: 18000000,
+        purchasePrice: 15000000,
+        status: 'فعال',
+        description: 'گیتار کلاسیک یاماها مدل C40 برای مبتدیان',
+        stock: 10,
+        createdAt: '1402/03/10'
+      },
+      {
+        id: 4,
+        name: 'درام ست یاماها DTX',
+        category: 'سازهای کوبه‌ای',
+        brand: 'یاماها',
+        price: 45000000,
+        purchasePrice: 38000000,
+        status: 'فعال',
+        description: 'درام ست الکترونیک یاماها مدل DTX',
+        stock: 3,
+        createdAt: '1402/04/05'
+      },
+      {
+        id: 5,
+        name: 'فلوت یاماها YFL-221',
+        category: 'سازهای بادی',
+        brand: 'یاماها',
+        price: 8500000,
+        purchasePrice: 7000000,
+        status: 'غیرفعال',
+        description: 'فلوت یاماها مدل YFL-221 برای دانش‌آموزان',
+        stock: 0,
+        createdAt: '1402/05/20'
+      }
+    ];
+    
+    products.push(...sampleProducts);
+    saveAllData();
+    console.log('Sample products data added:', products);
+  }
+}
+
 // تابع محاسبه آمار چک‌ها از آرایه checks
 function calculateChecksStatsFromArray() {
   const totalChecks = checks.length;
@@ -2970,21 +3273,21 @@ window.addEventListener('DOMContentLoaded', function() {
 
 // تابع به‌روزرسانی اطلاعات نتایج جستجو
 function updateSearchResultsInfo() {
-  const resultsCount = document.getElementById('results-count');
+  const resultsCount = document.getElementById('checks-results-count');
   
   // محاسبه چک‌های فیلتر شده
   const filteredChecks = filterChecks(checks.map((c, idx) => ({...c, _idx: idx})));
   const totalCount = filteredChecks.length;
-  const totalAmount = filteredChecks.reduce((sum, check) => sum + (check.amount || 0), 0);
+  const totalAmount = filteredChecks.reduce((sum, check) => sum + (parseFloat(check.amount) || 0), 0);
   
   if (resultsCount) {
     resultsCount.textContent = toPersianDigits(totalCount);
   }
   
   // به‌روزرسانی مجموع مبالغ
-  const totalAmountElement = document.querySelector('.search-results-info strong');
+  const totalAmountElement = document.getElementById('checks-total-amount');
   if (totalAmountElement) {
-    totalAmountElement.textContent = toPersianDigits(totalAmount.toLocaleString()) + ' تومان';
+    totalAmountElement.textContent = toPersianDigits(formatNumber(totalAmount)) + ' تومان';
   }
 }
 
@@ -3189,7 +3492,6 @@ window.addEventListener('DOMContentLoaded', function() {
     if (e.target === overlay) hideComprehensiveReportModal();
   });
 });
-
 // ... existing code ...
 function showCustomAlert(message, type = 'info') {
   try {
@@ -3580,18 +3882,35 @@ window.addEventListener('DOMContentLoaded', function() {
 // ... existing code ...
 // راه‌اندازی فیلترهای مشتریان و مقداردهی اولیه جدول
 function setupCustomerFilters() {
-  const nameInput = document.getElementById('filter-customer-name');
-  const phoneInput = document.getElementById('filter-customer-phone');
-  const emailInput = document.getElementById('filter-customer-email');
-  if (nameInput) nameInput.addEventListener('input', updateBuyersTable);
-  if (phoneInput) phoneInput.addEventListener('input', updateBuyersTable);
-  if (emailInput) emailInput.addEventListener('input', updateBuyersTable);
+  console.log('=== راه‌اندازی فیلترهای مشتریان ===');
+  
+  // فیلترهای اصلی
+  const filterIds = [
+    'filter-customer-name',
+    'filter-customer-phone', 
+    'filter-customer-email',
+    'filter-customer-province',
+    'filter-customer-city',
+    'filter-customer-instrument',
+    'filter-customer-purchases',
+    'filter-customer-lastbuy-from',
+    'filter-customer-lastbuy-to'
+  ];
+  
+  filterIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      console.log('Adding event listener for:', id);
+      el.addEventListener('input', updateBuyersTable);
+      el.addEventListener('change', updateBuyersTable);
+    } else {
+      console.log('Element not found:', id);
+    }
+  });
+  
+  // راه‌اندازی فیلترهای پیشرفته
+  setupAdvancedCustomerFiltersToggle();
 }
-
-document.addEventListener('DOMContentLoaded', function() {
-  setupCustomerFilters();
-  updateBuyersTable();
-});
 // ... existing code ...
 
 // ... existing code ...
@@ -3612,7 +3931,6 @@ function setupAdvancedCustomerFiltersToggle() {
     });
   }
 }
-
 // به‌روزرسانی جدول مشتریان با فیلتر پیشرفته
 function updateBuyersTable() {
   // فیلترهای ساده
@@ -3662,6 +3980,7 @@ function updateBuyersTable() {
   const citySales = {};
   filteredBuyers.forEach((buyer, idx) => {
     const buyerSales = sales.filter(s => s.buyerId === buyer.id);
+    const purchasesCount = buyerSales.length;
     const totalAmount = buyerSales.reduce((sum, s) => sum + (s.price || 0), 0);
     totalPurchases += totalAmount;
     // جمع فروش هر شهر
@@ -3682,10 +4001,10 @@ function updateBuyersTable() {
       buyer.province || '',
       buyer.city || '',
       buyer.instrument || '',
-      buyer.purchases ? toPersianDigits(buyer.purchases) : '',
+      purchasesCount ? toPersianDigits(purchasesCount) : '۰',
       toPersianDigits(totalAmount.toLocaleString()) + " <span style='font-size:12px;color:#888;'>تومان</span>",
       lastBuyOrDue ? toPersianDigits(lastBuyOrDue) : '',
-      `<div class="action-btns"><button class="action-btn" data-action="edit" data-idx="${idx}" title="ویرایش"><i class="fas fa-edit"></i></button><button class="action-btn" data-action="delete" data-idx="${idx}" title="حذف"><i class="fas fa-trash"></i></button></div>`
+      `<div class="action-btns"><button class="action-btn" data-action="orders" data-idx="${idx}" title="سوابق خرید"><i class="fas fa-history"></i></button><button class="action-btn" data-action="delete" data-idx="${idx}" title="حذف"><i class="fas fa-trash"></i></button></div>`
     ];
     const tr = document.createElement('tr');
     tr.innerHTML = cells.map((cell, i) => `<td${i === 0 ? " class='row-index'" : ''}>${cell}</td>`).join('');
@@ -3731,45 +4050,17 @@ function updateBuyersTable() {
       }
     });
   });
-  // ویرایش مشتری
-  tbody.querySelectorAll('button[data-action="edit"]').forEach(btn => {
+  // مشاهده خلاصه سفارش
+  tbody.querySelectorAll('button[data-action="orders"]').forEach(btn => {
     btn.addEventListener('click', function() {
       const idx = parseInt(this.getAttribute('data-idx'));
       const buyer = filteredBuyers[idx];
-      document.getElementById('customer-name').value = buyer.name;
-      document.getElementById('customer-phone').value = buyer.phone || '';
-      document.getElementById('customer-address').value = buyer.address || '';
-      document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
-      document.getElementById('transactions').classList.add('active');
-      document.getElementById('page-title').textContent = 'ثبت تراکنش';
+      showCustomerOrdersModal(buyer);
     });
   });
 }
 
-// راه‌اندازی فیلترهای مشتریان و مقداردهی اولیه جدول
-function setupCustomerFilters() {
-  const ids = [
-    'filter-customer-name',
-    'filter-customer-phone',
-    'filter-customer-email',
-    'filter-customer-province',
-    'filter-customer-city',
-    'filter-customer-instrument',
-    'filter-customer-purchases',
-    'filter-customer-lastbuy-from',
-    'filter-customer-lastbuy-to'
-  ];
-  ids.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.addEventListener('input', updateBuyersTable);
-  });
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-  setupAdvancedCustomerFiltersToggle();
-  setupCustomerFilters();
-  updateBuyersTable();
-});
+// تابع تکراری حذف شد - از تابع اصلی در خط 3628 استفاده می‌شود
 // ... existing code ...
 
 // ... existing code ...
@@ -3818,72 +4109,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // ... existing code ...
 
 // ... existing code ...
-function setupAdvancedChecksFiltersToggle() {
-  const expandBtn = document.getElementById('expand-filters-btn-checks');
-  const advFilters = document.getElementById('advanced-filters-checks');
-  const resetBtn = document.getElementById('reset-checks-btn');
-  if (expandBtn && advFilters) {
-    expandBtn.addEventListener('click', function() {
-      const isOpen = advFilters.style.display === 'block';
-      if (isOpen) {
-        advFilters.style.display = 'none';
-        expandBtn.innerHTML = '<i class="fas fa-chevron-down"></i> فیلترهای بیشتر';
-      } else {
-        advFilters.style.display = 'block';
-        expandBtn.innerHTML = '<i class="fas fa-chevron-up"></i> بستن فیلترهای بیشتر';
-        if (window.jalaliDatepicker) {
-          setTimeout(() => {
-            jalaliDatepicker.startWatch({selector: '#advanced-filters-checks .jalali-date'});
-          }, 100);
-        }
-      }
-    });
-  }
-  // اتصال فیلدهای اصلی و پیشرفته به آپدیت جدول
-  [
-    'search-buyer',
-    'search-sayadi',
-    'search-amount',
-    'search-bank',
-    'search-status',
-    'search-date-from',
-    'search-date-to',
-    'search-sort',
-    'search-limit'
-  ].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) {
-      el.addEventListener('input', updateChecksTable);
-      el.addEventListener('change', updateChecksTable);
-    }
-  });
-  // دکمه ریست
-  if (resetBtn) {
-    resetBtn.addEventListener('click', function() {
-      [
-        'search-buyer',
-        'search-sayadi',
-        'search-amount',
-        'search-bank',
-        'search-status',
-        'search-date-from',
-        'search-date-to',
-        'search-sort',
-        'search-limit'
-      ].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) {
-          if (el.tagName === 'SELECT') el.selectedIndex = 0;
-          else el.value = '';
-        }
-      });
-      updateChecksTable();
-    });
-  }
-}
-document.addEventListener('DOMContentLoaded', function() {
-  setupAdvancedChecksFiltersToggle();
-});
+// نسخه اول حذف شد - فقط نسخه دوم استفاده می‌شود
 // ... existing code ...
 
 // ... existing code ...
@@ -4175,46 +4401,1041 @@ document.addEventListener('DOMContentLoaded', function() {
   setupAdvancedSalesFiltersToggle();
 });
 // ... existing code ...
-
 // ... existing code ...
-// فقط یک نسخه ساده و تمیز:
-function setupAdvancedChecksFiltersToggle() {
-  const btn = document.getElementById('expand-filters-btn-checks');
-  const adv = document.getElementById('advanced-filters-checks');
-  if (btn && adv) {
-    btn.addEventListener('click', function() {
-      const isOpen = adv.style.display === 'block';
+// فیلترهای چک‌های ورودی - نسخه جدید
+function setupChecksFilters() {
+  console.log('=== راه‌اندازی فیلترهای چک‌های ورودی ===');
+  
+  // دکمه toggle فیلترهای پیشرفته
+  const toggleBtn = document.getElementById('checks-filter-toggle');
+  const advancedFilters = document.getElementById('checks-advanced-filters');
+  
+  if (toggleBtn && advancedFilters) {
+    console.log('دکمه toggle و فیلترهای پیشرفته پیدا شدند');
+    
+    toggleBtn.addEventListener('click', function() {
+      const isOpen = advancedFilters.style.display === 'block';
+      console.log('Toggle clicked, current state:', isOpen);
+      
       if (isOpen) {
-        adv.style.display = 'none';
-        btn.innerHTML = '<i class="fas fa-chevron-down"></i> فیلترهای بیشتر';
+        advancedFilters.style.display = 'none';
+        toggleBtn.innerHTML = '<i class="fas fa-chevron-down"></i> فیلترهای بیشتر';
       } else {
-        adv.style.display = 'block';
-        btn.innerHTML = '<i class="fas fa-chevron-up"></i> بستن فیلترهای بیشتر';
+        advancedFilters.style.display = 'block';
+        toggleBtn.innerHTML = '<i class="fas fa-chevron-up"></i> بستن فیلترهای بیشتر';
+        
+        // فعال‌سازی تقویم شمسی
         if (window.jalaliDatepicker) {
           setTimeout(() => {
-            jalaliDatepicker.startWatch({selector: '#advanced-filters-checks .jalali-date'});
+            jalaliDatepicker.startWatch({selector: '#checks-advanced-filters .jalali-date'});
           }, 100);
         }
       }
     });
-    [
-      'search-buyer',
-      'search-sayadi',
-      'search-amount',
-      'search-bank',
-      'search-date-from',
-      'search-date-to',
-      'search-status'
-    ].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) {
-        el.addEventListener('input', updateChecksTable);
-        el.addEventListener('change', updateChecksTable);
+  } else {
+    console.log('دکمه toggle یا فیلترهای پیشرفته پیدا نشدند');
+  }
+  
+  // دکمه reset
+  const resetBtn = document.getElementById('checks-filter-reset');
+  if (resetBtn) {
+    resetBtn.addEventListener('click', function() {
+      console.log('Reset button clicked');
+      
+      // پاک کردن همه فیلترها
+      const filterIds = [
+        'checks-filter-buyer',
+        'checks-filter-sayadi',
+        'checks-filter-amount',
+        'checks-filter-status',
+        'checks-filter-date-from',
+        'checks-filter-date-to',
+        'checks-filter-bank',
+        'checks-filter-limit'
+      ];
+      
+      filterIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          if (el.tagName === 'SELECT') {
+            el.selectedIndex = 0;
+          } else {
+            el.value = '';
+          }
+        }
+      });
+      
+      // به‌روزرسانی جدول
+      updateChecksTable();
+    });
+  }
+  
+  // دکمه جستجو
+  const searchBtn = document.getElementById('checks-search-btn');
+  if (searchBtn) {
+    searchBtn.addEventListener('click', function() {
+      console.log('Search button clicked');
+      updateChecksTable();
+    });
+  }
+  
+  // event listeners برای فیلترها
+  const filterIds = [
+    'checks-filter-buyer',
+    'checks-filter-sayadi',
+    'checks-filter-amount',
+    'checks-filter-status',
+    'checks-filter-date-from',
+    'checks-filter-date-to',
+    'checks-filter-bank',
+    'checks-filter-limit'
+  ];
+  
+  filterIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      console.log('Adding event listener for:', id);
+      el.addEventListener('input', () => {
+        console.log('Filter changed:', id, el.value);
+        updateChecksTable();
+      });
+      el.addEventListener('change', () => {
+        console.log('Filter changed:', id, el.value);
+        updateChecksTable();
+      });
+    } else {
+      console.log('Element not found:', id);
+    }
+  });
+}
+document.addEventListener('DOMContentLoaded', function() {
+  // بارگذاری داده‌ها
+  loadAllData();
+  
+  // تاخیر برای اطمینان از بارگذاری کامل DOM
+  setTimeout(() => {
+    setupChecksFilters();
+    setupCustomerFilters();
+    setupProductsFilters();
+    // به‌روزرسانی جداول
+    updateBuyersTable();
+    updateChecksTable();
+    updateSalesTable();
+    updateProductsTable();
+    updateDashboard();
+  }, 500);
+});
+// ... existing code ...
+
+// ... existing code ...
+function showOrderSummaryModal() {
+  let modal = document.getElementById('order-summary-modal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'order-summary-modal';
+    modal.style.position = 'fixed';
+    modal.style.top = '0';
+    modal.style.left = '0';
+    modal.style.width = '100vw';
+    modal.style.height = '100vh';
+    modal.style.background = 'rgba(0,0,0,0.35)';
+    modal.style.display = 'flex';
+    modal.style.alignItems = 'center';
+    modal.style.justifyContent = 'center';
+    modal.style.zIndex = '9999';
+    modal.innerHTML = `<div style="background:#fff;padding:32px 24px 18px 24px;border-radius:18px;max-width:420px;width:95vw;box-shadow:0 8px 32px rgba(52,152,219,0.13);position:relative;">
+      <button id="close-order-summary-modal" style="position:absolute;top:12px;left:12px;background:none;border:none;font-size:22px;color:#888;cursor:pointer;"><i class='fas fa-times'></i></button>
+      <div id="order-summary-modal-content"></div>
+    </div>`;
+    document.body.appendChild(modal);
+    document.getElementById('close-order-summary-modal').onclick = function() {
+      modal.remove();
+    };
+    modal.onclick = function(e) {
+      if (e.target === modal) modal.remove();
+    };
+  }
+  document.getElementById('order-summary-modal-content').innerHTML = document.getElementById('transaction-summary').innerHTML;
+  modal.style.display = 'flex';
+}
+// ... existing code ...
+
+// ... existing code ...
+// تابع تولید HTML خلاصه سفارش بر اساس شیء sale و buyer (بدون مقداردهی فرم)
+function generateOrderSummaryHTML(sale, buyer) {
+  if (!sale || !buyer) return '<div style="color:#c00">اطلاعات تراکنش یافت نشد</div>';
+  const toPersianDigits = window.toPersianDigits || (n => n);
+  const productName = sale.product || '';
+  const purchase = sale.purchasePrice || 0;
+  const salePrice = sale.price || 0;
+  const grossProfit = salePrice - purchase;
+  const color = sale.colorCost || 0;
+  const regulation = sale.regulationCost || 0;
+  const transport = sale.transportCost || 0;
+  const teacherPercent = sale.teacherPercent || 0;
+  const sellerPercent = sale.sellerPercent || 0;
+  const teacherCommission = sale.teacherCommission || 0;
+  const sellerCommission = sale.sellerCommission || 0;
+  const netProfit = grossProfit - color - regulation - transport - teacherCommission - sellerCommission;
+  const paymentMethod = sale.paymentMethod === 'cash' ? 'نقدی' : (sale.paymentMethod === 'installment' ? 'اقساط' : (sale.paymentMethod || ''));
+  const advance = sale.advancePayment || 0;
+  const remain = salePrice - advance;
+  const teacherName = sale.teacherName || '';
+  const sellerName = sale.sellerName || '';
+  let html = '';
+  html += `<h3><i class='fas fa-receipt'></i> خلاصه سفارش</h3>`;
+  html += `<div class='receipt-row'><span class='receipt-label'>مشتری:</span><span class='receipt-value' style='font-weight:600;'>${buyer.name}</span></div>`;
+  if (productName && productName !== 'انتخاب کنید') html += `<div class='receipt-row'><span class='receipt-label'>کالا:</span><span class='receipt-value' style='font-weight:600;'>${productName}</span></div>`;
+  html += `<div class='receipt-row'><span class='receipt-label'>سود ناخالص:</span><span class='receipt-value' style='font-weight:600;'>${toPersianDigits(grossProfit.toLocaleString())} تومان</span></div>`;
+  html += `<div class='receipt-row'><span class='receipt-label'>هزینه‌ها:</span><span class='receipt-value' style='font-weight:600;'>رنگ: ${toPersianDigits(color.toLocaleString())} | رگلاژ: ${toPersianDigits(regulation.toLocaleString())} | حمل: ${toPersianDigits(transport.toLocaleString())}</span></div>`;
+  html += `<div class='receipt-row'><span class='receipt-label'>پورسانت معلم:</span><span class='receipt-value' style='font-weight:600;'>${toPersianDigits(teacherCommission.toLocaleString())} تومان${teacherName ? ` (${teacherName})` : ''}</span></div>`;
+  html += `<div class='receipt-row'><span class='receipt-label'>پورسانت فروشنده:</span><span class='receipt-value' style='font-weight:600;'>${toPersianDigits(sellerCommission.toLocaleString())} تومان${sellerName ? ` (${sellerName})` : ''}</span></div>`;
+  html += `<div class='receipt-row'><span class='receipt-label'>سود خالص:</span><span class='receipt-value' style='font-weight:600;'>${toPersianDigits(netProfit.toLocaleString())} تومان</span></div>`;
+  html += `<div class='receipt-row'><span class='receipt-label'>روش پرداخت:</span><span class='receipt-value' style='font-weight:600;'>${paymentMethod}</span></div>`;
+  html += `<div class='receipt-row'><span class='receipt-label'>پیش‌پرداخت:</span><span class='receipt-value' style='font-weight:600;'>${toPersianDigits(advance.toLocaleString())} تومان</span></div>`;
+  if (paymentMethod !== 'نقدی') html += `<div class='receipt-row'><span class='receipt-label'>مبلغ قابل پرداخت با چک/اقساط:</span><span class='receipt-value' style='font-weight:600;'>${toPersianDigits(remain.toLocaleString())} تومان</span></div>`;
+  return html;
+}
+// ... existing code ...
+// تابع showOrderSummaryModal را طوری تغییر بده که html دریافتی را نمایش دهد
+function showOrderSummaryModal(html) {
+  let modal = document.getElementById('order-summary-modal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'order-summary-modal';
+    modal.style.position = 'fixed';
+    modal.style.top = '0';
+    modal.style.left = '0';
+    modal.style.width = '100vw';
+    modal.style.height = '100vh';
+    modal.style.background = 'rgba(0,0,0,0.35)';
+    modal.style.display = 'flex';
+    modal.style.alignItems = 'center';
+    modal.style.justifyContent = 'center';
+    modal.style.zIndex = '9999';
+    modal.innerHTML = `<div style="background:#fff;padding:32px 24px 18px 24px;border-radius:18px;max-width:420px;width:95vw;box-shadow:0 8px 32px rgba(52,152,219,0.13);position:relative;">
+      <button id="close-order-summary-modal" style="position:absolute;top:12px;left:12px;background:none;border:none;font-size:22px;color:#888;cursor:pointer;"><i class='fas fa-times'></i></button>
+      <div id="order-summary-modal-content"></div>
+    </div>`;
+    document.body.appendChild(modal);
+    document.getElementById('close-order-summary-modal').onclick = function() {
+      modal.remove();
+    };
+    modal.onclick = function(e) {
+      if (e.target === modal) modal.remove();
+    };
+  }
+  document.getElementById('order-summary-modal-content').innerHTML = html;
+  modal.style.display = 'flex';
+}
+// ... existing code ...
+
+// ... existing code ...
+// رفع ارتباط ناقص بین مشتری و تراکنش (buyerId و id)
+function fixBuyersAndSalesRelations() {
+  // اطمینان از یکتا بودن id برای هر buyer
+  buyers.forEach((b, i) => {
+    if (!b.id) b.id = generateId(buyers.slice(0, i));
+  });
+  // اطمینان از وجود buyerId صحیح در هر sale
+  sales.forEach(sale => {
+    if (!sale.buyerId) {
+      // سعی کن با نام مشتری پیدا کنی
+      const buyer = buyers.find(b => b.name === sale.customerName || b.name === sale.name);
+      if (buyer) sale.buyerId = buyer.id;
+    }
+  });
+  // اگر باز هم sale بدون buyerId داریم، یک مشتری جدید بساز
+  sales.forEach(sale => {
+    if (!sale.buyerId) {
+      const newBuyer = {
+        id: generateId(buyers),
+        name: sale.customerName || sale.name || 'مشتری ناشناس',
+        phone: sale.customerPhone || '',
+        address: sale.customerAddress || '',
+        birthDate: sale.birthDate || '',
+        province: sale.province || '',
+        city: sale.city || '',
+        instrument: sale.productType || '',
+        purchases: 1,
+        total: sale.price || 0,
+        lastBuy: sale.date || ''
+      };
+      buyers.push(newBuyer);
+      sale.buyerId = newBuyer.id;
+    }
+  });
+}
+// ... existing code ...
+// بعد از loadAllData این تابع را فراخوانی کن
+function loadAllData() {
+  buyers = JSON.parse(localStorage.getItem('buyers') || '[]');
+  sales = JSON.parse(localStorage.getItem('sales') || '[]');
+  checks = JSON.parse(localStorage.getItem('checks') || '[]');
+  // مهاجرت داده‌های قدیمی
+  migrateOldSalesData();
+  // اضافه کردن داده‌های نمونه چک‌ها در صورت خالی بودن
+  initializeSampleChecksData();
+  // رفع ارتباط ناقص بین مشتری و تراکنش
+  fixBuyersAndSalesRelations();
+}
+// ... existing code ...
+
+// ... existing code ...
+// تابع نمایش مودال سوابق خرید مشتری با امکانا
+
+// تابع تست فیلترهای چک‌های ورودی
+window.testChecksFilters = function() {
+  console.log('=== تست فیلترهای چک‌های ورودی ===');
+  console.log('دکمه toggle:', document.getElementById('checks-filter-toggle'));
+  console.log('فیلترهای پیشرفته:', document.getElementById('checks-advanced-filters'));
+  console.log('فیلترهای فعلی:', getChecksSearchFilters());
+  
+  // تست کلیک روی دکمه toggle
+  const toggleBtn = document.getElementById('checks-filter-toggle');
+  if (toggleBtn) {
+    console.log('کلیک کردن روی دکمه toggle...');
+    toggleBtn.click();
+  }
+};
+
+// تابع تست داده‌ها
+window.testData = function() {
+  console.log('=== تست داده‌ها ===');
+  console.log('تعداد مشتریان:', buyers.length);
+  console.log('تعداد تراکنش‌ها:', sales.length);
+  console.log('تعداد چک‌ها:', checks.length);
+  console.log('نمونه مشتریان:', buyers.slice(0, 3));
+  console.log('نمونه تراکنش‌ها:', sales.slice(0, 3));
+  console.log('نمونه چک‌ها:', checks.slice(0, 3));
+  
+  // تست جدول مشتریان
+  const tbody = document.getElementById('customers-list-tbody');
+  console.log('جدول مشتریان:', tbody);
+  
+  // تست فراخوانی تابع
+  console.log('فراخوانی updateBuyersTable...');
+  updateBuyersTable();
+};
+
+// تابع تست کامل سیستم
+window.testSystem = function() {
+  console.log('=== تست کامل سیستم ===');
+  
+  // بارگذاری مجدد داده‌ها
+  loadAllData();
+  
+  // راه‌اندازی فیلترها
+  setupCustomerFilters();
+  setupChecksFilters();
+  
+  // به‌روزرسانی جداول
+  updateBuyersTable();
+  updateChecksTable();
+  updateSalesTable();
+  updateDashboard();
+  
+  console.log('سیستم تست شد!');
+};
+
+// تابع تست نهایی - همه چیز را بررسی می‌کند
+window.finalTest = function() {
+  console.log('=== تست نهایی سیستم ===');
+  
+  // بررسی داده‌ها
+  console.log('داده‌ها:', {
+    buyers: buyers.length,
+    sales: sales.length,
+    checks: checks.length,
+    products: products.length
+  });
+  
+  // بررسی عناصر HTML
+  console.log('عناصر HTML:', {
+    customersTable: document.getElementById('customers-list-tbody'),
+    checksTable: document.querySelector('#checks .checks-table tbody'),
+    salesTable: document.getElementById('sales-list-tbody'),
+    productsTable: document.getElementById('products-list-tbody'),
+    filters: {
+      customerName: document.getElementById('filter-customer-name'),
+      checksToggle: document.getElementById('checks-filter-toggle'),
+      checksAdvanced: document.getElementById('checks-advanced-filters')
+    }
+  });
+  
+  // تست فیلترها
+  console.log('فیلترهای مشتریان:', {
+    name: document.getElementById('filter-customer-name')?.value,
+    phone: document.getElementById('filter-customer-phone')?.value,
+    email: document.getElementById('filter-customer-email')?.value
+  });
+  
+  console.log('فیلترهای چک‌ها:', getChecksSearchFilters());
+  
+  // تست جداول
+  updateBuyersTable();
+  updateChecksTable();
+  updateProductsTable();
+  
+  console.log('تست نهایی کامل شد!');
+};
+
+// تابع‌های مدیریت محصولات
+function updateProductsTable() {
+  
+  const tbody = document.getElementById('products-list-tbody');
+  if (!tbody) return;
+
+  // فیلترها
+  const nameFilter = document.getElementById('products-filter-name')?.value.trim() || '';
+  const categoryFilter = document.getElementById('products-filter-category')?.value || '';
+  const statusFilter = document.getElementById('products-filter-status')?.value || '';
+  const priceMinFilter = document.getElementById('products-filter-price-min')?.value.trim() || '';
+  const priceMaxFilter = document.getElementById('products-filter-price-max')?.value.trim() || '';
+  const brandFilter = document.getElementById('products-filter-brand')?.value.trim() || '';
+
+  // فیلتر داده‌ها
+  let filtered = products.filter(product => {
+    const nameMatch = !nameFilter || product.name.toLowerCase().includes(nameFilter.toLowerCase());
+    const categoryMatch = !categoryFilter || product.category === categoryFilter;
+    const statusMatch = !statusFilter || product.status === statusFilter;
+    const brandMatch = !brandFilter || product.brand.toLowerCase().includes(brandFilter.toLowerCase());
+    
+    // فیلتر قیمت
+    let priceMatch = true;
+    if (priceMinFilter || priceMaxFilter) {
+      const minPrice = priceMinFilter ? parseInt(priceMinFilter.replace(/\D/g, '')) : 0;
+      const maxPrice = priceMaxFilter ? parseInt(priceMaxFilter.replace(/\D/g, '')) : Infinity;
+      priceMatch = (product.price || 0) >= minPrice && (product.price || 0) <= maxPrice;
+    }
+    
+    return nameMatch && categoryMatch && statusMatch && brandMatch && priceMatch;
+  });
+
+  tbody.innerHTML = '';
+  filtered.forEach((product, idx) => {
+    const priceText = product.price ? toPersianDigits(product.price.toLocaleString('fa-IR')) + ' تومان' : '-';
+    const statusBadge = product.status === 'فعال' 
+      ? '<span class="status-badge status-paid"><i class="fas fa-check-circle"></i> فعال</span>'
+      : '<span class="status-badge status-cancelled"><i class="fas fa-times-circle"></i> غیرفعال</span>';
+    
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="row-index">${toPersianDigits(idx+1)}</td>
+      <td>${product.name}</td>
+      <td>${product.category}</td>
+      <td>${product.brand}</td>
+      <td>${priceText}</td>
+      <td>${statusBadge}</td>
+      <td>
+        <div class="action-btns">
+          <button class="small-btn success" data-action="edit" data-id="${product.id}" title="ویرایش"><i class="fas fa-edit"></i></button>
+          <button class="small-btn danger" data-action="delete" data-id="${product.id}" title="حذف"><i class="fas fa-trash"></i></button>
+        </div>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  // به‌روزرسانی کارت‌های آماری
+  updateProductsStatsCards();
+}
+
+// تابع به‌روزرسانی کارت‌های آماری محصولات
+function updateProductsStatsCards() {
+  const totalProducts = products.length;
+  const activeProducts = products.filter(p => p.status === 'فعال').length;
+  const inactiveProducts = products.filter(p => p.status === 'غیرفعال').length;
+  const avgPrice = totalProducts > 0 ? Math.round(products.reduce((sum, p) => sum + (p.price || 0), 0) / totalProducts) : 0;
+  
+  document.querySelector('#products .stat-card:nth-child(1) .stat-value').textContent = toPersianDigits(totalProducts);
+  document.querySelector('#products .stat-card:nth-child(2) .stat-value').textContent = toPersianDigits(activeProducts);
+  document.querySelector('#products .stat-card:nth-child(3) .stat-value').textContent = toPersianDigits(inactiveProducts);
+  document.querySelector('#products .stat-card:nth-child(4) .stat-value').textContent = toPersianDigits(avgPrice.toLocaleString('fa-IR')) + ' تومان';
+}
+// تابع راه‌اندازی فیلترهای محصولات
+function setupProductsFilters() {
+  
+  const filterIds = [
+    'products-filter-name',
+    'products-filter-category',
+    'products-filter-status',
+    'products-filter-price-min',
+    'products-filter-price-max',
+    'products-filter-brand'
+  ];
+
+  filterIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener('input', updateProductsTable);
+      el.addEventListener('change', updateProductsTable);
+    }
+  });
+
+  // راه‌اندازی toggle فیلترهای پیشرفته
+  const toggleBtn = document.getElementById('products-filter-toggle');
+  const advancedFilters = document.getElementById('products-advanced-filters');
+  
+  if (toggleBtn && advancedFilters) {
+    toggleBtn.addEventListener('click', function() {
+      const isVisible = advancedFilters.style.display === 'block';
+      advancedFilters.style.display = isVisible ? 'none' : 'block';
+      toggleBtn.innerHTML = isVisible 
+        ? '<i class="fas fa-chevron-down"></i> فیلترهای بیشتر'
+        : '<i class="fas fa-chevron-up"></i> فیلترهای کمتر';
+    });
+  }
+
+  // دکمه پاک کردن فیلترها
+  const resetBtn = document.getElementById('products-filter-reset');
+  if (resetBtn) {
+    resetBtn.addEventListener('click', function() {
+      filterIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+      updateProductsTable();
+    });
+  }
+  
+  // راه‌اندازی eventهای modal محصول
+  setupProductModalEvents();
+}
+
+// تابع افزودن محصول جدید
+function addProduct() {
+  const name = prompt('نام محصول را وارد کنید:');
+  if (!name) return;
+  
+  const category = prompt('دسته‌بندی را وارد کنید (پیانو/ویولن/گیتار/سازهای کوبه‌ای/سازهای بادی):');
+  if (!category) return;
+  
+  const brand = prompt('برند را وارد کنید:');
+  if (!brand) return;
+  
+  const priceStr = prompt('قیمت را وارد کنید:');
+  const price = priceStr ? parseInt(priceStr.replace(/\D/g, '')) : 0;
+  
+  const newProduct = {
+    id: generateId(products),
+    name: name,
+    category: category,
+    brand: brand,
+    price: price,
+    purchasePrice: Math.round(price * 0.8), // 80% قیمت فروش
+    status: 'فعال',
+    description: '',
+    stock: 1,
+    createdAt: new Date().toLocaleDateString('fa-IR')
+  };
+  
+  products.push(newProduct);
+  saveAllData();
+  updateProductsTable();
+  
+  console.log('محصول جدید اضافه شد:', newProduct);
+}
+
+// تابع حذف محصول
+function deleteProduct(productId) {
+  if (confirm('آیا از حذف این محصول مطمئن هستید؟')) {
+    const index = products.findIndex(p => p.id === productId);
+    if (index !== -1) {
+      products.splice(index, 1);
+      saveAllData();
+      updateProductsTable();
+      console.log('محصول حذف شد:', productId);
+    }
+  }
+}
+
+// تابع اضافه کردن اجباری داده‌های نمونه
+window.forceAddSampleData = function() {
+  console.log('=== اضافه کردن اجباری داده‌های نمونه ===');
+  
+  // پاک کردن localStorage
+  localStorage.removeItem('buyers');
+  localStorage.removeItem('sales');
+  localStorage.removeItem('checks');
+  
+  // پاک کردن آرایه‌ها
+  buyers = [];
+  sales = [];
+  checks = [];
+  
+  // اضافه کردن داده‌های نمونه
+  initializeSampleBuyersData();
+  initializeSampleSalesData();
+  initializeSampleChecksData();
+  
+  // به‌روزرسانی جداول
+  updateBuyersTable();
+  updateChecksTable();
+  updateSalesTable();
+  updateDashboard();
+  
+  console.log('داده‌های نمونه اضافه شدند!');
+};
+
+// تابع تست سریع - مستقیماً داده اضافه می‌کند
+window.quickTest = function() {
+  console.log('=== تست سریع ===');
+  
+  // اضافه کردن یک مشتری تست
+  const testBuyer = {
+    id: 999,
+    name: 'تست مشتری',
+    phone: '09123456789',
+    address: 'آدرس تست',
+    birthDate: '1365/01/01',
+    province: 'تهران',
+    city: 'تهران',
+    instrument: 'پیانو',
+    purchases: 1,
+    total: 50000000,
+    lastBuy: '1402/01/01'
+  };
+  
+  buyers.push(testBuyer);
+  saveAllData();
+  
+  console.log('مشتری تست اضافه شد:', testBuyer);
+  console.log('تعداد کل مشتریان:', buyers.length);
+  
+  // به‌روزرسانی جدول
+  updateBuyersTable();
+  
+  console.log('تست سریع کامل شد!');
+};
+
+// تابع تست مرتب‌سازی تراکنش‌ها
+window.testSalesSorting = function() {
+  console.log('=== تست مرتب‌سازی تراکنش‌ها ===');
+  
+  // نمایش تراکنش‌ها قبل از مرتب‌سازی
+  console.log('تراکنش‌ها قبل از مرتب‌سازی:', sales.map(s => ({ id: s.id, date: s.date, product: s.product })));
+  
+  // مرتب‌سازی
+  const sortedSales = [...sales].sort((a, b) => {
+    const dateA = a.date ? jalaliToGregorian(a.date) : new Date(0);
+    const dateB = b.date ? jalaliToGregorian(b.date) : new Date(0);
+    return dateB - dateA;
+  });
+  
+  console.log('تراکنش‌ها بعد از مرتب‌سازی:', sortedSales.map(s => ({ id: s.id, date: s.date, product: s.product })));
+  
+  // به‌روزرسانی جدول
+  updateSalesTable();
+  
+  console.log('تست مرتب‌سازی کامل شد!');
+};
+
+// مدیریت modal محصول
+function setupProductModalEvents() {
+  // نمایش modal افزودن/ویرایش
+  const addBtn = document.getElementById('add-product-btn');
+  const modal = document.getElementById('product-modal');
+  const closeBtn = document.getElementById('close-product-modal');
+  const cancelBtn = document.getElementById('cancel-product-btn');
+  const form = document.getElementById('product-form');
+  const title = document.getElementById('product-modal-title');
+  const saveBtn = document.getElementById('save-product-btn');
+  const tbody = document.getElementById('products-list-tbody');
+
+  // نمایش modal افزودن
+  if (addBtn) addBtn.onclick = () => showProductModal();
+  
+  // فرمت‌بندی قیمت‌ها
+  const priceInput = document.getElementById('product-price');
+  const purchasePriceInput = document.getElementById('product-purchase-price');
+  
+  if (priceInput) {
+    priceInput.addEventListener('input', function(e) {
+      let value = e.target.value.replace(/[^\d]/g, '');
+      if (value) {
+        value = parseInt(value).toLocaleString('en-US');
+        e.target.value = value;
       }
     });
   }
+  
+  if (purchasePriceInput) {
+    purchasePriceInput.addEventListener('input', function(e) {
+      let value = e.target.value.replace(/[^\d]/g, '');
+      if (value) {
+        value = parseInt(value).toLocaleString('en-US');
+        e.target.value = value;
+      }
+    });
+  }
+
+  // بستن modal
+  if (closeBtn) closeBtn.onclick = hideProductModal;
+  if (cancelBtn) cancelBtn.onclick = hideProductModal;
+
+  // ذخیره محصول (افزودن یا ویرایش)
+  if (form) form.onsubmit = function(e) {
+    e.preventDefault();
+    const editId = this.dataset.editId ? Number(this.dataset.editId) : null;
+    
+    // خواندن مقادیر فیلدها - بررسی دقیق نوع عناصر
+    const nameInput = document.querySelector('#product-name[type="text"]');
+    const categoryInput = document.getElementById('product-category');
+    const brandInput = document.getElementById('product-brand');
+    const priceInput = document.getElementById('product-price');
+    const purchasePriceInput = document.getElementById('product-purchase-price');
+    const statusInput = document.getElementById('product-status');
+    const descriptionInput = document.getElementById('product-description');
+    const serialInput = document.getElementById('product-serial');
+    const entryDateInput = document.getElementById('product-entry-date');
+    
+
+    
+    // بررسی وجود عناصر
+    if (!nameInput || !categoryInput || !brandInput || !priceInput || !statusInput) {
+      console.error('خطا: یکی از فیلدها پیدا نشد');
+      showNotification('خطا در بارگذاری فرم. لطفاً صفحه را refresh کنید.', 'error');
+      return;
+    }
+    
+    // خواندن مقادیر
+    const nameValue = nameInput.value;
+    const categoryValue = categoryInput.value;
+    const brandValue = brandInput.value;
+    const priceValue = priceInput.value;
+    const purchasePriceValue = purchasePriceInput ? purchasePriceInput.value : '';
+    const statusValue = statusInput.value;
+    const descriptionValue = descriptionInput ? descriptionInput.value : '';
+    const serialValue = serialInput ? serialInput.value : '';
+    const entryDateValue = entryDateInput ? entryDateInput.value : '';
+    
+    // پردازش مقادیر
+    const name = nameValue.trim();
+    const category = categoryValue;
+    const brand = brandValue.trim();
+    const price = parseInt(priceValue.replace(/,/g, '')) || 0;
+    const purchasePrice = parseInt(purchasePriceValue.replace(/,/g, '')) || 0;
+    const status = statusValue;
+    const description = descriptionValue.trim();
+    const serial = serialValue.trim();
+    const entryDate = entryDateValue;
+    
+    // بررسی فیلدهای ضروری
+    if (!name) {
+      showNotification('لطفاً نام محصول را وارد کنید.', 'error');
+      nameInput.focus();
+      return;
+    }
+    if (!category) {
+      showNotification('لطفاً دسته‌بندی را انتخاب کنید.', 'error');
+      categoryInput.focus();
+      return;
+    }
+    if (!brand) {
+      showNotification('لطفاً برند را وارد کنید.', 'error');
+      brandInput.focus();
+      return;
+    }
+    if (!price || price <= 0) {
+      showNotification('لطفاً قیمت معتبر وارد کنید.', 'error');
+      priceInput.focus();
+      return;
+    }
+    
+    // راه حل موقت - اگر نام خالی است، یک نام پیش‌فرض بگذار
+    const finalName = name || brand || 'محصول جدید';
+    const finalBrand = brand || 'بدون برند';
+    
+    if (editId) {
+      // ویرایش
+      const idx = products.findIndex(p => p.id === editId);
+      if (idx !== -1) {
+        products[idx] = { 
+          ...products[idx], 
+          name: finalName, 
+          category, 
+          brand: finalBrand, 
+          price, 
+          purchasePrice,
+          status, 
+          description,
+          serial,
+          entryDate
+        };
+        showNotification('محصول با موفقیت ویرایش شد.', 'success');
+      }
+    } else {
+      // افزودن
+      const newProduct = {
+        id: generateId(products),
+        name: finalName, 
+        category, 
+        brand: finalBrand, 
+        price, 
+        purchasePrice,
+        status, 
+        description,
+        serial,
+        entryDate,
+        stock: 1,
+        createdAt: new Date().toLocaleDateString('fa-IR')
+      };
+      products.push(newProduct);
+      showNotification('محصول جدید با موفقیت اضافه شد.', 'success');
+    }
+    saveAllData();
+    updateProductsTable();
+    hideProductModal();
+  };
+
+  // حذف و ویرایش محصول
+  if (tbody) tbody.onclick = function(e) {
+    const btn = e.target.closest('button[data-action]');
+    if (!btn) return;
+    const id = Number(btn.dataset.id);
+    if (btn.dataset.action === 'edit') {
+      showProductModal(id);
+    } else if (btn.dataset.action === 'delete') {
+      if (confirm('آیا از حذف این محصول مطمئن هستید؟')) {
+        const idx = products.findIndex(p => p.id === id);
+        if (idx !== -1) {
+          products.splice(idx, 1);
+          saveAllData();
+          updateProductsTable();
+          showNotification('محصول حذف شد.', 'success');
+        }
+      }
+    }
+  };
 }
-document.addEventListener('DOMContentLoaded', function() {
-  setupAdvancedChecksFiltersToggle();
-});
-// ... existing code ...
+
+// نمایش modal و مقداردهی فرم
+function showProductModal(editId = null) {
+  const modal = document.getElementById('product-modal');
+  const form = document.getElementById('product-form');
+  const title = document.getElementById('product-modal-title');
+  form.reset();
+  form.dataset.editId = editId || '';
+  if (editId) {
+    const p = products.find(pr => pr.id === editId);
+    if (p) {
+      document.getElementById('product-name').value = p.name;
+      document.getElementById('product-category').value = p.category;
+      document.getElementById('product-brand').value = p.brand;
+      document.getElementById('product-price').value = p.price ? p.price.toLocaleString('fa-IR') : '';
+      document.getElementById('product-purchase-price').value = p.purchasePrice ? p.purchasePrice.toLocaleString('fa-IR') : '';
+      document.getElementById('product-status').value = p.status;
+      document.getElementById('product-description').value = p.description || '';
+      document.getElementById('product-serial').value = p.serial || '';
+      document.getElementById('product-entry-date').value = p.entryDate || '';
+      title.innerHTML = '<i class="fas fa-edit"></i> ویرایش محصول';
+    }
+  } else {
+    title.innerHTML = '<i class="fas fa-box"></i> افزودن محصول جدید';
+  }
+  modal.style.display = 'flex';
+  
+  // راه‌اندازی jalali datepicker برای تاریخ ورود
+  const entryDateInput = document.getElementById('product-entry-date');
+  if (entryDateInput) {
+    // بررسی وجود jalaliDatepicker
+    if (typeof jalaliDatepicker !== 'undefined') {
+      jalaliDatepicker.startWatch({
+        separatorChar: "/",
+        minDate: "1400/01/01",
+        maxDate: "1450/12/29",
+        initDate: false,
+        format: "YYYY/MM/DD",
+        autoHide: true,
+        persianDigits: false,
+        showGregorianDate: false,
+        showTooltip: true,
+        tooltipFormat: "YYYY/MM/DD",
+        emptyFieldFormat: "YYYY/MM/DD",
+        theme: {
+          bgd: "#ffffff",
+          txt: "#000000",
+          fld: "#ffffff",
+          sep: "#000000",
+          btn: "#1565c0",
+          btnHover: "#0d47a1",
+          btnTxt: "#ffffff",
+          btnTxtHover: "#ffffff",
+          border: "#e1e5e9",
+          borderHover: "#1565c0",
+          borderFocus: "#1565c0",
+          shadow: "0 2px 8px rgba(0,0,0,0.1)",
+          shadowHover: "0 4px 16px rgba(21,101,192,0.2)",
+          shadowFocus: "0 0 0 3px rgba(21,101,192,0.1)"
+        }
+      });
+    } else {
+      // اگر jalaliDatepicker موجود نباشد، فیلد را readonly کن
+      entryDateInput.setAttribute('readonly', true);
+      entryDateInput.style.backgroundColor = '#f8f9fa';
+      entryDateInput.style.cursor = 'not-allowed';
+    }
+  }
+}
+function hideProductModal() {
+  document.getElementById('product-modal').style.display = 'none';
+}
+
+// تابع تست validation فرم محصول
+window.testProductForm = function() {
+  console.log('=== تست فرم محصول ===');
+  
+  const nameInput = document.querySelector('#product-name[type="text"]');
+  const categoryInput = document.getElementById('product-category');
+  const brandInput = document.getElementById('product-brand');
+  const priceInput = document.getElementById('product-price');
+  const statusInput = document.getElementById('product-status');
+  
+  console.log('عناصر DOM:');
+  console.log('- نام input:', nameInput);
+  console.log('- دسته‌بندی input:', categoryInput);
+  console.log('- برند input:', brandInput);
+  console.log('- قیمت input:', priceInput);
+  console.log('- وضعیت input:', statusInput);
+  
+  if (!nameInput || !categoryInput || !brandInput || !priceInput || !statusInput) {
+    console.error('❌ یکی از فیلدها پیدا نشد!');
+    return;
+  }
+  
+  const name = nameInput.value;
+  const category = categoryInput.value;
+  const brand = brandInput.value;
+  const price = priceInput.value;
+  const status = statusInput.value;
+  
+  console.log('مقادیر خام:');
+  console.log('- نام:', `"${name}"`);
+  console.log('- دسته‌بندی:', `"${category}"`);
+  console.log('- برند:', `"${brand}"`);
+  console.log('- قیمت:', `"${price}"`);
+  console.log('- وضعیت:', `"${status}"`);
+  
+  console.log('مقادیر پردازش شده:');
+  console.log('- نام (trim):', `"${name.trim()}"`);
+  console.log('- برند (trim):', `"${brand.trim()}"`);
+  console.log('- قیمت (parseInt):', parseInt(price) || 0);
+  
+  console.log('بررسی validation:');
+  console.log('- نام:', name.trim() ? '✓' : '✗');
+  console.log('- دسته‌بندی:', category ? '✓' : '✗');
+  console.log('- برند:', brand.trim() ? '✓' : '✗');
+  console.log('- قیمت:', (price && parseInt(price) > 0) ? '✓' : '✗');
+  console.log('- وضعیت:', status ? '✓' : '✗');
+  
+  // تست دقیق‌تر
+  console.log('تست دقیق‌تر:');
+  console.log('- name.length:', name.length);
+  console.log('- name.trim().length:', name.trim().length);
+  console.log('- name === "":', name === "");
+  console.log('- name.trim() === "":', name.trim() === "");
+  console.log('- !name:', !name);
+  console.log('- !name.trim():', !name.trim());
+  
+  // بررسی همه عناصر با ID مشابه
+  console.log('بررسی همه عناصر با ID مشابه:');
+  const allElementsWithName = document.querySelectorAll('[id*="product-name"]');
+  console.log('همه عناصر با product-name:', allElementsWithName);
+  allElementsWithName.forEach((el, index) => {
+    console.log(`عنصر ${index}:`, el.tagName, el.type, el.value);
+  });
+}
+
+// تابع تست ذخیره و بارگذاری داده‌ها
+window.testDataPersistence = function() {
+  console.log('=== تست ذخیره و بارگذاری داده‌ها ===');
+  
+  console.log('داده‌های فعلی:');
+  console.log('- products:', products);
+  console.log('- products.length:', products.length);
+  
+  console.log('localStorage:');
+  const productsData = localStorage.getItem('products');
+  console.log('- products data:', productsData);
+  
+  if (productsData) {
+    const parsedData = JSON.parse(productsData);
+    console.log('- parsed products:', parsedData);
+    console.log('- parsed products.length:', parsedData.length);
+  }
+  
+  // تست ذخیره
+  console.log('تست ذخیره...');
+  saveAllData();
+  
+  // تست بارگذاری
+  console.log('تست بارگذاری...');
+  const testData = localStorage.getItem('products');
+  console.log('- test data:', testData);
+  
+  if (testData) {
+    const testParsed = JSON.parse(testData);
+    console.log('- test parsed:', testParsed);
+    console.log('- test parsed.length:', testParsed.length);
+  }
+}
+
+// تابع تست کامل سیستم محصولات
+window.testProductSystem = function() {
+  console.log('=== تست کامل سیستم محصولات ===');
+  
+  // تست 1: بررسی localStorage
+  console.log('1. بررسی localStorage:');
+  const allKeys = Object.keys(localStorage);
+  console.log('- همه کلیدها:', allKeys);
+  
+  const productsData = localStorage.getItem('products');
+  console.log('- products data:', productsData);
+  
+  // تست 2: بررسی آرایه products
+  console.log('2. بررسی آرایه products:');
+  console.log('- products:', products);
+  console.log('- products.length:', products.length);
+  console.log('- products type:', typeof products);
+  console.log('- Array.isArray(products):', Array.isArray(products));
+  
+  // تست 3: تست ذخیره
+  console.log('3. تست ذخیره:');
+  const testProduct = {
+    id: 999,
+    name: 'تست محصول',
+    category: 'تست',
+    brand: 'تست',
+    price: 1000000,
+    status: 'فعال',
+    description: 'محصول تست'
+  };
+  
+  products.push(testProduct);
+  console.log('- بعد از اضافه کردن:', products.length);
+  
+  saveAllData();
+  console.log('- بعد از ذخیره');
+  
+  // تست 4: تست بارگذاری
+  console.log('4. تست بارگذاری:');
+  const savedData = localStorage.getItem('products');
+  console.log('- saved data:', savedData);
+  
+  if (savedData) {
+    const parsed = JSON.parse(savedData);
+    console.log('- parsed data:', parsed);
+    console.log('- parsed length:', parsed.length);
+  }
+  
+  // تست 5: تست loadAllData
+  console.log('5. تست loadAllData:');
+  loadAllData();
+  console.log('- بعد از loadAllData:', products.length);
+  
+  // پاک کردن محصول تست
+  products = products.filter(p => p.id !== 999);
+  saveAllData();
+  console.log('- محصول تست حذف شد');
+}

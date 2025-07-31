@@ -1,0 +1,62 @@
+/* employees.css */
+#employees-list .report-table {
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(25, 118, 210, 0.08), 0 1.5px 8px 0 rgba(46, 204, 113, 0.08);
+  background: #fff;
+  margin-top: 0;
+  animation: fadeInTable 0.7s cubic-bezier(.4,2,.6,1) both;
+}
+#employees-list .report-table th, #employees-list .report-table td {
+  font-size: 15px;
+  border-bottom: 1.5px solid #e3f2fd;
+  position: relative;
+}
+#employees-list .report-table td.row-index {
+  color: #90caf9;
+  font-weight: bold;
+  font-size: 1.1em;
+}
+#employees-list .action-btns {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+#employees-list .action-btn {
+  border: none;
+  background: none;
+  color: #1976d2;
+  font-size: 1.1em;
+  cursor: pointer;
+  padding: 6px 8px;
+  border-radius: 6px;
+  transition: background 0.2s, color 0.2s, transform 0.18s;
+  position: relative;
+}
+#employees-list .action-btn:hover {
+  background: #e3f2fd;
+  color: #1565c0;
+  transform: scale(1.15) rotate(-7deg);
+  z-index: 2;
+}
+#employees-list .action-btn[title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  bottom: 120%;
+  right: 50%;
+  transform: translateX(50%);
+  background: #1976d2;
+  color: #fff;
+  padding: 4px 12px;
+  border-radius: 8px;
+  font-size: 0.95em;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px #1976d233;
+  opacity: 1;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+#employees-list .action-btn[title]::after {
+  opacity: 0;
+  pointer-events: none;
+} 

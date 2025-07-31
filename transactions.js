@@ -1,0 +1,3 @@
+// transactions.js
+// کدهای ثبت و لیست تراکنش‌ها
+// ... کدهای saveTransaction، updateSalesTable و رویدادهای تراکنش را اینجا منتقل کن ... 

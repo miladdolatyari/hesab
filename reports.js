@@ -1,0 +1,3 @@
+// reports.js
+// کدهای گزارشات و نمودارها
+// ... کدهای updateReports، showComprehensiveReportModal و ... را اینجا منتقل کن ... 

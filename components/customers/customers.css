@@ -1,0 +1,76 @@
+/* customers.css */
+#customers-list .report-table {
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(25, 118, 210, 0.08), 0 1.5px 8px 0 rgba(46, 204, 113, 0.08);
+  background: #fff;
+  margin-top: 0;
+  animation: fadeInTable 0.7s cubic-bezier(.4,2,.6,1) both;
+}
+#customers-list .report-table th, #customers-list .report-table td {
+  font-size: 15px;
+  border-bottom: 1.5px solid #e3f2fd;
+  position: relative;
+}
+#customers-list .report-table td.row-index {
+  color: #90caf9;
+  font-weight: bold;
+  font-size: 1.1em;
+}
+#customers-list .action-btns {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+#customers-list .action-btn {
+  border: none;
+  background: none;
+  color: #1976d2;
+  font-size: 1.1em;
+  cursor: pointer;
+  padding: 6px 8px;
+  border-radius: 6px;
+  transition: background 0.2s, color 0.2s, transform 0.18s;
+  position: relative;
+}
+#customers-list .action-btn:hover {
+  background: #e3f2fd;
+  color: #1565c0;
+  transform: scale(1.15) rotate(-7deg);
+  z-index: 2;
+}
+#customers-list .action-btn[title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  bottom: 120%;
+  right: 50%;
+  transform: translateX(50%);
+  background: #1976d2;
+  color: #fff;
+  padding: 4px 12px;
+  border-radius: 8px;
+  font-size: 0.95em;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px #1976d233;
+  opacity: 1;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+#customers-list .action-btn[title]::after {
+  opacity: 0;
+  pointer-events: none;
+}
+/* مودال سوابق خرید */
+.custom-modal-overlay {
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+  background: rgba(0,0,0,0.35); display: flex; align-items: center; justify-content: center; z-index: 9999;
+}
+.custom-modal-box {
+  background: #fff; padding: 32px 24px 18px 24px; border-radius: 18px; max-width: 700px; width: 98vw;
+  box-shadow: 0 8px 32px rgba(52,152,219,0.13); position: relative;
+}
+.custom-modal-close {
+  position: absolute; top: 12px; left: 12px; background: none; border: none; font-size: 22px; color: #888; cursor: pointer;
+}
+.custom-modal-title { margin-bottom: 12px; font-size: 1.2rem; font-weight: bold; }
+.custom-modal-table th, .custom-modal-table td { font-size: 14px; } 

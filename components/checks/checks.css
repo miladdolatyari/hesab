@@ -1,0 +1,105 @@
+/* checks.css */
+.checks-table {
+  width: 100%;
+  border-radius: 16px;
+  overflow-x: auto;
+  box-shadow: 0 4px 24px rgba(25, 118, 210, 0.08), 0 1.5px 8px 0 rgba(46, 204, 113, 0.08);
+  background: #fff;
+  margin-top: 0;
+  animation: fadeInTable 0.7s cubic-bezier(.4,2,.6,1) both;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.checks-table th, .checks-table td {
+  font-size: 15px;
+  border-bottom: 1.5px solid #e3f2fd;
+  padding: 14px 12px;
+  text-align: center;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+.checks-table th {
+  background: #f5f7fa;
+  color: #1976d2;
+  font-weight: bold;
+  border-top: none;
+}
+.checks-table thead tr:first-child th:first-child {
+  border-top-right-radius: 16px;
+}
+.checks-table thead tr:first-child th:last-child {
+  border-top-left-radius: 16px;
+}
+.checks-table tbody tr:last-child td:first-child {
+  border-bottom-right-radius: 16px;
+}
+.checks-table tbody tr:last-child td:last-child {
+  border-bottom-left-radius: 16px;
+}
+.checks-table tbody tr {
+  transition: background 0.25s, box-shadow 0.25s;
+  cursor: pointer;
+}
+.checks-table tbody tr:nth-child(even) {
+  background: linear-gradient(90deg, #f8fafb 0%, #f0f4f8 100%);
+}
+.checks-table tbody tr:nth-child(odd) {
+  background: #fff;
+}
+.checks-table tbody tr:hover {
+  background: linear-gradient(90deg, #e3f2fd 0%, #bbdefb 100%);
+  box-shadow: 0 2px 12px #1976d233;
+}
+.check-form {
+  background: #fff;
+  border-radius: 12px;
+  padding: 32px 18px;
+  box-shadow: 0 4px 24px rgba(44,62,80,0.07), 0 1.5px 6px rgba(0,0,0,0.04);
+  margin-bottom: 32px;
+  max-width: 100%;
+  width: 100%;
+  border: none;
+}
+.check-status {
+  display: inline-block;
+  padding: 4px 14px;
+  border-radius: 16px;
+  font-size: 0.95em;
+  font-weight: 600;
+  color: #fff;
+  box-shadow: 0 1px 6px #1976d233;
+  letter-spacing: 0.5px;
+}
+.check-status.paid { background: linear-gradient(90deg, #43a047 0%, #66bb6a 100%); }
+.check-status.pending { background: linear-gradient(90deg, #ff9800 0%, #ffb74d 100%); }
+.check-status.cancelled { background: linear-gradient(90deg, #e53935 0%, #ff7043 100%); }
+#checks .action-buttons {
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.checks-table .small-btn {
+  margin: 0 2px !important;
+}
+
+@media (max-width: 900px) {
+  .checks-table th, .checks-table td {
+    padding: 8px 4px;
+    font-size: 0.95em;
+  }
+  .checks-table {
+    overflow-x: auto;
+    display: block;
+  }
+  .check-form {
+    padding: 12px 2px;
+    max-width: 100%;
+  }
+  #checks .action-buttons {
+    justify-content: center !important;
+    gap: 8px !important;
+  }
+} 
